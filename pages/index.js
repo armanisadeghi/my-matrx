@@ -164,12 +164,15 @@ Details: ${result.details || 'No additional details'}`)
       </div>
 
       <div style={{ marginTop: '40px', padding: '20px', background: '#e9ecef', borderRadius: '8px' }}>
-        <h3>🔗 API Endpoints</h3>
-        <ul>
-          <li><code>/p/[uuid]</code> - View any page by ID</li>
-          <li><code>/api/test</code> - API health check</li>
-          <li><code>/pages/[filename]</code> - Static HTML files</li>
-        </ul>
+        <h3>🛠️ Administration</h3>
+        <p>
+          <a href="/admin" style={{ color: '#007bff', textDecoration: 'none', fontSize: '18px' }}>
+            → Go to Admin Dashboard
+          </a>
+        </p>
+        <p style={{ color: '#666', fontSize: '14px', margin: '10px 0 0 0' }}>
+          Manage pages, test database connections, and system diagnostics
+        </p>
       </div>
     </div>
   )
