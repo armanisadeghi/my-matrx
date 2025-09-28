@@ -32,15 +32,26 @@ That's it! Your site will be live on Vercel with a custom URL.
 
 ## 📝 Adding New Pages
 
-### 🚀 Automated Method (Recommended)
+### 🚀 Super Easy Method (Recommended)
 ```bash
-# Generate UUID and auto-update index page
+# Create a new page with template and auto-update index
 npm run new-page
 ```
 This command will:
-1. Generate a new UUID
-2. Automatically scan all HTML files and update the index page
-3. Extract titles and descriptions from your HTML files
+1. Generate a UUID and create a new HTML file in `/pages` directory
+2. Add a beautiful template with proper structure and styling
+3. Automatically update the index page with the new page
+
+### ⚡ Just Create File Method
+```bash
+# Create a new HTML file with template (no index update)
+npm run create-page
+```
+This creates a new HTML file with:
+- UUID-based filename in `/pages` directory
+- Professional HTML template with styling
+- Placeholder content ready for your edits
+- Meta information and proper structure
 
 ### 📋 Manual Method
 ```bash
@@ -121,6 +132,7 @@ my-matrx/
 │   ├── {uuid}.html                     # Individual HTML pages
 │   └── {uuid}.html                     # More HTML pages
 ├── index.html                          # Landing page listing all pages
+├── create-page.js                      # Script to create new HTML files with template
 ├── update-index.js                     # Auto-update script for index page
 ├── vercel.json                         # Vercel deployment configuration with API
 ├── package.json                        # Project metadata and scripts

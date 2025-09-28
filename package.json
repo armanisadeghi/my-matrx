@@ -9,7 +9,8 @@
     "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
     "serve": "npx http-server -p 3000 -c-1 -o",
     "update-index": "node update-index.js",
-    "new-page": "npm run generate-uuid && npm run update-index"
+    "create-page": "node create-page.js",
+    "new-page": "npm run create-page && npm run update-index"
   },
   "keywords": ["static", "html", "vercel"],
   "author": "",
