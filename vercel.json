@@ -10,9 +10,6 @@
       "maxDuration": 10
     }
   },
-  "env": {
-    "DEPLOY_API_KEY": "@deploy-api-key"
-  },
   "headers": [
     {
       "source": "/(.*)",
