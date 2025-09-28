@@ -1,0 +1,23 @@
+{
+  "name": "my-matrx",
+  "version": "1.0.0",
+  "description": "A clean repository for hosting individual HTML/CSS/JS pages on Vercel",
+  "main": "pages/index.html",
+  "scripts": {
+    "start": "npx serve . -l 3000",
+    "dev": "npx serve . -l 3000 --cors",
+    "preview": "npx serve pages -l 3000"
+  },
+  "keywords": [
+    "html",
+    "css",
+    "javascript",
+    "vercel",
+    "static-site",
+    "web-development"
+  ],
+  "author": "My Matrx",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
