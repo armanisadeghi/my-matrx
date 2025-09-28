@@ -61,7 +61,7 @@ export class StaticSiteAPI {
 # Your custom API key (the one we generated)
 NEXT_PUBLIC_DEPLOY_API_KEY=fd010a122c7ea2e704b08ef353c741bba5fe9ffab17ee20a7a8082e696634b13
 
-# Your deployed static site URL
+# Your deployed static site URL - 
 NEXT_PUBLIC_STATIC_SITE_URL=https://mymatrx.com
 ```
 
