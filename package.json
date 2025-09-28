@@ -2,15 +2,13 @@
   "name": "my-matrx",
   "version": "1.0.0",
   "description": "Simple static site for HTML pages with easy deployment",
-  "main": "index.html",
+  "main": "pages/index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
-    "create-manual-page": "node create-page.js",
-    "update-index": "node update-index.js"
+    "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\""
   },
   "keywords": [
     "static",
