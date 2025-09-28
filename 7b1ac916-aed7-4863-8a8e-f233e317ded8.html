@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDO Threads: Non-Surgical Lifting & Collagen Stimulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header"
+                "hero benefits"
+                "types treatment"
+                "results footer";
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto auto;
+            gap: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out both;
+        }
+
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        .card:nth-child(5) { animation-delay: 0.4s; }
+        .card:nth-child(6) { animation-delay: 0.5s; }
+        .card:nth-child(7) { animation-delay: 0.6s; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            transition: left 0.6s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .header {
+            grid-area: header;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header .subtitle {
+            font-size: 1.3rem;
+            color: #666;
+            font-weight: 300;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero {
+            grid-area: hero;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .key-points {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .point {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease-out both;
+        }
+
+        .point:nth-child(1) { animation-delay: 0.1s; }
+        .point:nth-child(2) { animation-delay: 0.2s; }
+        .point:nth-child(3) { animation-delay: 0.3s; }
+        .point:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .point:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(10px) scale(1.02);
+        }
+
+        .point-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .benefits {
+            grid-area: benefits;
+        }
+
+        .benefits h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .benefit-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1));
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .benefit-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .benefit-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .types {
+            grid-area: types;
+        }
+
+        .types h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .thread-types {
+            display: flex;
+            gap: 15px;
+            height: calc(100% - 60px);
+        }
+
+        .thread-type {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.1), rgba(102, 126, 234, 0.1));
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .thread-type:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .thread-type h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .treatment {
+            grid-area: treatment;
+        }
+
+        .treatment h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .treatment-areas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            justify-items: center;
+            margin-bottom: 20px;
+        }
+
+        .area-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            animation: popIn 0.5s ease-out both;
+            width: 100%;
+            text-align: center;
+        }
+
+        .area-tag:nth-child(1) { animation-delay: 0.1s; }
+        .area-tag:nth-child(2) { animation-delay: 0.2s; }
+        .area-tag:nth-child(3) { animation-delay: 0.3s; }
+        .area-tag:nth-child(4) { animation-delay: 0.4s; }
+        .area-tag:nth-child(5) { animation-delay: 0.5s; }
+        .area-tag:nth-child(6) { animation-delay: 0.6s; }
+        .area-tag:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .area-tag:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .results {
+            grid-area: results;
+            text-align: center;
+        }
+
+        .results h3 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            animation: countUp 1.5s ease-out 1s both;
+        }
+
+        @keyframes countUp {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .footer {
+            grid-area: footer;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            text-align: center;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer h3 {
+            font-size: 1.6rem;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+
+        .footer p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            color: #f093fb;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "hero"
+                    "benefits"
+                    "types"
+                    "treatment"
+                    "results"
+                    "footer";
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero h3 {
+                font-size: 1.8rem;
+            }
+            
+            .benefit-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .thread-types {
+                flex-direction: column;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PDO Threads</h1>
+            <p class="subtitle">Non-Surgical Lifting & Collagen Stimulation</p>
+        </div>
+
+        <div class="card hero">
+            <h3>What Are PDO Threads?</h3>
+            <div class="key-points">
+                <div class="point">
+                    <div class="point-icon">✓</div>
+                    <div>
+                        <strong>Minimally invasive lift</strong> — no surgery, no incisions
+                    </div>
+                </div>
+                <div class="point">
+                    <div class="point-icon">🧬</div>
+                    <div>
+                        Made from safe, <strong>absorbable polydioxanone (PDO)</strong>
+                    </div>
+                </div>
+                <div class="point">
+                    <div class="point-icon">✨</div>
+                    <div>
+                        <strong>FDA-cleared</strong> for facial and body rejuvenation
+                    </div>
+                </div>
+                <div class="point">
+                    <div class="point-icon">💪</div>
+                    <div>
+                        <strong>Dual action:</strong> Instant lift + long-term collagen boost
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card benefits">
+            <h3>Key Benefits</h3>
+            <div class="benefit-grid">
+                <div class="benefit-item">
+                    <span class="benefit-icon">⚡</span>
+                    <div><strong>Quick Procedure</strong><br>In-office treatment</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🏠</span>
+                    <div><strong>Minimal Downtime</strong><br>Back to normal quickly</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🌟</span>
+                    <div><strong>Natural Results</strong><br>Never "overdone"</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🛡️</span>
+                    <div><strong>Safe & Low Risk</strong><br>Used in medicine for decades</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card types">
+            <h3>Thread Types</h3>
+            <div class="thread-types">
+                <div class="thread-type">
+                    <h4>Smooth Threads</h4>
+                    <p>Perfect for <strong>skin tightening</strong> and reducing <strong>fine lines</strong></p>
+                </div>
+                <div class="thread-type">
+                    <h4>Barbed Threads</h4>
+                    <p>Ideal for <strong>lifting</strong> and <strong>contouring</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card treatment">
+            <h3>Treatment Areas</h3>
+            <div class="treatment-areas">
+                <span class="area-tag">Brows</span>
+                <span class="area-tag">Cheeks</span>
+                <span class="area-tag">Jawline</span>
+                <span class="area-tag">Neck</span>
+                <span class="area-tag">Chest</span>
+                <span class="area-tag">Hands</span>
+                <span class="area-tag">Buttocks</span>
+            </div>
+        </div>
+
+        <div class="card results">
+            <h3>Results & Duration</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">12-18</div>
+                    <div class="stat-label">Months Duration</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Absorbable</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">2x</div>
+                    <div class="stat-label">Benefits: Lift + Collagen</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>Key Takeaway</h3>
+            <p>PDO threads offer a <span class="highlight">safe, non-surgical option</span> for firmer, younger-looking skin—with <span class="highlight">real lift and lasting collagen benefits</span>.</p>
+        </div>
+    </div>
+</body>
+</html>

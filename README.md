@@ -6,9 +6,11 @@ A simple static site repository for serving HTML pages with easy deployment to V
 
 ### Local Development
 ```bash
-# Start local server
+# Start local server (automatically opens browser)
+npm run serve
+# or start without opening browser
 npm run dev
-# or
+# or preview on different port
 npm run preview
 ```
 
@@ -77,7 +79,7 @@ my-matrx/
 - ✅ **Vercel Optimized**: Configured for optimal Vercel deployment
 - ✅ **Clean URLs**: Automatic `.html` extension removal
 - ✅ **Security Headers**: Basic security headers included
-- ✅ **Local Development**: Simple Python server for testing
+- ✅ **Local Development**: Node.js http-server for reliable testing
 
 ## 🎨 Styling Guidelines
 

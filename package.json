@@ -4,9 +4,10 @@
   "description": "Simple static site for HTML pages with easy deployment",
   "main": "index.html",
   "scripts": {
-    "dev": "python -m http.server 3000 || python3 -m http.server 3000",
-    "preview": "python -m http.server 8080 || python3 -m http.server 8080",
-    "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\""
+    "dev": "npx http-server -p 3000 -c-1",
+    "preview": "npx http-server -p 8080 -c-1",
+    "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
+    "serve": "npx http-server -p 3000 -c-1 -o"
   },
   "keywords": ["static", "html", "vercel"],
   "author": "",
