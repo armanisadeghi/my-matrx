@@ -65,7 +65,18 @@ NEXT_PUBLIC_DEPLOY_API_KEY=fd010a122c7ea2e704b08ef353c741bba5fe9ffab17ee20a7a808
 NEXT_PUBLIC_STATIC_SITE_URL=https://mymatrx.com
 ```
 
-### **3. Updated Component Example**
+### **3. CORS Configuration**
+
+The static site API endpoints are configured to allow requests from:
+- `https://aimatrx.com` (your production React app)
+- `http://localhost:3000` (local development)
+- `http://localhost:3001` (alternative local port)
+
+If you need to add additional domains, update the `allowedOrigins` array in:
+- `api/deploy-page.js`
+- `api/test.js`
+
+### **4. Updated Component Example**
 ```javascript
 // components/HTMLPageGenerator.jsx
 import { useState } from 'react';
