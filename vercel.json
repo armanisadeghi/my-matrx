@@ -1,15 +1,4 @@
 {
-  "functions": {
-    "pages/api/**.js": {
-      "maxDuration": 10
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/pages/(.*)",
-      "destination": "/pages/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/p/(.*)",
@@ -24,16 +13,16 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "*"
+          "value": "GET, POST, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "*"
+          "value": "Content-Type, Authorization"
         }
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
@@ -41,11 +30,11 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "*"
+          "value": "GET, POST, OPTIONS"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "*"
+          "value": "Content-Type, Authorization"
         }
       ]
     }
