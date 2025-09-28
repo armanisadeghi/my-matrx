@@ -1,0 +1,18 @@
+{
+  "name": "my-matrx",
+  "version": "1.0.0",
+  "description": "Simple static site for HTML pages with easy deployment",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000 || python3 -m http.server 3000",
+    "preview": "python -m http.server 8080 || python3 -m http.server 8080",
+    "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\""
+  },
+  "keywords": ["static", "html", "vercel"],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "."
+  }
+}

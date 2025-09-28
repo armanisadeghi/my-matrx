@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kybella for Jowls: Non-Surgical Fat Reduction</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            min-height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "hero stats expert"
+                "benefits treatment footer";
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 15px;
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out both;
+        }
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        .card:nth-child(5) { animation-delay: 0.4s; }
+        .card:nth-child(6) { animation-delay: 0.5s; }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            transition: left 0.6s ease;
+        }
+        .card:hover::before {
+            left: 100%;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            grid-area: header;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            animation: slideDown 0.8s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 300;
+            animation: slideUp 0.8s ease-out 0.2s both;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero {
+            grid-area: hero;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hero h3 {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .key-points {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-grow: 1;
+        }
+        .point {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.6s ease-out both;
+        }
+        .point:nth-child(1) { animation-delay: 0.1s; }
+        .point:nth-child(2) { animation-delay: 0.2s; }
+        .point:nth-child(3) { animation-delay: 0.3s; }
+        .point:nth-child(4) { animation-delay: 0.4s; }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .point:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(8px) scale(1.02);
+        }
+        .point-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .point-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .stats {
+            grid-area: stats;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .stats h3 {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .stat-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex-grow: 1;
+        }
+        .stat {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1));
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            animation: popIn 0.5s ease-out both;
+        }
+        .stat:nth-child(1) { animation-delay: 0.1s; }
+        .stat:nth-child(2) { animation-delay: 0.2s; }
+        .stat:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .stat:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        .expert {
+            grid-area: expert;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .expert h3 {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .expert-content {
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.15), rgba(102, 126, 234, 0.15));
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+        .expert-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .expert-title {
+            font-size: 1rem;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+        .expert-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .benefits {
+            grid-area: benefits;
+        }
+        .benefits h3 {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .benefit-item {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1));
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            animation: slideInUp 0.6s ease-out both;
+        }
+        .benefit-item:nth-child(1) { animation-delay: 0.1s; }
+        .benefit-item:nth-child(2) { animation-delay: 0.2s; }
+        .benefit-item:nth-child(3) { animation-delay: 0.3s; }
+        .benefit-item:nth-child(4) { animation-delay: 0.4s; }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .benefit-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+        .benefit-icon {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .benefit-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .treatment {
+            grid-area: treatment;
+            text-align: center;
+        }
+        .treatment h3 {
+            font-size: 1.6rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .ideal-for {
+            background: linear-gradient(135deg, rgba(118, 75, 162, 0.1), rgba(102, 126, 234, 0.1));
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+        .ideal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+        .ideal-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ideal-item {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .ideal-item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .footer {
+            grid-area: footer;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            text-align: center;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .footer h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #ecf0f1;
+        }
+        .footer p {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        .highlight {
+            color: #f093fb;
+            font-weight: 600;
+        }
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "header header"
+                    "hero stats"
+                    "expert benefits"
+                    "treatment footer";
+            }
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "hero"
+                    "stats"
+                    "expert"
+                    "benefits"
+                    "treatment"
+                    "footer";
+                padding: 10px;
+                gap: 10px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .card {
+                padding: 15px;
+            }
+            .benefit-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-number {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kybella for Jowls</h1>
+            <p class="subtitle">Non-Surgical Fat Reduction with Proven Results</p>
+        </div>
+        
+        <div class="card hero">
+            <h3>What Makes Kybella Effective?</h3>
+            <div class="key-points">
+                <div class="point">
+                    <div class="point-icon">💉</div>
+                    <div class="point-text">
+                        <strong>Non-surgical</strong> — No incisions, minimal discomfort
+                    </div>
+                </div>
+                <div class="point">
+                    <div class="point-icon">🔥</div>
+                    <div class="point-text">
+                        <strong>Permanent fat removal</strong> — Destroyed cells don't return
+                    </div>
+                </div>
+                <div class="point">
+                    <div class="point-icon">⚠️</div>
+                    <div class="point-text">
+                        <strong>Off-label use</strong> — Requires certified expert injector
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card stats">
+            <h3>Proven Results</h3>
+            <div class="stat-grid">
+                <div class="stat">
+                    <span class="stat-number">90%+</span>
+                    <div class="stat-label">Patients see significant jowl reduction</div>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">1-3</span>
+                    <div class="stat-label">Sessions needed for most patients</div>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">3-7</span>
+                    <div class="stat-label">Days until swelling subsides</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card expert">
+            <h3>Expert Leadership</h3>
+            <div class="expert-content">
+                <div class="expert-name">Dr. Sherly Soleiman</div>
+                <div class="expert-title">National Research Leader</div>
+                <div class="expert-badge">Certified Expert Injector</div>
+            </div>
+        </div>
+        
+        <div class="card benefits">
+            <h3>Key Benefits</h3>
+            <div class="benefit-grid">
+                <div class="benefit-item">
+                    <span class="benefit-icon">⚡</span>
+                    <div class="benefit-text">Quick Treatment</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🏠</span>
+                    <div class="benefit-text">Minimal Downtime</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🛡️</span>
+                    <div class="benefit-text">Safe & Effective</div>
+                </div>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🎯</span>
+                    <div class="benefit-text">Targeted Results</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card treatment">
+            <h3>Ideal Candidates</h3>
+            <div class="ideal-for">
+                <div class="ideal-title">Best For:</div>
+                <div class="ideal-items">
+                    <div class="ideal-item">Localized jowl fat</div>
+                    <div class="ideal-item">Firm skin tone</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <h3>Key Takeaway</h3>
+            <p>Kybella offers a <span class="highlight">safe, non-surgical solution</span> for jowl reduction with <span class="highlight">proven results</span> when performed by expert injectors.</p>
+        </div>
+    </div>
+</body>
+</html>
