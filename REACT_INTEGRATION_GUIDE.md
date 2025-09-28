@@ -5,7 +5,7 @@
 ### **1. API Service (utils/staticSiteAPI.js)**
 ```javascript
 // utils/staticSiteAPI.js
-const STATIC_SITE_URL = 'https://your-static-site.vercel.app'; // Replace with your deployed URL
+const STATIC_SITE_URL = 'https://mymatrx.com'; // Your production domain
 const API_KEY = process.env.NEXT_PUBLIC_DEPLOY_API_KEY; // Your custom API key
 
 export class StaticSiteAPI {
@@ -62,7 +62,7 @@ export class StaticSiteAPI {
 NEXT_PUBLIC_DEPLOY_API_KEY=fd010a122c7ea2e704b08ef353c741bba5fe9ffab17ee20a7a8082e696634b13
 
 # Your deployed static site URL
-NEXT_PUBLIC_STATIC_SITE_URL=https://your-static-site.vercel.app
+NEXT_PUBLIC_STATIC_SITE_URL=https://mymatrx.com
 ```
 
 ### **3. Updated Component Example**
