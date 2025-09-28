@@ -4,15 +4,19 @@
   "description": "Simple static site for HTML pages with easy deployment",
   "main": "index.html",
   "scripts": {
-    "dev": "npx http-server -p 3000 -c-1",
-    "preview": "npx http-server -p 8080 -c-1",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
-    "serve": "npx http-server -p 3000 -c-1 -o",
-    "update-index": "node update-index.js",
-    "create-page": "node create-page.js",
-    "new-page": "npm run create-page && npm run update-index"
+    "create-manual-page": "node create-page.js",
+    "update-index": "node update-index.js"
   },
-  "keywords": ["static", "html", "vercel"],
+  "keywords": [
+    "static",
+    "html",
+    "vercel"
+  ],
   "author": "",
   "license": "MIT",
   "repository": {
@@ -20,6 +24,10 @@
     "url": "."
   },
   "dependencies": {
-    "node-html-parser": "^6.1.12"
+    "@supabase/supabase-js": "^2.58.0",
+    "next": "^15.5.4",
+    "node-html-parser": "^6.1.12",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }

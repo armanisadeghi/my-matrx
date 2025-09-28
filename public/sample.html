@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cost of Losing 1 Star</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 25%, #ff9ff3 75%, #54a0ff 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "impact restaurants ecommerce"
+                "threshold independents recovery";
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto 1fr 1fr;
+            gap: 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideIn 0.8s ease-out both;
+        }
+
+        .card:nth-child(2) { animation-delay: 0.1s; }
+        .card:nth-child(3) { animation-delay: 0.2s; }
+        .card:nth-child(4) { animation-delay: 0.3s; }
+        .card:nth-child(5) { animation-delay: 0.4s; }
+        .card:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
+            transition: left 0.6s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            grid-area: header;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24, #ff9ff3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            animation: titlePulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.02); }
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            color: #666;
+            font-weight: 400;
+            animation: subtitleFade 1s ease-out 0.5s both;
+        }
+
+        @keyframes subtitleFade {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .impact {
+            grid-area: impact;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(238, 90, 36, 0.15));
+            border: 2px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .impact h3 {
+            font-size: 1.6rem;
+            color: #c44569;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .impact-stat {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            animation: statBounce 1.5s ease-out 1s both;
+        }
+
+        @keyframes statBounce {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .impact-desc {
+            font-size: 1.1rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .restaurants {
+            grid-area: restaurants;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 159, 243, 0.1));
+            border: 2px solid rgba(255, 107, 107, 0.2);
+        }
+
+        .restaurants h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .restaurant-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stat-highlight {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .ecommerce {
+            grid-area: ecommerce;
+            background: linear-gradient(135deg, rgba(238, 90, 36, 0.1), rgba(84, 160, 255, 0.1));
+            border: 2px solid rgba(238, 90, 36, 0.2);
+        }
+
+        .ecommerce h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .ecommerce-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: iconSpin 4s linear infinite;
+        }
+
+        @keyframes iconSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .threshold {
+            grid-area: threshold;
+            background: linear-gradient(135deg, rgba(255, 159, 243, 0.1), rgba(84, 160, 255, 0.1));
+            border: 2px solid rgba(255, 159, 243, 0.3);
+            text-align: center;
+        }
+
+        .threshold h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .star-rating {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            animation: starPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.1); filter: brightness(1.2); }
+        }
+
+        .threshold-text {
+            font-size: 1.1rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .independents {
+            grid-area: independents;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(238, 90, 36, 0.1));
+            border: 2px solid rgba(255, 107, 107, 0.2);
+            text-align: center;
+        }
+
+        .independents h3 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .warning-icon {
+            font-size: 3rem;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            animation: warningBlink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes warningBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .independents-text {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .recovery {
+            grid-area: recovery;
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.15), rgba(84, 160, 255, 0.15));
+            border: 2px solid rgba(46, 213, 115, 0.4);
+            text-align: center;
+        }
+
+        .recovery h3 {
+            font-size: 1.5rem;
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .recovery-icon {
+            font-size: 3rem;
+            color: #27ae60;
+            margin-bottom: 15px;
+            animation: recoveryGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes recoveryGlow {
+            from { filter: brightness(1) drop-shadow(0 0 5px rgba(39, 174, 96, 0.3)); }
+            to { filter: brightness(1.3) drop-shadow(0 0 15px rgba(39, 174, 96, 0.6)); }
+        }
+
+        .recovery-text {
+            font-size: 1rem;
+            color: #555;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .highlight {
+            color: #27ae60;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas: 
+                    "header header"
+                    "impact restaurants"
+                    "ecommerce threshold"
+                    "independents recovery";
+                grid-template-rows: auto 1fr 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "impact"
+                    "restaurants"
+                    "ecommerce"
+                    "threshold"
+                    "independents"
+                    "recovery";
+                grid-template-rows: auto repeat(6, 1fr);
+                padding: 15px;
+                gap: 15px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .impact-stat {
+                font-size: 2.2rem;
+            }
+
+            .stat-highlight {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>The Cost of Losing 1 Star</h1>
+            <p class="subtitle">How Star Ratings Impact Your Business Revenue</p>
+        </div>
+
+        <div class="card impact">
+            <h3>The Immediate Impact</h3>
+            <div class="impact-stat">1★ DROP</div>
+            <div class="impact-desc">Can devastate your business</div>
+        </div>
+
+        <div class="card restaurants">
+            <h3>Restaurants</h3>
+            <div class="restaurant-icon">🍽️</div>
+            <div class="stat-highlight">5-9%</div>
+            <div class="stat-label">Less Revenue</div>
+        </div>
+
+        <div class="card ecommerce">
+            <h3>E-Commerce</h3>
+            <div class="ecommerce-icon">🛒</div>
+            <div class="stat-highlight">200%</div>
+            <div class="stat-label">Lost Growth</div>
+        </div>
+
+        <div class="card threshold">
+            <h3>Critical Threshold</h3>
+            <div class="star-rating">⭐⭐⭐⭐</div>
+            <div class="threshold-text">Below 4 stars = <br><strong>Big drop in purchases</strong></div>
+        </div>
+
+        <div class="card independents">
+            <h3>Most Vulnerable</h3>
+            <div class="warning-icon">⚠️</div>
+            <div class="independents-text"><strong>Independent businesses</strong><br>hit hardest</div>
+        </div>
+
+        <div class="card recovery">
+            <h3>Path to Recovery</h3>
+            <div class="recovery-icon">🚀</div>
+            <div class="recovery-text">
+                <span class="highlight">Fast response</span> +<br>
+                <span class="highlight">More positive reviews</span><br>
+                = Recovery possible
+            </div>
+        </div>
+    </div>
+</body>
+</html>
