@@ -32,43 +32,51 @@ That's it! Your site will be live on Vercel with a custom URL.
 
 ## 📝 Adding New Pages
 
-### Step 1: Generate a UUID
+### 🚀 Automated Method (Recommended)
 ```bash
+# Generate UUID and auto-update index page
+npm run new-page
+```
+This command will:
+1. Generate a new UUID
+2. Automatically scan all HTML files and update the index page
+3. Extract titles and descriptions from your HTML files
+
+### 📋 Manual Method
+```bash
+# Step 1: Generate a UUID
 npm run generate-uuid
-```
-This will output a unique identifier like: `3bb6da52-ade0-4b8c-96b3-ce0a18979bcc`
 
-### Step 2: Create Your HTML File
-Create a new HTML file using the UUID as the filename:
-```
-{your-uuid}.html
-```
+# Step 2: Create your HTML file using the UUID as filename
+# {your-uuid}.html
 
-### Step 3: Update the Index Page
-Add your new page to `index.html` by adding a new page card in the `.pages-list` section:
+# Step 3: Update index page automatically
+npm run update-index
 
-```html
-<a href="your-uuid.html" class="page-card">
-    <div class="page-title">Your Page Title</div>
-    <div class="page-description">
-        Brief description of your page content
-    </div>
-    <div class="page-id">ID: your-uuid</div>
-</a>
-```
-
-### Step 4: Deploy
-```bash
+# Step 4: Deploy
 vercel --prod
 ```
+
+### 🔄 Auto-Update Index Anytime
+```bash
+npm run update-index
+```
+This will automatically:
+- Scan all HTML files in the directory
+- Extract titles from `<title>` tags
+- Extract descriptions from meta descriptions or content
+- Update the index.html with all pages
+- Sort pages alphabetically by title
 
 ## 📁 File Structure
 ```
 my-matrx/
 ├── index.html                          # Landing page listing all pages
 ├── {uuid}.html                         # Individual HTML pages
+├── update-index.js                     # Auto-update script for index page
 ├── vercel.json                         # Vercel deployment configuration
 ├── package.json                        # Project metadata and scripts
+├── node_modules/                       # Dependencies (auto-generated)
 └── README.md                          # This file
 ```
 
@@ -76,6 +84,8 @@ my-matrx/
 
 - ✅ **Zero Build Process**: Pure HTML/CSS/JS - no compilation needed
 - ✅ **UUID-Based Naming**: Unique, collision-free page identifiers
+- ✅ **Auto-Index Updates**: Automatically scans and updates homepage with new pages
+- ✅ **Smart Content Extraction**: Pulls titles and descriptions from HTML files
 - ✅ **Vercel Optimized**: Configured for optimal Vercel deployment
 - ✅ **Clean URLs**: Automatic `.html` extension removal
 - ✅ **Security Headers**: Basic security headers included
