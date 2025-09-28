@@ -28,6 +28,21 @@ export default function DynamicPage({ pageData, notFound }) {
 
 export async function getServerSideProps({ params }) {
   try {
+    console.log('=== SERVER SIDE PROPS DEBUG ===')
+    console.log('Params:', params)
+    console.log('Environment check:')
+    console.log('SUPABASE_URL:', process.env.SUPABASE_URL ? 'SET' : 'NOT SET')
+    console.log('SUPABASE_SERVICE_ROLE:', process.env.SUPABASE_SERVICE_ROLE ? 'SET' : 'NOT SET')
+
+    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE) {
+      console.error('Missing environment variables!')
+      return {
+        props: {
+          notFound: true
+        }
+      }
+    }
+
     // Use service role key for server-side operations (more reliable)
     const supabase = createClient(
       process.env.SUPABASE_URL,
@@ -45,9 +60,7 @@ export async function getServerSideProps({ params }) {
     if (error || !data) {
       console.log('Page not found:', params.id, error?.message)
       return {
-        props: {
-          notFound: true
-        }
+        notFound: true
       }
     }
 
