@@ -8,6 +8,9 @@
   "functions": {
     "api/deploy-page.js": {
       "maxDuration": 10
+    },
+    "api/test.js": {
+      "maxDuration": 5
     }
   },
   "headers": [
@@ -41,11 +44,11 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
+          "value": "Content-Type, Authorization, X-Requested-With"
         },
         {
           "key": "Access-Control-Allow-Credentials",
-          "value": "true"
+          "value": "false"
         }
       ]
     }
