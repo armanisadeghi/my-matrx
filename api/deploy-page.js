@@ -1,9 +1,20 @@
 // Vercel Serverless Function to receive and deploy HTML pages
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*'); // In production, set this to your React app's domain
+  // Set CORS headers with specific allowed origins
+  const allowedOrigins = [
+    'https://aimatrx.com',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
