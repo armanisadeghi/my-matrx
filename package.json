@@ -1,8 +1,8 @@
 {
   "name": "my-matrx",
   "version": "1.0.0",
-  "description": "Simple static site for HTML pages with easy deployment",
-  "main": "pages/index.js",
+  "description": "Next.js app for dynamic HTML pages with Supabase",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
