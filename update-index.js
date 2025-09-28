@@ -9,12 +9,21 @@ const { parse } = require('node-html-parser');
  */
 function updateIndex() {
     const currentDir = process.cwd();
+    const pagesDir = path.join(currentDir, 'pages');
     
-    // Get all HTML files except index.html
-    const htmlFiles = fs.readdirSync(currentDir)
-        .filter(file => file.endsWith('.html') && file !== 'index.html')
+    // Check if pages directory exists
+    if (!fs.existsSync(pagesDir)) {
+        console.log('Pages directory does not exist. Creating it...');
+        fs.mkdirSync(pagesDir, { recursive: true });
+        console.log('✅ Created pages directory');
+        return;
+    }
+    
+    // Get all HTML files from pages directory
+    const htmlFiles = fs.readdirSync(pagesDir)
+        .filter(file => file.endsWith('.html'))
         .map(file => {
-            const filePath = path.join(currentDir, file);
+            const filePath = path.join(pagesDir, file);
             const content = fs.readFileSync(filePath, 'utf8');
             const root = parse(content);
             
@@ -56,7 +65,7 @@ function updateIndex() {
     let indexContent = fs.readFileSync(indexPath, 'utf8');
     
     // Generate new page cards HTML
-    const pageCardsHTML = htmlFiles.map(page => `            <a href="${page.filename}" class="page-card">
+    const pageCardsHTML = htmlFiles.map(page => `            <a href="pages/${page.filename}" class="page-card">
                 <div class="page-title">${page.title}</div>
                 <div class="page-description">
                     ${page.description}
