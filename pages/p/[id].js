@@ -70,9 +70,17 @@ export default function DynamicPage({ pageData, notFound }) {
     return <div dangerouslySetInnerHTML={{ __html: enhancedHTML }} />
   }
 
-  // Extract body content if HTML has complete head, otherwise use full content
+  // Extract body content and styles if HTML has complete head, otherwise use full content
   let bodyContent = pageData.html_content
+  let inlineStyles = ''
+  
   if (hasCompleteHead) {
+    // Extract styles from head section
+    const styleMatches = pageData.html_content.match(/<style[^>]*>([\s\S]*?)<\/style>/gi)
+    if (styleMatches) {
+      inlineStyles = styleMatches.join('\n')
+    }
+    
     // Extract just the body content, stripping html/head tags
     const bodyMatch = pageData.html_content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
     if (bodyMatch) {
@@ -87,6 +95,11 @@ export default function DynamicPage({ pageData, notFound }) {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <link rel="icon" href="/favicon.ico" />
+        
+        {/* Extracted styles from original HTML */}
+        {inlineStyles && (
+          <style dangerouslySetInnerHTML={{ __html: inlineStyles.replace(/<\/?style[^>]*>/gi, '') }} />
+        )}
         
         {/* SEO Meta Tags */}
         <meta property="og:title" content={metaTitle} />
