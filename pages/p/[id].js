@@ -9,6 +9,7 @@ export default function DynamicPage({ pageData, notFound }) {
           <title>Page Not Found - MyMatrx</title>
           <meta name="description" content="The requested page could not be found." />
           <link rel="icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/favicon.ico" />
         </Head>
         <div style={{ 
           display: 'flex', 
@@ -55,7 +56,7 @@ export default function DynamicPage({ pageData, notFound }) {
     if (!enhancedHTML.includes('favicon')) {
       enhancedHTML = enhancedHTML.replace(
         /<head([^>]*)>/i, 
-        `<head$1>\n    <link rel="icon" href="/favicon.ico" />`
+        `<head$1>\n    <link rel="icon" href="/favicon.ico" />\n    <link rel="shortcut icon" href="/favicon.ico" />`
       )
     }
     
@@ -95,6 +96,8 @@ export default function DynamicPage({ pageData, notFound }) {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
         
         {/* Extracted styles from original HTML */}
         {inlineStyles && (

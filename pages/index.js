@@ -87,6 +87,8 @@ Details: ${result.details || 'No additional details'}`)
         <title>MyMatrx - Dynamic HTML Pages</title>
         <meta name="description" content="Create and serve dynamic HTML pages with AI-powered content generation" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
