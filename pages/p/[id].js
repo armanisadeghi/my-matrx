@@ -43,9 +43,12 @@ export default function DynamicPage({ pageData, notFound }) {
 
   // Check if HTML already has complete head section
   const hasCompleteHead = pageData.html_content.includes('<html') && pageData.html_content.includes('<head>')
+  
+  // If we have database SEO fields, always use Next.js Head for better SEO control
+  const hasDatabaseSEO = pageData.meta_title || pageData.meta_description || pageData.meta_keywords || pageData.og_image
 
-  if (hasCompleteHead) {
-    // If HTML has complete head, inject favicon and canonical URL
+  if (hasCompleteHead && !hasDatabaseSEO) {
+    // Only use raw HTML if no database SEO fields are present
     let enhancedHTML = pageData.html_content
     
     // Add favicon if not present
@@ -67,7 +70,17 @@ export default function DynamicPage({ pageData, notFound }) {
     return <div dangerouslySetInnerHTML={{ __html: enhancedHTML }} />
   }
 
-  // If HTML doesn't have complete head, use Next.js Head component
+  // Extract body content if HTML has complete head, otherwise use full content
+  let bodyContent = pageData.html_content
+  if (hasCompleteHead) {
+    // Extract just the body content, stripping html/head tags
+    const bodyMatch = pageData.html_content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
+    if (bodyMatch) {
+      bodyContent = bodyMatch[1]
+    }
+  }
+
+  // Use Next.js Head component for SEO control
   return (
     <>
       <Head>
@@ -108,7 +121,7 @@ export default function DynamicPage({ pageData, notFound }) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       
-      <div dangerouslySetInnerHTML={{ __html: pageData.html_content }} />
+      <div dangerouslySetInnerHTML={{ __html: bodyContent }} />
     </>
   )
 }
