@@ -11,26 +11,56 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { title, description, htmlContent, userId } = req.body
+    const { 
+      title, 
+      description, 
+      htmlContent, 
+      html_content, // Support both formats
+      userId, 
+      user_id, // Support both formats
+      meta_title,
+      meta_description,
+      meta_keywords,
+      og_image,
+      canonical_url
+    } = req.body
 
-    console.log('Creating page with data:', { title, description, userId: userId || 'none' })
+    // Use the provided value or fallback
+    const finalHtmlContent = htmlContent || html_content
+    const finalUserId = userId || user_id
 
-    if (!title || !htmlContent) {
+    console.log('Creating page with data:', { 
+      title, 
+      description, 
+      userId: finalUserId || 'none',
+      hasSEO: !!(meta_title || meta_description)
+    })
+
+    if (!title || !finalHtmlContent) {
       return res.status(400).json({ 
         error: 'Missing required fields', 
-        required: ['title', 'htmlContent'],
-        received: { title: !!title, htmlContent: !!htmlContent }
+        required: ['title', 'htmlContent or html_content'],
+        received: { title: !!title, htmlContent: !!finalHtmlContent }
       })
     }
 
+    const insertData = {
+      title,
+      description: description || null,
+      html_content: finalHtmlContent,
+      user_id: finalUserId || null
+    }
+
+    // Add SEO fields if provided
+    if (meta_title) insertData.meta_title = meta_title
+    if (meta_description) insertData.meta_description = meta_description
+    if (meta_keywords) insertData.meta_keywords = meta_keywords
+    if (og_image) insertData.og_image = og_image
+    if (canonical_url) insertData.canonical_url = canonical_url
+
     const { data, error } = await supabase
       .from('html_pages')
-      .insert({
-        title,
-        description: description || null,
-        html_content: htmlContent,
-        user_id: userId || null
-      })
+      .insert(insertData)
       .select()
       .single()
 

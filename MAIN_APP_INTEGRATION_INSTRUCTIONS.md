@@ -28,6 +28,17 @@ Run this command in your main app:
 npm install @supabase/supabase-js
 ```
 
+## 🎯 STEP 2.5: SEO Enhancement (Optional but Recommended)
+
+The HTML pages now support SEO fields for better search engine optimization:
+
+### Database Schema:
+- `meta_title` - SEO title (50-60 chars recommended)
+- `meta_description` - SEO description (150-160 chars recommended) 
+- `meta_keywords` - Comma-separated keywords
+- `og_image` - URL to social sharing image
+- `canonical_url` - Canonical URL for duplicate content
+
 ---
 
 ## 📋 STEP 3: Create Supabase Client for HTML Pages
@@ -61,20 +72,30 @@ export class HTMLPageService {
    * @param {string} title - Page title
    * @param {string} description - Optional description
    * @param {string} userId - User ID from your main app
+   * @param {Object} seoData - Optional SEO enhancement data
    * @returns {Promise<{success: boolean, pageId: string, url: string}>}
    */
-  static async createPage(htmlContent, title, description = '', userId) {
+  static async createPage(htmlContent, title, description = '', userId, seoData = {}) {
     try {
-      console.log('Creating HTML page:', { title, userId })
+      console.log('Creating HTML page:', { title, userId, hasSEO: Object.keys(seoData).length > 0 })
+
+      const insertData = {
+        html_content: htmlContent,
+        title: title,
+        description: description,
+        user_id: userId
+      }
+
+      // Add SEO fields if provided (backwards compatible)
+      if (seoData.meta_title) insertData.meta_title = seoData.meta_title
+      if (seoData.meta_description) insertData.meta_description = seoData.meta_description
+      if (seoData.meta_keywords) insertData.meta_keywords = seoData.meta_keywords
+      if (seoData.og_image) insertData.og_image = seoData.og_image
+      if (seoData.canonical_url) insertData.canonical_url = seoData.canonical_url
 
       const { data, error } = await supabaseHtml
         .from('html_pages')
-        .insert({
-          html_content: htmlContent,
-          title: title,
-          description: description,
-          user_id: userId
-        })
+        .insert(insertData)
         .select()
         .single()
 
@@ -172,7 +193,7 @@ export function useHTMLPages(userId) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const createHTMLPage = async (htmlContent, title, description = '') => {
+  const createHTMLPage = async (htmlContent, title, description = '', seoData = {}) => {
     setIsCreating(true)
     setError(null)
 
@@ -181,7 +202,8 @@ export function useHTMLPages(userId) {
         htmlContent, 
         title, 
         description, 
-        userId
+        userId,
+        seoData // Optional SEO enhancement
       )
       
       return result
@@ -483,6 +505,45 @@ export function AIHTMLGenerator() {
       </div>
     </div>
   )
+}
+```
+
+---
+
+## 🎯 EXAMPLE: Creating SEO-Enhanced Pages
+
+```javascript
+// Example: Create a page with SEO optimization
+const createOptimizedPage = async (htmlContent, title, userId) => {
+  const seoData = {
+    meta_title: `${title} - Expert Analysis | MyMatrx`,
+    meta_description: `Discover insights about ${title.toLowerCase()} with AI-powered analysis and expert recommendations.`,
+    meta_keywords: `${title.toLowerCase()}, analysis, AI, business insights`,
+    og_image: 'https://mymatrx.com/images/default-social.jpg' // Optional
+  }
+  
+  const result = await HTMLPageService.createPage(
+    htmlContent,
+    title,
+    'AI-generated business analysis',
+    userId,
+    seoData // SEO enhancement - completely optional and backwards compatible
+  )
+  
+  return result
+}
+
+// Example: Backwards compatible (still works without SEO)
+const createBasicPage = async (htmlContent, title, userId) => {
+  const result = await HTMLPageService.createPage(
+    htmlContent,
+    title,
+    'Basic page description',
+    userId
+    // No seoData parameter - works exactly as before
+  )
+  
+  return result
 }
 ```
 

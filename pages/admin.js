@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Head from 'next/head'
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -126,7 +127,16 @@ export default function AdminPage() {
   })
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+    <>
+      <Head>
+        <title>Admin Dashboard - MyMatrx</title>
+        <meta name="description" content="Administrative dashboard for managing HTML pages and system diagnostics" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      
+      <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
       <div style={{ borderBottom: '2px solid #dee2e6', paddingBottom: '20px', marginBottom: '30px' }}>
         <h1 style={{ color: '#333', marginBottom: '10px' }}>🛠️ Admin Dashboard</h1>
         <p style={{ color: '#666', margin: '0' }}>Manage pages, test connections, and debug the system</p>
@@ -343,18 +353,20 @@ export default function AdminPage() {
               </ul>
             </div>
 
-            <div style={{ padding: '20px', backgroundColor: '#fff3cd', borderRadius: '8px', border: '1px solid #ffeaa7' }}>
-              <h3 style={{ color: '#856404', margin: '0 0 15px 0' }}>⚠️ Cleanup Recommendations</h3>
+            <div style={{ padding: '20px', backgroundColor: '#d1ecf1', borderRadius: '8px', border: '1px solid #bee5eb' }}>
+              <h3 style={{ color: '#0c5460', margin: '0 0 15px 0' }}>✨ SEO Features Available</h3>
               <ul style={{ margin: '0', paddingLeft: '20px' }}>
-                <li>Remove debug.js and test.js files</li>
-                <li>Clean up test-static.html from public/</li>
-                <li>Migrate static HTML files to database</li>
-                <li>Remove unused API endpoints</li>
+                <li>Automatic favicon on all pages</li>
+                <li>Meta titles and descriptions</li>
+                <li>Open Graph social sharing tags</li>
+                <li>Twitter Card optimization</li>
+                <li>Server-side rendering for fast SEO</li>
               </ul>
             </div>
           </div>
         </div>
       )}
     </div>
+    </>
   )
 }

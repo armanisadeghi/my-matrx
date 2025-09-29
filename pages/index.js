@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Head from 'next/head'
 
 export default function HomePage({ recentPages }) {
   const [testResult, setTestResult] = useState('')
@@ -81,12 +82,20 @@ Details: ${result.details || 'No additional details'}`)
   }
 
   return (
-    <div style={{ 
-      fontFamily: 'Arial, sans-serif', 
-      padding: '40px', 
-      maxWidth: '800px', 
-      margin: '0 auto' 
-    }}>
+    <>
+      <Head>
+        <title>MyMatrx - Dynamic HTML Pages</title>
+        <meta name="description" content="Create and serve dynamic HTML pages with AI-powered content generation" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
+      
+      <div style={{ 
+        fontFamily: 'Arial, sans-serif', 
+        padding: '40px', 
+        maxWidth: '800px', 
+        margin: '0 auto' 
+      }}>
       <h1>🚀 My Matrx - Dynamic HTML Pages</h1>
       <p>This is a Next.js app that serves HTML pages dynamically from Supabase.</p>
       
@@ -175,6 +184,7 @@ Details: ${result.details || 'No additional details'}`)
         </p>
       </div>
     </div>
+    </>
   )
 }
 
