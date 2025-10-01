@@ -54,7 +54,8 @@ function renderListingPage(client, page, relatedPages, components, isPreview) {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href={client.favicon || '/favicon.ico'} />
+        <link rel="apple-touch-icon" href={client.favicon || '/favicon.ico'} />
         {isPreview && <meta name="robots" content="noindex, nofollow" />}
         {combinedCSS && <style dangerouslySetInnerHTML={{ __html: combinedCSS }} />}
       </Head>
@@ -149,7 +150,8 @@ function renderNormalPage(client, page, components, isPreview) {
         <title>{metaTitle}</title>
         <meta name="description" content={metaDescription} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href={client.favicon || '/favicon.ico'} />
+        <link rel="apple-touch-icon" href={client.favicon || '/favicon.ico'} />
         {isPreview && <meta name="robots" content="noindex, nofollow" />}
         
         <meta property="og:title" content={metaTitle} />
