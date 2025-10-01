@@ -9,13 +9,14 @@
     <style>
         :root {
             --color-primary-teal: #3BA5A5;
+            --color-primary-teal-dark: #2A7A7A;
             --color-primary-green: #8DB85C;
             --color-primary-olive: #6B8E3D;
             --color-neutral-gray: #9B9B8A;
             --color-neutral-light: #F5F5F0;
             --color-white: #FFFFFF;
             --color-text-dark: #333333;
-            --color-accent-teal-light: #7DC4C4;
+            --color-accent-teal-light: #5FB5B5;
             --color-accent-green-soft: #B5D17E;
             --color-text-primary: #333333;
             --color-text-secondary: #5A5A4D;
@@ -83,7 +84,7 @@
         }
 
         .nav-links a:hover {
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
         }
 
         .cta-button {
@@ -108,7 +109,7 @@
 
         .phone-link {
             display: flex;
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
             text-decoration: none;
             font-weight: 600;
             font-size: 0.95rem;
@@ -118,7 +119,7 @@
         }
 
         .phone-link:hover {
-            color: var(--color-accent-teal-light);
+            color: var(--color-primary-teal);
         }
 
         .phone-link svg {
@@ -231,7 +232,7 @@
 
         .about-content h2 {
             font-size: 2.2rem;
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
             margin-bottom: 1rem;
         }
 
@@ -282,7 +283,7 @@
 
         .section-header h2 {
             font-size: 2.5rem;
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
             margin-bottom: 0.5rem;
         }
 
@@ -369,12 +370,17 @@
         }
 
         .learn-more {
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
             text-decoration: none;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .learn-more:hover {
+            color: var(--color-primary-teal);
         }
 
         /* Why Choose Section */
@@ -417,7 +423,7 @@
 
         .feature-card h3 {
             font-size: 1.3rem;
-            color: var(--color-primary-teal);
+            color: var(--color-primary-teal-dark);
             margin-bottom: 0.8rem;
         }
 
@@ -525,9 +531,10 @@
             margin-bottom: 2rem;
         }
 
-        .footer-section h4 {
+        .footer-section h3 {
             color: var(--color-accent-green-soft);
             margin-bottom: 1rem;
+            font-size: 1.1rem;
         }
 
         .footer-section ul {
@@ -541,12 +548,14 @@
 
         .footer-section a {
             color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: color 0.3s;
+            text-decoration: underline;
+            text-decoration-color: rgba(255,255,255,0.3);
+            transition: all 0.3s;
         }
 
         .footer-section a:hover {
             color: var(--color-accent-green-soft);
+            text-decoration-color: var(--color-accent-green-soft);
         }
 
         .footer-bottom {
@@ -558,12 +567,14 @@
 
         .footer-bottom a {
             color: var(--color-accent-green-soft);
-            text-decoration: none;
-            transition: color 0.3s;
+            text-decoration: underline;
+            text-decoration-color: rgba(181, 209, 126, 0.5);
+            transition: all 0.3s;
         }
 
         .footer-bottom a:hover {
             color: var(--color-accent-teal-light);
+            text-decoration-color: var(--color-accent-teal-light);
         }
 
         /* Tablet & Mobile Responsive */
@@ -946,11 +957,11 @@
     <footer>
         <div class="footer-container">
             <div class="footer-section">
-                <h4>Institute of Plant-Based Medicine</h4>
+                <h3>Institute of Plant-Based Medicine</h3>
                 <p>Advanced gastroenterology and concierge medicine in Newport Beach</p>
             </div>
             <div class="footer-section">
-                <h4>Quick Links</h4>
+                <h3>Quick Links</h3>
                 <ul>
                     <li><a href="#about">About Dr. Sadeghi</a></li>
                     <li><a href="#services">Services</a></li>
@@ -959,7 +970,7 @@
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Services</h4>
+                <h3>Services</h3>
                 <ul>
                     <li><a href="#">Gastroenterology</a></li>
                     <li><a href="#">Concierge Medicine</a></li>
@@ -968,7 +979,7 @@
                 </ul>
             </div>
             <div class="footer-section">
-                <h4>Contact</h4>
+                <h3>Contact</h3>
                 <ul>
                     <li>901 Dover Drive, Suite 205</li>
                     <li>Newport Beach, CA</li>
