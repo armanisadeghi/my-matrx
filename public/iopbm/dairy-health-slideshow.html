@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dairy & Gut Health: Evidence-Based Critique</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .matrx625-slideshow-container {
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .matrx625-slide {
+            width: 100%;
+            height: calc(100% - 70px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            padding: 60px 50px 30px 50px;
+            background: white;
+        }
+
+        .matrx625-slide.matrx625-active {
+            opacity: 1;
+            z-index: 1;
+        }
+
+        .matrx625-slide-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 30px;
+            line-height: 1.2;
+        }
+
+        .matrx625-slide-subtitle {
+            font-size: 1.2rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .matrx625-slide-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .matrx625-slide-content ul {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .matrx625-slide-content li {
+            margin-bottom: 18px;
+            padding-left: 35px;
+            position: relative;
+            color: #4a5568;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .matrx625-slide-content li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+        }
+
+        .matrx625-icon-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .matrx625-icon {
+            width: 80px;
+            height: 80px;
+        }
+
+        .matrx625-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: #f7fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            z-index: 10;
+        }
+
+        .matrx625-nav-button {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .matrx625-nav-button:hover {
+            background: #667eea;
+            transform: scale(1.1);
+        }
+
+        .matrx625-nav-button:hover svg {
+            stroke: white;
+        }
+
+        .matrx625-nav-button.matrx625-hidden {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .matrx625-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #e2e8f0;
+        }
+
+        .matrx625-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .matrx625-slide-counter {
+            color: #4a5568;
+            font-size: 1rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .matrx625-highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .matrx625-slideshow-container {
+                height: 500px;
+            }
+
+            .matrx625-slide {
+                padding: 40px 30px 20px 30px;
+            }
+
+            .matrx625-slide-title {
+                font-size: 1.8rem;
+                margin-bottom: 20px;
+            }
+
+            .matrx625-slide-subtitle {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+
+            .matrx625-slide-content li {
+                font-size: 0.95rem;
+                margin-bottom: 15px;
+                padding-left: 30px;
+            }
+
+            .matrx625-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .matrx625-footer {
+                height: 60px;
+                gap: 30px;
+            }
+
+            .matrx625-nav-button {
+                width: 40px;
+                height: 40px;
+            }
+
+            .matrx625-slide-counter {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .matrx625-slideshow-container {
+                height: 550px;
+            }
+
+            .matrx625-slide {
+                padding: 30px 20px 20px 20px;
+            }
+
+            .matrx625-slide-title {
+                font-size: 1.5rem;
+            }
+
+            .matrx625-slide-content li {
+                font-size: 0.9rem;
+            }
+
+            .matrx625-footer {
+                gap: 20px;
+            }
+
+            .matrx625-nav-button {
+                width: 38px;
+                height: 38px;
+            }
+
+            .matrx625-slide-counter {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrx625-slideshow-container">
+        <!-- Slide 1: Title -->
+        <div class="matrx625-slide matrx625-active">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M19 11H5M19 11C20.1046 11 21 11.8954 21 13V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V13C3 11.8954 3.89543 11 5 11M19 11V9C19 7.89543 18.1046 7 17 7M5 11V9C5 7.89543 5.89543 7 7 7M7 7V5C7 3.89543 7.89543 3 9 3H15C16.1046 3 17 3.89543 17 5V7M7 7H17"/>
+                </svg>
+            </div>
+            <h1 class="matrx625-slide-title">Dairy & Gut Health</h1>
+            <p class="matrx625-slide-subtitle">An Evidence-Based Critique</p>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li>Scientific perspective from <span class="matrx625-highlight">Dr. Angie Sadeghi</span></li>
+                    <li>Board-certified gastroenterologist</li>
+                    <li>Founder, Institute of Plant-Based Medicine</li>
+                    <li>Challenging dairy's role in gut health and nutrition</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 2: Fermented Foods -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Dairy & Fermented Foods Myth</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">No unique benefit</span> from dairy-based fermented foods over plant-based alternatives</li>
+                    <li>Non-dairy options like kimchi and sauerkraut equally effective</li>
+                    <li>Gut microbiome thrives on <span class="matrx625-highlight">dietary fiber</span> - absent in dairy, abundant in plants</li>
+                    <li>No evidence from randomized controlled trials supporting dairy superiority</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: Lactose Intolerance -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Lactose Intolerance Crisis</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">68% of global population</span> is lactose intolerant</li>
+                    <li>U.S. rates: 36-65% with higher prevalence in certain ethnic groups</li>
+                    <li>Symptoms: diarrhea, gas, bloating, abdominal pain</li>
+                    <li>Yet dietary guidelines continue recommending dairy consumption</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 4: Allergies & Inflammation -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Allergies & Inflammation</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li>Cow's milk allergy affects <span class="matrx625-highlight">0.6-3%</span> of population</li>
+                    <li>Leading cause of food-induced anaphylaxis in children</li>
+                    <li>Triggers eosinophilic esophagitis (EoE) and gastroenteritis</li>
+                    <li>Major contributor to asthma, especially in children</li>
+                    <li>Casein and whey proteins disrupt gut microbial balance</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 5: Cancer Risks -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Cancer Risk Evidence</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">Prostate Cancer:</span> 2+ glasses of milk daily = nearly 2x risk of advanced cancer</li>
+                    <li><span class="matrx625-highlight">Breast Cancer:</span> 53% higher risk with high-fat cheese consumption</li>
+                    <li>¼ cup of milk daily: 30-50% increased breast cancer risk</li>
+                    <li>Potential links to lymphoma and gastric cancer</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Heart & Bone Health -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Heart Disease & Bone Health</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">Leading source</span> of saturated fat and cholesterol</li>
+                    <li>Raises LDL cholesterol, increasing heart disease risk</li>
+                    <li>High-fat dairy increases coronary heart disease mortality</li>
+                    <li><span class="matrx625-highlight">Bone Health Myth:</span> No reduction in fracture risk with higher dairy intake</li>
+                    <li>Some studies show higher fracture rates with increased milk consumption</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 7: Other Health Effects -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                    <line x1="9" y1="9" x2="9.01" y2="9"/>
+                    <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Skin & Neurological Effects</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">Acne:</span> 48% higher odds with dairy consumption</li>
+                    <li>May trigger eczema and psoriasis</li>
+                    <li><span class="matrx625-highlight">Parkinson's Disease:</span> 45% increased risk with high milk intake</li>
+                    <li>Iron-deficiency anemia risk in infants consuming cow's milk</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Mechanisms -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Why Dairy May Be Harmful</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">Hormones:</span> Estrogens and IGF-1 may promote cancer cell growth</li>
+                    <li><span class="matrx625-highlight">Saturated Fat:</span> Raises LDL cholesterol</li>
+                    <li><span class="matrx625-highlight">Calcium Overload:</span> May inhibit vitamin D activation</li>
+                    <li><span class="matrx625-highlight">Lactose:</span> GI symptoms and potential cancer links</li>
+                    <li><span class="matrx625-highlight">Inflammation:</span> Evidence of inflammatory processes</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: Industry Influence -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Industry Marketing Critique</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li>Heavily subsidized with significant marketing budgets</li>
+                    <li>Pays health professionals to endorse products</li>
+                    <li>Misappropriates legitimate gut health science</li>
+                    <li>Ignores high lactose intolerance prevalence</li>
+                    <li><span class="matrx625-highlight">Lobby influence</span> on U.S. dietary guidelines documented</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 10: Recommendations -->
+        <div class="matrx625-slide">
+            <div class="matrx625-icon-container">
+                <svg class="matrx625-icon" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                </svg>
+            </div>
+            <h2 class="matrx625-slide-title">Evidence-Based Recommendations</h2>
+            <div class="matrx625-slide-content">
+                <ul>
+                    <li><span class="matrx625-highlight">Limit high-fat dairy:</span> Minimize cheese and whole milk</li>
+                    <li><span class="matrx625-highlight">Choose plant-based:</span> Soy, almond, oat milks fortified with calcium and vitamin D</li>
+                    <li>Dairy not essential for children's bone health</li>
+                    <li>Avoid cow's milk for infants due to anemia risk</li>
+                    <li>Consult board-certified gastroenterologist for personalized guidance</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="matrx625-progress">
+            <div class="matrx625-progress-bar" style="width: 10%"></div>
+        </div>
+
+        <!-- Footer with Navigation -->
+        <div class="matrx625-footer">
+            <button class="matrx625-nav-button matrx625-prev matrx625-hidden" onclick="changeSlide(-1)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            
+            <div class="matrx625-slide-counter">
+                <span id="currentSlide">1</span> / <span id="totalSlides">10</span>
+            </div>
+            
+            <button class="matrx625-nav-button matrx625-next" onclick="changeSlide(1)">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.matrx625-slide');
+        const totalSlides = slides.length;
+        const prevButton = document.querySelector('.matrx625-prev');
+        const nextButton = document.querySelector('.matrx625-next');
+        const progressBar = document.querySelector('.matrx625-progress-bar');
+        const currentSlideCounter = document.getElementById('currentSlide');
+        const totalSlidesCounter = document.getElementById('totalSlides');
+
+        totalSlidesCounter.textContent = totalSlides;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('matrx625-active'));
+            slides[n].classList.add('matrx625-active');
+            
+            // Update counter
+            currentSlideCounter.textContent = n + 1;
+            
+            // Update progress bar
+            const progress = ((n + 1) / totalSlides) * 100;
+            progressBar.style.width = progress + '%';
+            
+            // Show/hide navigation buttons
+            if (n === 0) {
+                prevButton.classList.add('matrx625-hidden');
+            } else {
+                prevButton.classList.remove('matrx625-hidden');
+            }
+            
+            if (n === totalSlides - 1) {
+                nextButton.classList.add('matrx625-hidden');
+            } else {
+                nextButton.classList.remove('matrx625-hidden');
+            }
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+            showSlide(currentSlide);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+
+        // Touch/swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.querySelector('.matrx625-slideshow-container').addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.querySelector('.matrx625-slideshow-container').addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) changeSlide(1);
+            if (touchEndX > touchStartX + 50) changeSlide(-1);
+        }
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
