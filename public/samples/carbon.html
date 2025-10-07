@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organic Chemistry Bond Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+
+        .tool-button {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .tool-button.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+            background-color: #3B82F6;
+            color: white;
+        }
+
+        canvas {
+            cursor: crosshair;
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Sidebar / Control Panel -->
+    <div class="w-full md:w-72 bg-white shadow-lg p-4 md:p-6 flex-shrink-0 z-10 overflow-y-auto">
+        <div class="space-y-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Carbon Chem Sim</h1>
+                <p class="text-sm text-gray-500 mt-1">Build and explore molecules.</p>
+            </div>
+
+            <!-- Element Selector -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-gray-700">1. Select Element</h2>
+                <div class="grid grid-cols-4 gap-2">
+                    <button id="select-C"
+                        class="tool-button flex flex-col items-center p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">
+                        <span class="text-2xl font-bold" style="color: #333;">C</span>
+                        <span class="text-xs">Carbon</span>
+                    </button>
+                    <button id="select-H"
+                        class="tool-button flex flex-col items-center p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">
+                        <span class="text-2xl font-bold" style="color: #555;">H</span>
+                        <span class="text-xs">Hydrogen</span>
+                    </button>
+                    <button id="select-O"
+                        class="tool-button flex flex-col items-center p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">
+                        <span class="text-2xl font-bold" style="color: #E63946;">O</span>
+                        <span class="text-xs">Oxygen</span>
+                    </button>
+                    <button id="select-N"
+                        class="tool-button flex flex-col items-center p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">
+                        <span class="text-2xl font-bold" style="color: #457B9D;">N</span>
+                        <span class="text-xs">Nitrogen</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bond Selector -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-gray-700">2. Select Bond Type</h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="select-single"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">Single</button>
+                    <button id="select-double"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">Double</button>
+                    <button id="select-triple"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200">Triple</button>
+                </div>
+            </div>
+
+            <!-- Tool Selector -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-gray-700">3. Select Tool</h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="tool-add"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200 text-sm">Add</button>
+                    <button id="tool-bond"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200 text-sm">Bond</button>
+                    <button id="tool-delete"
+                        class="tool-button p-2 rounded-lg border bg-gray-50 hover:bg-gray-200 text-sm">Delete</button>
+                </div>
+            </div>
+
+
+            <!-- Actions -->
+            <div>
+                <h2 class="text-lg font-semibold mb-2 text-gray-700">Actions</h2>
+                <div class="flex flex-col space-y-2">
+                    <button id="clear-canvas"
+                        class="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition">Clear
+                        All</button>
+                    <button id="toggle-hydrogens"
+                        class="w-full bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 transition">Auto-Fill
+                        H: ON</button>
+                    <button id="help-button"
+                        class="w-full bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition">Help</button>
+                </div>
+            </div>
+            <!-- Info Display -->
+            <div class="pt-4 border-t">
+                <h2 class="text-lg font-semibold mb-2 text-gray-700">Molecular Formula</h2>
+                <div id="formula-display"
+                    class="bg-gray-100 p-3 rounded-lg text-center text-lg font-mono tracking-wider">Empty</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Area -->
+    <div class="flex-grow bg-gray-200 relative">
+        <canvas id="chem-canvas" class="w-full h-full"></canvas>
+        <div id="info-box"
+            class="absolute bg-black bg-opacity-70 text-white text-xs rounded-md p-2 pointer-events-none hidden"></div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6 md:p-8 relative">
+            <button id="close-modal"
+                class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold mb-4">How to Use the Simulator</h2>
+            <div class="space-y-4 text-gray-600">
+                <p>This tool helps you learn the basics of organic chemistry bonding rules (valence).</p>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><b>Add Atoms:</b> Select an element, choose the "Add" tool, and click on an empty area of the
+                        canvas.</li>
+                    <li><b>Move Atoms:</b> With the "Add" tool active, click and drag an atom to move it.</li>
+                    <li><b>Create Bonds:</b> Select the "Bond" tool. Click one atom, then click another to form a bond
+                        between them.</li>
+                    <li><b>Change Bond Type:</b> Select a bond type (Single, Double, Triple) and the "Bond" tool, then
+                        click an existing bond.</li>
+                    <li><b>Delete:</b> Select the "Delete" tool and click on any atom or bond to remove it.</li>
+                    <li><b>Auto-Fill Hydrogens:</b> By default, hydrogens are added to satisfy each atom's valence. You
+                        can toggle this off.</li>
+                </ul>
+                <h3 class="text-xl font-semibold pt-4">Valence Rules</h3>
+                <p>Each element "wants" to form a specific number of bonds:</p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li><b>Carbon (C):</b> Forms 4 bonds.</li>
+                    <li><b>Hydrogen (H):</b> Forms 1 bond.</li>
+                    <li><b>Oxygen (O):</b> Forms 2 bonds.</li>
+                    <li><b>Nitrogen (N):</b> Forms 3 bonds.</li>
+                </ul>
+                <p class="font-semibold">The simulator will show an error if a requested bond violates these rules!</p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Setup ---
+        const canvas = document.getElementById('chem-canvas');
+        const ctx = canvas.getContext('2d');
+        const parent = canvas.parentElement;
+
+        let atoms = [];
+        let bonds = [];
+        let messages = [];
+
+        // --- State ---
+        let selectedElement = 'C';
+        let selectedBondType = 1; // 1: single, 2: double, 3: triple
+        let activeTool = 'add'; // 'add', 'bond', or 'delete'
+        let autoFillHydrogens = true;
+
+        let mouse = { x: 0, y: 0, down: false, downX: 0, downY: 0 };
+        let draggedAtom = null;
+        let hoveredAtom = null;
+        let hoveredBond = null;
+        let bondingState = { active: false, startAtom: null };
+
+        const ELEMENT_CONFIG = {
+            'C': { color: '#333333', radius: 18, valence: 4 },
+            'H': { color: '#CCCCCC', radius: 12, valence: 1 },
+            'O': { color: '#E63946', radius: 16, valence: 2 },
+            'N': { color: '#457B9D', radius: 17, valence: 3 },
+        };
+
+        // --- UI Element Hooks ---
+        const selectC = document.getElementById('select-C');
+        const selectH = document.getElementById('select-H');
+        const selectO = document.getElementById('select-O');
+        const selectN = document.getElementById('select-N');
+        const selectSingle = document.getElementById('select-single');
+        const selectDouble = document.getElementById('select-double');
+        const selectTriple = document.getElementById('select-triple');
+        const toolAdd = document.getElementById('tool-add');
+        const toolBond = document.getElementById('tool-bond');
+        const toolDelete = document.getElementById('tool-delete');
+        const clearButton = document.getElementById('clear-canvas');
+        const toggleHydrogensButton = document.getElementById('toggle-hydrogens');
+        const formulaDisplay = document.getElementById('formula-display');
+        const infoBox = document.getElementById('info-box');
+        const helpButton = document.getElementById('help-button');
+        const helpModal = document.getElementById('help-modal');
+        const closeModal = document.getElementById('close-modal');
+
+        // --- Core Functions ---
+        function resizeCanvas() {
+            canvas.width = parent.clientWidth;
+            canvas.height = parent.clientHeight;
+            render();
+        }
+
+        function displayMessage(text, x, y) {
+            messages.push({ text, x, y, opacity: 1, life: 120 });
+        }
+
+        function getAtomAt(x, y) {
+            for (let i = atoms.length - 1; i >= 0; i--) {
+                const atom = atoms[i];
+                const dist = Math.hypot(atom.x - x, atom.y - y);
+                if (dist < ELEMENT_CONFIG[atom.element].radius) {
+                    return atom;
+                }
+            }
+            return null;
+        }
+
+        function getBondAt(x, y) {
+            const tolerance = 8;
+            for (const bond of bonds) {
+                const { atom1, atom2 } = bond;
+                const dx = atom2.x - atom1.x;
+                const dy = atom2.y - atom1.y;
+                const len = Math.hypot(dx, dy);
+                const dot = ((x - atom1.x) * dx + (y - atom1.y) * dy) / (len * len);
+                const closestX = atom1.x + dot * dx;
+                const closestY = atom1.y + dot * dy;
+                if (dot >= 0 && dot <= 1) {
+                    const dist = Math.hypot(x - closestX, y - closestY);
+                    if (dist < tolerance) return bond;
+                }
+            }
+            return null;
+        }
+
+        function getCurrentBondCount(atom) {
+            return bonds.reduce((acc, bond) => {
+                if (bond.atom1 === atom || bond.atom2 === atom) return acc + bond.type;
+                return acc;
+            }, 0);
+        }
+
+        function countHydrogenBonds(atom) {
+            return bonds.filter(b =>
+                (b.atom1 === atom && b.atom2.element === 'H') ||
+                (b.atom2 === atom && b.atom1.element === 'H')
+            ).length;
+        }
+
+        function canFormNewBond(atom1, atom2, type) {
+            if (!atom1 || !atom2 || atom1 === atom2 || type <= 0) return false;
+
+            const existingBond = bonds.find(b => (b.atom1 === atom1 && b.atom2 === atom2) || (b.atom1 === atom2 && b.atom2 === atom1));
+            if (existingBond) return false; // Already bonded
+
+            const currentBonds1 = getCurrentBondCount(atom1);
+            const currentBonds2 = getCurrentBondCount(atom2);
+            const neededSpace1 = type - countHydrogenBonds(atom1);
+            const neededSpace2 = type - countHydrogenBonds(atom2);
+
+            const valence1 = ELEMENT_CONFIG[atom1.element].valence;
+            const valence2 = ELEMENT_CONFIG[atom2.element].valence;
+
+            return (currentBonds1 + type <= valence1) && (currentBonds2 + type <= valence2) &&
+                (countHydrogenBonds(atom1) >= type) && (countHydrogenBonds(atom2) >= type);
+        }
+
+        function createBond(atom1, atom2, type) {
+            const existingBond = bonds.find(b => (b.atom1 === atom1 && b.atom2 === atom2) || (b.atom1 === atom2 && b.atom2 === atom1));
+            if (existingBond) {
+                displayMessage("Bond already exists.", mouse.x, mouse.y);
+                return;
+            }
+
+            const currentBonds1 = getCurrentBondCount(atom1);
+            const currentBonds2 = getCurrentBondCount(atom2);
+            const valence1 = ELEMENT_CONFIG[atom1.element].valence;
+            const valence2 = ELEMENT_CONFIG[atom2.element].valence;
+
+            if (currentBonds1 + type > valence1 || currentBonds2 + type > valence2) {
+                displayMessage("Cannot form bond: valence limit exceeded.", mouse.x, mouse.y);
+                return;
+            }
+            if (countHydrogenBonds(atom1) < type || countHydrogenBonds(atom2) < type) {
+                displayMessage("Not enough hydrogens to form new bond.", mouse.x, mouse.y);
+                return;
+            }
+
+
+            // Remove hydrogens to make space
+            let hydrogensToRemove = type;
+            bonds.slice().forEach(b => {
+                if (hydrogensToRemove > 0 && ((b.atom1 === atom1 && b.atom2.element === 'H') || (b.atom2 === atom1 && b.atom1.element === 'H'))) {
+                    removeAtom(b.atom1 === atom1 ? b.atom2 : b.atom1, false);
+                    hydrogensToRemove--;
+                }
+            });
+
+            hydrogensToRemove = type;
+            bonds.slice().forEach(b => {
+                if (hydrogensToRemove > 0 && ((b.atom1 === atom2 && b.atom2.element === 'H') || (b.atom2 === atom2 && b.atom1.element === 'H'))) {
+                    removeAtom(b.atom1 === atom2 ? b.atom2 : b.atom1, false);
+                    hydrogensToRemove--;
+                }
+            });
+
+            bonds.push({ atom1, atom2, type });
+            if (autoFillHydrogens) balanceHydrogens();
+            updateFormula();
+        }
+
+        function changeBondType(bond, newType) {
+            const delta = newType - bond.type;
+            const { atom1, atom2 } = bond;
+
+            if (delta === 0) return;
+
+            if (delta > 0) { // Upgrading bond
+                const currentBonds1 = getCurrentBondCount(atom1);
+                const currentBonds2 = getCurrentBondCount(atom2);
+                const valence1 = ELEMENT_CONFIG[atom1.element].valence;
+                const valence2 = ELEMENT_CONFIG[atom2.element].valence;
+
+                if (currentBonds1 + delta > valence1 || currentBonds2 + delta > valence2) {
+                    displayMessage("Cannot upgrade bond: valence limit exceeded.", mouse.x, mouse.y);
+                    return;
+                }
+                if (countHydrogenBonds(atom1) < delta || countHydrogenBonds(atom2) < delta) {
+                    displayMessage("Not enough Hydrogens to upgrade bond.", mouse.x, mouse.y);
+                    return;
+                }
+                // Remove H's to make space
+                let hToRemove = delta;
+                bonds.slice().forEach(b => {
+                    if (hToRemove > 0 && ((b.atom1 === atom1 && b.atom2.element === 'H') || (b.atom2 === atom1 && b.atom1.element === 'H'))) {
+                        removeAtom(b.atom1 === atom1 ? b.atom2 : b.atom1, false);
+                        hToRemove--;
+                    }
+                });
+                hToRemove = delta;
+                bonds.slice().forEach(b => {
+                    if (hToRemove > 0 && ((b.atom1 === atom2 && b.atom2.element === 'H') || (b.atom2 === atom2 && b.atom1.element === 'H'))) {
+                        removeAtom(b.atom1 === atom2 ? b.atom2 : b.atom1, false);
+                        hToRemove--;
+                    }
+                });
+            }
+
+            bond.type = newType;
+
+            if (autoFillHydrogens) balanceHydrogens();
+            updateFormula();
+        }
+
+        function removeAtom(atomToRemove, rebalance = true) {
+            bonds = bonds.filter(bond => bond.atom1 !== atomToRemove && bond.atom2 !== atomToRemove);
+            atoms = atoms.filter(atom => atom !== atomToRemove);
+            if (rebalance && autoFillHydrogens) balanceHydrogens();
+            if (rebalance) updateFormula();
+        }
+
+        function removeBond(bondToRemove) {
+            bonds = bonds.filter(bond => bond !== bondToRemove);
+            if (autoFillHydrogens) balanceHydrogens();
+            updateFormula();
+        }
+
+        function balanceHydrogens() {
+            if (!autoFillHydrogens) return;
+
+            // Remove all existing hydrogens first to prevent duplicates
+            atoms.filter(a => a.element === 'H').forEach(h => removeAtom(h, false));
+
+            const atomsToProcess = [...atoms];
+            atomsToProcess.forEach(atom => {
+                if (atom.element === 'H') return;
+                const currentBonds = getCurrentBondCount(atom);
+                const requiredBonds = ELEMENT_CONFIG[atom.element].valence;
+                let neededHydrogens = requiredBonds - currentBonds;
+
+                if (neededHydrogens > 0) {
+                    for (let i = 0; i < neededHydrogens; i++) {
+                        const angle = (Math.PI * 2 / neededHydrogens) * i + Math.random() * 0.5 - 0.25;
+                        const h = {
+                            id: Date.now() + Math.random(), element: 'H',
+                            x: atom.x + Math.cos(angle) * 50, y: atom.y + Math.sin(angle) * 50,
+                            vx: 0, vy: 0
+                        };
+                        atoms.push(h);
+                        bonds.push({ atom1: atom, atom2: h, type: 1 });
+                    }
+                }
+            });
+            updateFormula();
+        }
+
+        function updateFormula() {
+            const counts = atoms.reduce((acc, atom) => {
+                acc[atom.element] = (acc[atom.element] || 0) + 1;
+                return acc;
+            }, {});
+
+            let formula = "";
+            const order = ['C', 'H', 'N', 'O'];
+            order.forEach(el => {
+                if (counts[el]) {
+                    formula += el + (counts[el] > 1 ? `<sub>${counts[el]}</sub>` : '');
+                }
+            });
+            formulaDisplay.innerHTML = formula || 'Empty';
+        }
+
+        function updateInfoBox() {
+            if (hoveredAtom) {
+                const config = ELEMENT_CONFIG[hoveredAtom.element];
+                const bondCount = getCurrentBondCount(hoveredAtom);
+                infoBox.style.display = 'block';
+                infoBox.style.left = `${hoveredAtom.x + 20}px`;
+                infoBox.style.top = `${hoveredAtom.y + 20}px`;
+                infoBox.innerHTML = `Element: ${hoveredAtom.element}<br>Bonds: ${bondCount} / ${config.valence}`;
+            } else {
+                infoBox.style.display = 'none';
+            }
+        }
+
+        function updateButtonSelection() {
+            [selectC, selectH, selectO, selectN].forEach(btn => btn.classList.remove('selected'));
+            ({ 'C': selectC, 'H': selectH, 'O': selectO, 'N': selectN })[selectedElement].classList.add('selected');
+            [selectSingle, selectDouble, selectTriple].forEach(btn => btn.classList.remove('selected'));
+            ({ 1: selectSingle, 2: selectDouble, 3: selectTriple })[selectedBondType].classList.add('selected');
+            [toolAdd, toolBond, toolDelete].forEach(btn => btn.classList.remove('selected'));
+            ({ 'add': toolAdd, 'bond': toolBond, 'delete': toolDelete })[activeTool].classList.add('selected');
+        }
+
+        // --- Physics Simulation ---
+        function applyPhysics() {
+            const repulsion = 1200;
+            const stiffness = 0.05;
+            const damping = 0.7;
+            atoms.forEach(a => { a.fx = 0; a.fy = 0; });
+            for (let i = 0; i < atoms.length; i++) {
+                for (let j = i + 1; j < atoms.length; j++) {
+                    const a1 = atoms[i], a2 = atoms[j], dx = a2.x - a1.x, dy = a2.y - a1.y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq > 1) {
+                        const force = repulsion / distSq, angle = Math.atan2(dy, dx);
+                        a1.fx -= Math.cos(angle) * force; a1.fy -= Math.sin(angle) * force;
+                        a2.fx += Math.cos(angle) * force; a2.fy += Math.sin(angle) * force;
+                    }
+                }
+            }
+            bonds.forEach(bond => {
+                const { atom1, atom2 } = bond, idealLength = 80;
+                const dx = atom2.x - atom1.x, dy = atom2.y - atom1.y, dist = Math.hypot(dx, dy);
+                const displacement = dist - idealLength, force = displacement * stiffness, angle = Math.atan2(dy, dx);
+                atom1.fx += Math.cos(angle) * force; atom1.fy += Math.sin(angle) * force;
+                atom2.fx -= Math.cos(angle) * force; atom2.fy -= Math.sin(angle) * force;
+            });
+            atoms.forEach(atom => {
+                if (atom !== draggedAtom) {
+                    atom.vx = (atom.vx + atom.fx) * damping; atom.vy = (atom.vy + atom.fy) * damping;
+                    atom.x += atom.vx; atom.y += atom.vy;
+                }
+            });
+        }
+
+        // --- Drawing ---
+        function drawBond(bond) {
+            const { atom1, atom2, type } = bond, offset = 5, dx = atom2.x - atom1.x, dy = atom2.y - atom1.y;
+            const angle = Math.atan2(dy, dx), perpX = -Math.sin(angle) * offset, perpY = Math.cos(angle) * offset;
+            ctx.strokeStyle = (bond === hoveredBond) ? (activeTool === 'delete' ? '#ff0000' : '#3B82F6') : '#555555';
+            ctx.lineWidth = 2;
+            if (type === 1) { ctx.beginPath(); ctx.moveTo(atom1.x, atom1.y); ctx.lineTo(atom2.x, atom2.y); ctx.stroke(); }
+            else if (type === 2) {
+                ctx.beginPath(); ctx.moveTo(atom1.x + perpX, atom1.y + perpY); ctx.lineTo(atom2.x + perpX, atom2.y + perpY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(atom1.x - perpX, atom1.y - perpY); ctx.lineTo(atom2.x - perpX, atom2.y - perpY); ctx.stroke();
+            } else if (type === 3) {
+                ctx.beginPath(); ctx.moveTo(atom1.x, atom1.y); ctx.lineTo(atom2.x, atom2.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(atom1.x + perpX * 2, atom1.y + perpY * 2); ctx.lineTo(atom2.x + perpX * 2, atom2.y + perpY * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(atom1.x - perpX * 2, atom1.y - perpY * 2); ctx.lineTo(atom2.x - perpX * 2, atom2.y - perpY * 2); ctx.stroke();
+            }
+        }
+
+        function drawAtom(atom) {
+            const config = ELEMENT_CONFIG[atom.element];
+            ctx.beginPath();
+            ctx.arc(atom.x, atom.y, config.radius, 0, Math.PI * 2);
+            ctx.fillStyle = config.color;
+            ctx.fill();
+            if (atom === hoveredAtom || atom === bondingState.startAtom) {
+                ctx.strokeStyle = activeTool === 'delete' ? '#ff0000' : '#3B82F6';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+            ctx.fillStyle = (atom.element === 'C' || atom.element === 'N' || atom.element === 'O') ? 'white' : 'black';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.font = `bold ${config.radius * 1.1}px Inter`;
+            ctx.fillText(atom.element, atom.x, atom.y);
+        }
+
+        function drawMessages() {
+            messages.forEach((msg, index) => {
+                ctx.font = 'bold 14px Inter';
+                ctx.fillStyle = `rgba(220, 38, 38, ${msg.opacity})`;
+                ctx.textAlign = 'center';
+                ctx.fillText(msg.text, msg.x, msg.y - 30);
+                msg.opacity -= 0.01;
+                msg.life--;
+                if (msg.life <= 0) messages.splice(index, 1);
+            });
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            bonds.forEach(drawBond);
+            if (bondingState.active) {
+                ctx.beginPath(); ctx.strokeStyle = '#3B82F6'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+                ctx.moveTo(bondingState.startAtom.x, bondingState.startAtom.y); ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke(); ctx.setLineDash([]);
+            }
+            atoms.forEach(drawAtom);
+            drawMessages();
+        }
+
+        function animate() {
+            applyPhysics();
+            render();
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(e);
+            mouse.x = pos.x; mouse.y = pos.y;
+            mouse.down = true;
+            mouse.downX = pos.x; mouse.downY = pos.y;
+
+            const targetAtom = getAtomAt(mouse.x, mouse.y);
+            if (activeTool === 'add' && targetAtom) {
+                draggedAtom = targetAtom;
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            mouse.down = false;
+            const clickedAtom = getAtomAt(mouse.x, mouse.y);
+            const clickedBond = getBondAt(mouse.x, mouse.y);
+            const isClick = Math.hypot(mouse.x - mouse.downX, mouse.y - mouse.downY) < 5;
+
+            // --- Tool-specific logic for clicks ---
+            if (isClick) {
+                switch (activeTool) {
+                    case 'add':
+                        if (!clickedAtom && !clickedBond) {
+                            atoms.push({ id: Date.now(), element: selectedElement, x: mouse.x, y: mouse.y, vx: 0, vy: 0 });
+                            if (autoFillHydrogens) balanceHydrogens();
+                            else updateFormula();
+                        }
+                        break;
+                    case 'bond':
+                        if (bondingState.active) {
+                            if (clickedAtom && clickedAtom !== bondingState.startAtom) {
+                                createBond(bondingState.startAtom, clickedAtom, selectedBondType);
+                            } else {
+                                displayMessage("Bonding cancelled.", mouse.x, mouse.y);
+                            }
+                            bondingState.active = false;
+                            bondingState.startAtom = null;
+                        } else {
+                            if (clickedAtom) {
+                                bondingState.active = true;
+                                bondingState.startAtom = clickedAtom;
+                            } else if (clickedBond) {
+                                changeBondType(clickedBond, selectedBondType);
+                            }
+                        }
+                        break;
+                    case 'delete':
+                        if (clickedAtom) removeAtom(clickedAtom);
+                        else if (clickedBond) removeBond(clickedBond);
+                        break;
+                }
+            }
+            draggedAtom = null;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+            mouse.x = pos.x; mouse.y = pos.y;
+
+            hoveredAtom = getAtomAt(mouse.x, mouse.y);
+            hoveredBond = hoveredAtom ? null : getBondAt(mouse.x, mouse.y);
+            updateInfoBox();
+
+            if (draggedAtom && mouse.down && activeTool === 'add') {
+                draggedAtom.x = mouse.x;
+                draggedAtom.y = mouse.y;
+            }
+
+            let cursorStyle = 'crosshair';
+            switch (activeTool) {
+                case 'add':
+                    cursorStyle = hoveredAtom ? 'move' : 'crosshair';
+                    break;
+                case 'bond':
+                    cursorStyle = (hoveredAtom || hoveredBond || bondingState.active) ? 'pointer' : 'crosshair';
+                    break;
+                case 'delete':
+                    cursorStyle = (hoveredAtom || hoveredBond) ? 'pointer' : 'crosshair';
+                    break;
+            }
+            canvas.style.cursor = cursorStyle;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            hoveredAtom = null; hoveredBond = null; draggedAtom = null;
+            if (bondingState.active) {
+                bondingState.active = false;
+                bondingState.startAtom = null;
+            }
+            updateInfoBox();
+        });
+
+        function resetActionState() {
+            bondingState.active = false;
+            bondingState.startAtom = null;
+            draggedAtom = null;
+        }
+
+        // UI Button Handlers
+        selectC.addEventListener('click', () => { selectedElement = 'C'; updateButtonSelection(); });
+        selectH.addEventListener('click', () => { selectedElement = 'H'; updateButtonSelection(); });
+        selectO.addEventListener('click', () => { selectedElement = 'O'; updateButtonSelection(); });
+        selectN.addEventListener('click', () => { selectedElement = 'N'; updateButtonSelection(); });
+        selectSingle.addEventListener('click', () => { selectedBondType = 1; updateButtonSelection(); });
+        selectDouble.addEventListener('click', () => { selectedBondType = 2; updateButtonSelection(); });
+        selectTriple.addEventListener('click', () => { selectedBondType = 3; updateButtonSelection(); });
+        toolAdd.addEventListener('click', () => { activeTool = 'add'; resetActionState(); updateButtonSelection(); });
+        toolBond.addEventListener('click', () => { activeTool = 'bond'; resetActionState(); updateButtonSelection(); });
+        toolDelete.addEventListener('click', () => { activeTool = 'delete'; resetActionState(); updateButtonSelection(); });
+        clearButton.addEventListener('click', () => { atoms = []; bonds = []; resetActionState(); updateFormula(); });
+        toggleHydrogensButton.addEventListener('click', () => {
+            autoFillHydrogens = !autoFillHydrogens;
+            toggleHydrogensButton.textContent = `Auto-Fill H: ${autoFillHydrogens ? 'ON' : 'OFF'}`;
+            toggleHydrogensButton.classList.toggle('bg-green-500', autoFillHydrogens);
+            toggleHydrogensButton.classList.toggle('hover:bg-green-600', autoFillHydrogens);
+            toggleHydrogensButton.classList.toggle('bg-yellow-500', !autoFillHydrogens);
+            toggleHydrogensButton.classList.toggle('hover:bg-yellow-600', !autoFillHydrogens);
+            if (autoFillHydrogens) {
+                balanceHydrogens();
+            } else {
+                atoms = atoms.filter(a => a.element !== 'H');
+                bonds = bonds.filter(b => b.atom1.element !== 'H' && b.atom2.element !== 'H');
+                updateFormula();
+            }
+        });
+        helpButton.addEventListener('click', () => helpModal.classList.remove('hidden'));
+        closeModal.addEventListener('click', () => helpModal.classList.add('hidden'));
+        helpModal.addEventListener('click', (e) => { if (e.target === helpModal) helpModal.classList.add('hidden'); });
+
+        // --- Initial Load ---
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        updateButtonSelection();
+        updateFormula();
+        animate();
+    </script>
+</body>
+
+</html>
