@@ -24,7 +24,7 @@
         .header {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
-            padding: 12px 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -74,6 +74,83 @@
         .info-item svg {
             width: 20px;
             height: 20px;
+        }
+
+        .mine-counter {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px 18px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 0 auto 15px auto;
+        }
+        
+        .mine-counter-container {
+            display: flex;
+            justify-content: center;
+            padding: 0 10px;
+        }
+
+        .mine-counter-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .mine-counter-header svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .mine-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .mine-progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mine-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 10px;
+            transition: width 0.3s ease, background 0.3s ease;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .mine-progress-fill.warning {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        .mine-progress-fill.danger {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .mine-message {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 4px;
+            font-weight: 500;
+            text-align: center;
+            min-height: 14px;
         }
         
         .difficulty {
@@ -130,56 +207,59 @@
         .board-container {
             flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
             overflow: auto;
+            gap: 0;
         }
         
         #board {
             display: inline-grid;
-            gap: 3px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 6px;
+            gap: 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px;
             border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
         }
         
         .cell {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(145deg, #9ca3af, #6b7280);
-            border-radius: 4px;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(145deg, #a8b5c7, #7b8a9e);
+            border: 1px solid #64748b;
+            border-radius: 2px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 20px;
             user-select: none;
             transition: all 0.15s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         .cell svg {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
         }
         
         .cell:hover:not(.revealed):not(.flagged) {
-            background: linear-gradient(145deg, #b0b7c3, #7b8494);
-            transform: scale(1.05);
+            background: linear-gradient(145deg, #bcc7d6, #8d9fb3);
+            filter: brightness(1.1);
         }
         
         .cell.revealed {
-            background: linear-gradient(145deg, #f8f8f8, #e8e8e8);
-            border: 1px solid rgba(0,0,0,0.1);
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
             cursor: default;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .cell.flagged {
-            background: linear-gradient(145deg, #ff6b6b, #ee5a6f);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-color: #d97706;
             animation: pulse 1s ease-in-out infinite;
         }
 
@@ -199,33 +279,42 @@
             100% { transform: scale(1); }
         }
         
-        .cell.number-1 { color: #3498db; }
-        .cell.number-2 { color: #27ae60; }
-        .cell.number-3 { color: #e74c3c; }
-        .cell.number-4 { color: #8e44ad; }
-        .cell.number-5 { color: #d35400; }
-        .cell.number-6 { color: #16a085; }
-        .cell.number-7 { color: #2c3e50; }
-        .cell.number-8 { color: #7f8c8d; }
+        .cell.highlighted {
+            background: #94a3b8 !important;
+            border: 1px solid #475569 !important;
+            filter: brightness(0.9);
+        }
+        
+        .cell.number-1 { color: #2563eb; font-weight: 800; }
+        .cell.number-2 { color: #16a34a; font-weight: 800; }
+        .cell.number-3 { color: #dc2626; font-weight: 800; }
+        .cell.number-4 { color: #7c3aed; font-weight: 800; }
+        .cell.number-5 { color: #ea580c; font-weight: 800; }
+        .cell.number-6 { color: #0891b2; font-weight: 800; }
+        .cell.number-7 { color: #1e293b; font-weight: 800; }
+        .cell.number-8 { color: #64748b; font-weight: 800; }
         
         .status {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 40px 60px;
-            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 40px 50px;
+            border-radius: 25px;
             font-size: 32px;
             font-weight: bold;
             color: white;
             display: none;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            gap: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
             animation: slideIn 0.4s ease-out;
             z-index: 1000;
+            max-width: 500px;
+            text-align: center;
         }
 
         @keyframes slideIn {
@@ -239,9 +328,79 @@
             }
         }
 
-        .status svg {
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 36px;
+        }
+
+        .status-header svg {
             width: 48px;
             height: 48px;
+        }
+
+        .status-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .status-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .status-button {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-button.primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .status-button.primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .status-button svg {
+            width: 20px;
+            height: 20px;
         }
 
         .status.show {
@@ -249,35 +408,102 @@
         }
         
         .status.win {
-            background: linear-gradient(135deg, #27ae60, #229954);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95));
         }
         
         .status.lose {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.95), rgba(220, 38, 38, 0.95));
         }
 
         @media (max-width: 768px) {
             .header {
-                padding: 10px 15px;
+                padding: 8px 12px;
             }
 
             .title {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             .title svg {
-                width: 28px;
-                height: 28px;
+                width: 24px;
+                height: 24px;
             }
 
             .info {
                 font-size: 14px;
-                gap: 12px;
+                gap: 10px;
+            }
+
+            .board-container {
+                padding: 5px;
+            }
+
+            .mine-counter {
+                padding: 10px 14px;
+                margin-bottom: 10px;
+            }
+
+            .mine-counter-header {
+                font-size: 13px;
+            }
+
+            .mine-stats {
+                font-size: 16px;
+            }
+
+            .mine-message {
+                font-size: 10px;
             }
 
             .cell {
-                width: 34px;
-                height: 34px;
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+
+            .cell svg {
+                width: 22px;
+                height: 22px;
+            }
+
+            .status {
+                font-size: 20px;
+                padding: 30px 25px;
+                max-width: 90%;
+            }
+
+            .status-header {
+                font-size: 24px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .status-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .board-container {
+                padding: 3px;
+            }
+
+            .mine-counter {
+                max-width: 300px;
+                padding: 8px 12px;
+                margin-bottom: 8px;
+            }
+
+            .mine-stats {
+                font-size: 14px;
+            }
+
+            .cell {
+                width: 32px;
+                height: 32px;
                 font-size: 16px;
             }
 
@@ -286,27 +512,35 @@
                 height: 20px;
             }
 
-            .status {
-                font-size: 24px;
-                padding: 30px 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .cell {
-                width: 28px;
-                height: 28px;
-                font-size: 14px;
-            }
-
-            .cell svg {
-                width: 18px;
-                height: 18px;
-            }
-
             button {
                 font-size: 12px;
                 padding: 6px 12px;
+            }
+
+            .status {
+                padding: 20px 15px;
+                max-width: 95%;
+            }
+
+            .status-header {
+                font-size: 20px;
+            }
+
+            .status-stats {
+                gap: 10px;
+            }
+
+            .stat-item {
+                padding: 10px;
+            }
+
+            .stat-value {
+                font-size: 18px;
+            }
+
+            .status-button {
+                padding: 8px 16px;
+                font-size: 13px;
             }
         }
     </style>
@@ -339,12 +573,6 @@
 
         <div class="info">
             <div class="info-item">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z"/>
-                </svg>
-                <span><span id="flagCount">0</span>/<span id="mineCount">0</span></span>
-            </div>
-            <div class="info-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <path d="M12 6v6l4 2"/>
@@ -355,6 +583,25 @@
     </div>
 
     <div class="board-container">
+        <div class="mine-counter-container">
+            <div class="mine-counter">
+                <div class="mine-counter-header">
+                    <div class="mine-stats">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="12" cy="12" r="8"/>
+                            <circle cx="12" cy="12" r="5" fill="#c0392b"/>
+                            <circle cx="12" cy="5" r="1.5" fill="white"/>
+                            <rect x="10.5" y="6.5" width="3" height="5" rx="0.5" fill="white"/>
+                        </svg>
+                        <span><span id="minesRemaining">0</span> mines left</span>
+                    </div>
+                </div>
+                <div class="mine-progress-bar">
+                    <div class="mine-progress-fill" id="mineProgress"></div>
+                </div>
+                <div class="mine-message" id="mineMessage"></div>
+            </div>
+        </div>
         <div id="board"></div>
     </div>
     
@@ -371,6 +618,9 @@
         let firstClick = true;
         let timerInterval;
         let seconds = 0;
+        let leftMouseDown = false;
+        let rightMouseDown = false;
+        let highlightedCells = [];
         
         const difficulties = {
             beginner: { rows: 8, cols: 8, mines: 10 },
@@ -389,6 +639,38 @@
             resetGame();
         }
         
+        function updateMineCounter() {
+            const minesRemaining = Math.max(0, mineCount - flagCount);
+            const progressPercent = (flagCount / mineCount) * 100;
+            
+            document.getElementById('minesRemaining').textContent = minesRemaining;
+            
+            const progressBar = document.getElementById('mineProgress');
+            progressBar.style.width = progressPercent + '%';
+            
+            // Update progress bar color and message based on progress
+            const messageEl = document.getElementById('mineMessage');
+            progressBar.className = 'mine-progress-fill';
+            
+            if (progressPercent === 0) {
+                messageEl.textContent = 'Start flagging mines!';
+            } else if (progressPercent < 30) {
+                messageEl.textContent = 'Keep going! 🔍';
+            } else if (progressPercent < 60) {
+                progressBar.classList.add('warning');
+                messageEl.textContent = 'Great progress! 💪';
+            } else if (progressPercent < 90) {
+                progressBar.classList.add('warning');
+                messageEl.textContent = 'Almost there! 🎯';
+            } else if (progressPercent < 100) {
+                progressBar.classList.add('danger');
+                messageEl.textContent = 'So close! 🔥';
+            } else if (progressPercent >= 100) {
+                progressBar.classList.add('danger');
+                messageEl.textContent = 'All flags used! ⚠️';
+            }
+        }
+        
         function resetGame() {
             clearInterval(timerInterval);
             seconds = 0;
@@ -399,12 +681,14 @@
             revealedCount = 0;
             gameOver = false;
             firstClick = true;
+            leftMouseDown = false;
+            rightMouseDown = false;
+            highlightedCells = [];
             
-            document.getElementById('mineCount').textContent = mineCount;
-            document.getElementById('flagCount').textContent = '0';
             document.getElementById('status').innerHTML = '';
             document.getElementById('status').className = 'status';
             
+            updateMineCounter();
             initBoard();
             renderBoard();
         }
@@ -458,10 +742,75 @@
             }
         }
         
+        function handleChordHighlight(r, c) {
+            if (gameOver || !board[r][c].revealed) {
+                return;
+            }
+            
+            clearHighlights();
+            
+            // Highlight adjacent unrevealed cells
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        if (!board[nr][nc].revealed && !board[nr][nc].flagged) {
+                            const cell = document.querySelector(`[data-row="${nr}"][data-col="${nc}"]`);
+                            if (cell) {
+                                cell.classList.add('highlighted');
+                                highlightedCells.push(cell);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function clearHighlights() {
+            highlightedCells.forEach(cell => cell.classList.remove('highlighted'));
+            highlightedCells = [];
+        }
+        
+        function handleChordClick(r, c) {
+            if (gameOver || !board[r][c].revealed || board[r][c].adjacentMines === 0) {
+                return;
+            }
+            
+            // Count adjacent flags
+            let adjacentFlags = 0;
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr;
+                    const nc = c + dc;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].flagged) {
+                        adjacentFlags++;
+                    }
+                }
+            }
+            
+            // If flags match the number, reveal adjacent cells
+            if (adjacentFlags === board[r][c].adjacentMines) {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = r + dr;
+                        const nc = c + dc;
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                            if (!board[nr][nc].revealed && !board[nr][nc].flagged) {
+                                revealCell(nr, nc);
+                            }
+                        }
+                    }
+                }
+                renderBoard();
+                checkWin();
+            }
+        }
+        
         function renderBoard() {
             const boardEl = document.getElementById('board');
             boardEl.innerHTML = '';
-            boardEl.style.gridTemplateColumns = `repeat(${cols}, 40px)`;
+            boardEl.style.gridTemplateColumns = `repeat(${cols}, 45px)`;
             
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
@@ -486,10 +835,62 @@
                         }
                     }
                     
+                    // Left click
                     cell.addEventListener('click', () => handleLeftClick(r, c));
+                    
+                    // Right click
                     cell.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
                         handleRightClick(r, c);
+                    });
+                    
+                    // Mouse down events
+                    cell.addEventListener('mousedown', (e) => {
+                        if (e.button === 1) { // Middle mouse button
+                            e.preventDefault();
+                            handleChordClick(r, c);
+                        } else if (e.button === 0) {
+                            leftMouseDown = true;
+                        } else if (e.button === 2) {
+                            rightMouseDown = true;
+                        }
+                        
+                        // Check if both buttons are now down
+                        if (leftMouseDown && rightMouseDown) {
+                            e.preventDefault();
+                            handleChordHighlight(r, c);
+                        }
+                    });
+                    
+                    // Mouse enter - highlight when moving with both buttons pressed
+                    cell.addEventListener('mouseenter', (e) => {
+                        if (leftMouseDown && rightMouseDown) {
+                            handleChordHighlight(r, c);
+                        }
+                    });
+                    
+                    // Mouse up events
+                    cell.addEventListener('mouseup', (e) => {
+                        if (e.button === 0) {
+                            if (rightMouseDown && leftMouseDown) {
+                                handleChordClick(r, c);
+                            }
+                            leftMouseDown = false;
+                            clearHighlights();
+                        } else if (e.button === 2) {
+                            if (rightMouseDown && leftMouseDown) {
+                                handleChordClick(r, c);
+                            }
+                            rightMouseDown = false;
+                            clearHighlights();
+                        }
+                    });
+                    
+                    // Mouse leave
+                    cell.addEventListener('mouseleave', () => {
+                        if (!leftMouseDown || !rightMouseDown) {
+                            clearHighlights();
+                        }
                     });
                     
                     boardEl.appendChild(cell);
@@ -521,8 +922,8 @@
             
             board[r][c].flagged = !board[r][c].flagged;
             flagCount += board[r][c].flagged ? 1 : -1;
-            document.getElementById('flagCount').textContent = flagCount;
             
+            updateMineCounter();
             renderBoard();
         }
         
@@ -562,36 +963,91 @@
             gameOver = true;
             clearInterval(timerInterval);
             
+            // Calculate stats
+            const minesFound = Math.min(flagCount, mineCount);
+            const minesRemaining = mineCount - minesFound;
+            const accuracy = mineCount > 0 ? Math.round((minesFound / mineCount) * 100) : 0;
+            
             const statusEl = document.getElementById('status');
             if (won) {
                 statusEl.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                        <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    <span>You Won!</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                        <line x1="9" y1="9" x2="9.01" y2="9"/>
-                        <line x1="15" y1="9" x2="15.01" y2="9"/>
-                    </svg>
+                    <div class="status-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <span>You Won!</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                            <line x1="9" y1="9" x2="9.01" y2="9"/>
+                            <line x1="15" y1="9" x2="15.01" y2="9"/>
+                        </svg>
+                    </div>
+                    <div class="status-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Time</div>
+                            <div class="stat-value">${seconds}s</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Mines Found</div>
+                            <div class="stat-value">${mineCount}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Cells Revealed</div>
+                            <div class="stat-value">${revealedCount}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Cells</div>
+                            <div class="stat-value">${rows * cols}</div>
+                        </div>
+                    </div>
+                    <div class="status-buttons">
+                        <button class="status-button primary" onclick="resetGame(); document.getElementById('status').classList.remove('show');">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                            </svg>
+                            Play Again
+                        </button>
+                    </div>
                 `;
                 statusEl.className = 'status win show';
             } else {
                 statusEl.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="15" y1="9" x2="9" y2="15"/>
-                        <line x1="9" y1="9" x2="15" y2="15"/>
-                    </svg>
-                    <span>Game Over!</span>
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="12" r="8"/>
-                        <circle cx="12" cy="12" r="5" fill="#c0392b"/>
-                        <circle cx="12" cy="5" r="1.5" fill="white"/>
-                        <rect x="10.5" y="6.5" width="3" height="5" rx="0.5" fill="white"/>
-                    </svg>
+                    <div class="status-header">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        <span>Game Over!</span>
+                    </div>
+                    <div class="status-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Time Survived</div>
+                            <div class="stat-value">${seconds}s</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Mines Flagged</div>
+                            <div class="stat-value">${flagCount}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Mines Remaining</div>
+                            <div class="stat-value">${minesRemaining}</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Accuracy</div>
+                            <div class="stat-value">${accuracy}%</div>
+                        </div>
+                    </div>
+                    <div class="status-buttons">
+                        <button class="status-button primary" onclick="resetGame(); document.getElementById('status').classList.remove('show');">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                            </svg>
+                            Try Again
+                        </button>
+                    </div>
                 `;
                 statusEl.className = 'status lose show';
                 
@@ -606,6 +1062,13 @@
             
             renderBoard();
         }
+        
+        // Global mouse up to reset button states
+        document.addEventListener('mouseup', () => {
+            leftMouseDown = false;
+            rightMouseDown = false;
+            clearHighlights();
+        });
         
         resetGame();
     </script>
