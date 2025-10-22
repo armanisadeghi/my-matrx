@@ -9,25 +9,20 @@ const nextConfig = {
   },
   async rewrites() {
     return [
-      // Rewrite for games directory
+      // Rewrite for games directory - only for paths without extensions
       {
-        source: '/games/:path',
+        source: '/games/:path((?!.*\\.).*)',
         destination: '/games/:path.html',
       },
       // Rewrite for iopbm directory
       {
-        source: '/iopbm/:path',
+        source: '/iopbm/:path((?!.*\\.).*)',
         destination: '/iopbm/:path.html',
       },
       // Rewrite for samples directory
       {
-        source: '/samples/:path',
+        source: '/samples/:path((?!.*\\.).*)',
         destination: '/samples/:path.html',
-      },
-      // Generic rewrite for any path in public that doesn't already have an extension
-      {
-        source: '/:path((?!.*\\.).*)',
-        destination: '/:path.html',
       },
     ]
   },
