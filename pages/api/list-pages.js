@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
     const { data, error, count } = await supabase
       .from('html_pages')
-      .select('id, title, description, created_at, user_id', { count: 'exact' })
+      .select('id, meta_title, meta_description, is_indexable, created_at, user_id', { count: 'exact' })
       .order('created_at', { ascending: false })
       .limit(10)
 

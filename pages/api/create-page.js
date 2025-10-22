@@ -12,8 +12,6 @@ export default async function handler(req, res) {
 
   try {
     const { 
-      title, 
-      description, 
       htmlContent, 
       html_content, // Support both formats
       userId, 
@@ -22,7 +20,8 @@ export default async function handler(req, res) {
       meta_description,
       meta_keywords,
       og_image,
-      canonical_url
+      canonical_url,
+      is_indexable
     } = req.body
 
     // Use the provided value or fallback
@@ -30,30 +29,29 @@ export default async function handler(req, res) {
     const finalUserId = userId || user_id
 
     console.log('Creating page with data:', { 
-      title, 
-      description, 
+      meta_title, 
+      meta_description, 
       userId: finalUserId || 'none',
-      hasSEO: !!(meta_title || meta_description)
+      is_indexable: is_indexable || false
     })
 
-    if (!title || !finalHtmlContent) {
+    if (!meta_title || !finalHtmlContent) {
       return res.status(400).json({ 
         error: 'Missing required fields', 
-        required: ['title', 'htmlContent or html_content'],
-        received: { title: !!title, htmlContent: !!finalHtmlContent }
+        required: ['meta_title', 'htmlContent or html_content'],
+        received: { meta_title: !!meta_title, htmlContent: !!finalHtmlContent }
       })
     }
 
     const insertData = {
-      title,
-      description: description || null,
+      meta_title,
+      meta_description: meta_description || null,
       html_content: finalHtmlContent,
-      user_id: finalUserId || null
+      user_id: finalUserId || null,
+      is_indexable: is_indexable || false
     }
 
-    // Add SEO fields if provided
-    if (meta_title) insertData.meta_title = meta_title
-    if (meta_description) insertData.meta_description = meta_description
+    // Add optional SEO fields if provided
     if (meta_keywords) insertData.meta_keywords = meta_keywords
     if (og_image) insertData.og_image = og_image
     if (canonical_url) insertData.canonical_url = canonical_url
@@ -79,7 +77,8 @@ export default async function handler(req, res) {
       success: true,
       pageId: data.id,
       url: `/p/${data.id}`,
-      title: data.title,
+      meta_title: data.meta_title,
+      is_indexable: data.is_indexable,
       createdAt: data.created_at
     })
 

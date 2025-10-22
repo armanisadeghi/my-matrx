@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Image Editor</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Active tool button style */
+        .tool-btn.active,
+        .aspect-ratio-btn.active {
+            background-color: #3B82F6;
+            /* blue-600 */
+            color: white;
+        }
+
+        /* Custom slider track */
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #4B5563;
+            /* gray-600 */
+            border-radius: 9999px;
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 4px;
+            background: #4B5563;
+            /* gray-600 */
+            border-radius: 9999px;
+        }
+
+        /* Custom slider thumb */
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            /* blue-600 */
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #3B82F6;
+            /* blue-600 */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Hide default file input */
+        #file-input {
+            display: none;
+        }
+
+        /* Canvas wrapper for centering and scrolling */
+        #canvas-wrapper {
+            max-width: 100%;
+            max-height: 100%;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+        }
+
+        /* Overlay canvas for previews */
+        #overlay-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            /* Disabled by default */
+        }
+
+        /* Cropper UI */
+        #cropper {
+            position: absolute;
+            border: 2px dashed #3B82F6;
+            cursor: move;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .cropper-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #3B82F6;
+            border: 1px solid white;
+            border-radius: 50%;
+        }
+
+        .handle-nw {
+            top: -5px;
+            left: -5px;
+            cursor: nwse-resize;
+        }
+
+        .handle-ne {
+            top: -5px;
+            right: -5px;
+            cursor: nesw-resize;
+        }
+
+        .handle-sw {
+            bottom: -5px;
+            left: -5px;
+            cursor: nesw-resize;
+        }
+
+        .handle-se {
+            bottom: -5px;
+            right: -5px;
+            cursor: nwse-resize;
+        }
+
+        .handle-n {
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: ns-resize;
+        }
+
+        .handle-s {
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: ns-resize;
+        }
+
+        .handle-w {
+            top: 50%;
+            left: -5px;
+            transform: translateY(-50%);
+            cursor: ew-resize;
+        }
+
+        .handle-e {
+            top: 50%;
+            right: -5px;
+            transform: translateY(-50%);
+            cursor: ew-resize;
+        }
+
+        /* Disable selection when dragging */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white h-screen flex flex-col">
+
+    <!-- Header Bar -->
+    <header class="bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 py-2 shadow-md z-20">
+        <!-- ... existing header html ... -->
+        <h1 class="text-xl font-bold">Modern Image Editor</h1>
+        <div class="flex items-center space-x-2">
+            <!-- File Menu -->
+            <div class="flex items-center space-x-2">
+                <button id="upload-btn"
+                    class="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-1">
+                    <i data-lucide="upload" width="16" height="16"></i>
+                    <span>Upload</span>
+                </button>
+                <input type="file" id="file-input" accept="image/*">
+                <button id="save-btn"
+                    class="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-1">
+                    <i data-lucide="download" width="16" height="16"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+
+            <div class="border-l border-gray-600 h-6 mx-2"></div>
+
+            <!-- Edit Menu -->
+            <div class="flex items-center space-x-2">
+                <button id="undo-btn"
+                    class="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Undo">
+                    <i data-lucide="undo-2" width="16" height="16"></i>
+                </button>
+                <button id="redo-btn"
+                    class="bg-gray-700 hover:bg-gray-600 p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Redo">
+                    <i data-lucide="redo-2" width="16" height="16"></i>
+                </button>
+                <button id="reset-btn"
+                    class="bg-red-700 hover:bg-red-800 p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Reset Image">
+                    <i data-lucide="x" width="16" height="16"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- Left Tools Sidebar -->
+        <aside class="w-16 bg-gray-800 p-2 flex flex-col items-center space-y-2 border-r border-gray-700 z-10">
+            <!-- ... existing tool buttons ... -->
+            <!-- Select/Move Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="select" title="Select/Pan">
+                <i data-lucide="mouse-pointer-2" width="20" height="20"></i>
+            </button>
+            <!-- Crop Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="crop" title="Crop">
+                <i data-lucide="crop" width="20" height="20"></i>
+            </button>
+            <!-- Draw Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="draw" title="Draw">
+                <i data-lucide="pen-tool" width="20" height="20"></i>
+            </button>
+            <!-- Text Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="text" title="Text">
+                <i data-lucide="type" width="20" height="20"></i>
+            </button>
+            <!-- Adjust Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="adjust" title="Adjustments">
+                <i data-lucide="sliders-horizontal" width="20" height="20"></i>
+            </button>
+            <!-- Transform Tool -->
+            <button class="tool-btn p-3 rounded-lg hover:bg-gray-700" data-tool="transform" title="Transform">
+                <i data-lucide="rotate-cw" width="20" height="20"></i>
+            </button>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main id="workspace" class="flex-1 bg-gray-900 flex items-center justify-center overflow-auto p-4 relative">
+            <!-- Welcome Message -->
+            <div id="welcome-message" class="text-center text-gray-500">
+                <!-- ... existing welcome message ... -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                    class="mx-auto mb-4">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <path d="M21 15l-5-5L5 21"></path>
+                </svg>
+                <h2 class="text-2xl font-semibold">Upload an image to start</h2>
+                <p>Click the "Upload" button or drag and drop an image.</p>
+            </div>
+
+            <!-- Canvas Wrapper (for zoom/pan) -->
+            <div id="canvas-wrapper" class="relative" style="display: none;">
+                <canvas id="canvas" class="rounded-md shadow-lg block"></canvas>
+                <canvas id="overlay-canvas" class="block"></canvas>
+                <!-- Cropper UI -->
+                <div id="cropper">
+                    <!-- ... existing cropper handles ... -->
+                    <div class="cropper-handle handle-nw" data-handle="nw"></div>
+                    <div class="cropper-handle handle-ne" data-handle="ne"></div>
+                    <div class="cropper-handle handle-sw" data-handle="sw"></div>
+                    <div class="cropper-handle handle-se" data-handle="se"></div>
+                    <div class="cropper-handle handle-n" data-handle="n"></div>
+                    <div class="cropper-handle handle-s" data-handle="s"></div>
+                    <div class="cropper-handle handle-w" data-handle="w"></div>
+                    <div class="cropper-handle handle-e" data-handle="e"></div>
+                </div>
+            </div>
+
+            <!-- Zoom Controls -->
+            <div id="zoom-controls"
+                class="absolute bottom-4 right-4 z-10 flex items-center space-x-1 bg-gray-800 bg-opacity-75 p-1 rounded-lg">
+                <button id="zoom-out-btn" class="p-2 hover:bg-gray-700 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <span id="zoom-level-display" class="px-2 text-sm font-medium w-16 text-center">100%</span>
+                <button id="zoom-in-btn" class="p-2 hover:bg-gray-700 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </main>
+
+        <!-- Right Options Sidebar -->
+        <aside id="options-sidebar" class="w-64 bg-gray-800 p-4 border-l border-gray-700 overflow-y-auto z-10">
+
+            <!-- Welcome Panel (Default) -->
+            <div class="options-panel" id="select-options">
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Select & Pan</h3>
+                <p class="text-sm text-gray-400">Drag the canvas to pan the image.</p>
+                <p class="text-sm text-gray-400 mt-2">Use the controls in the bottom-right to zoom.</p>
+            </div>
+
+            <!-- Crop Options -->
+            <div class="options-panel hidden" id="crop-options">
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Crop Image</h3>
+                <p class="text-sm text-gray-400 mb-2">Select an aspect ratio:</p>
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="free">Free</button>
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="1:1">1:1</button>
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="4:3">4:3</button>
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="3:4">3:4</button>
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="16:9">16:9</button>
+                    <button class="aspect-ratio-btn bg-gray-700 hover:bg-gray-600 p-2 rounded-lg text-xs"
+                        data-ratio="9:16">9:16</button>
+                </div>
+                <p class="text-sm text-gray-400 mb-4">Drag the handles on the image to select your crop area.</p>
+                <button id="apply-crop-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium">Apply Crop</button>
+            </div>
+
+            <!-- Draw Options -->
+            <div class="options-panel hidden" id="draw-options">
+                <!-- ... existing draw options ... -->
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Drawing Tool</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="brush-color" class="block text-sm font-medium text-gray-300 mb-1">Brush
+                            Color</label>
+                        <input type="color" id="brush-color" value="#FF0000"
+                            class="w-full h-10 rounded-lg p-0 border-0 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="brush-size" class="block text-sm font-medium text-gray-300 mb-1">Brush Size (<span
+                                id="brush-size-value">10</span>px)</label>
+                        <input type="range" id="brush-size" min="1" max="100" value="10"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Options -->
+            <div class="options-panel hidden" id="text-options">
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Text Tool</h3>
+                <p class="text-sm text-gray-400 mb-4">Click and drag on the image to position your text.</p>
+                <div class="space-y-4">
+                    <!-- ... existing text inputs ... -->
+                    <div>
+                        <label for="text-input" class="block text-sm font-medium text-gray-300 mb-1">Text</label>
+                        <input type="text" id="text-input" value="Hello World"
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="text-size" class="block text-sm font-medium text-gray-300 mb-1">Font Size (<span
+                                id="text-size-value">48</span>px)</label>
+                        <input type="range" id="text-size" min="10" max="200" value="48"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="text-color" class="block text-sm font-medium text-gray-300 mb-1">Text Color</label>
+                        <input type="color" id="text-color" value="#FFFFFF"
+                            class="w-full h-10 rounded-lg p-0 border-0 cursor-pointer">
+                    </div>
+                    <div>
+                        <label for="text-font" class="block text-sm font-medium text-gray-300 mb-1">Font Family</label>
+                        <select id="text-font"
+                            class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Arial">Arial</option>
+                            <option value="Verdana">Verdana</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Impact">Impact</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="apply-text-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium mt-6">Apply
+                    Text</button>
+            </div>
+
+            <!-- Adjust Options -->
+            <div class="options-panel hidden" id="adjust-options">
+                <!-- ... existing adjust options ... -->
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Adjustments</h3>
+                <p class="text-sm text-gray-400 mb-4">Sliders show a live preview. Click "Apply" to bake changes.</p>
+                <div class="space-y-4">
+                    <!-- Brightness -->
+                    <div>
+                        <label for="filter-brightness" class="block text-sm font-medium text-gray-300 mb-1">Brightness
+                            (<span id="brightness-value">100</span>%)</label>
+                        <input type="range" id="filter-brightness" min="0" max="200" value="100"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="brightness" data-unit="%">
+                    </div>
+                    <!-- Contrast -->
+                    <div>
+                        <label for="filter-contrast" class="block text-sm font-medium text-gray-300 mb-1">Contrast
+                            (<span id="contrast-value">100</span>%)</label>
+                        <input type="range" id="filter-contrast" min="0" max="200" value="100"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="contrast" data-unit="%">
+                    </div>
+                    <!-- Saturation -->
+                    <div>
+                        <label for="filter-saturate" class="block text-sm font-medium text-gray-300 mb-1">Saturation
+                            (<span id="saturate-value">100</span>%)</label>
+                        <input type="range" id="filter-saturate" min="0" max="200" value="100"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="saturate" data-unit="%">
+                    </div>
+                    <!-- Grayscale -->
+                    <div>
+                        <label for="filter-grayscale" class="block text-sm font-medium text-gray-300 mb-1">Grayscale
+                            (<span id="grayscale-value">0</span>%)</label>
+                        <input type="range" id="filter-grayscale" min="0" max="100" value="0"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="grayscale" data-unit="%">
+                    </div>
+                    <!-- Sepia -->
+                    <div>
+                        <label for="filter-sepia" class="block text-sm font-medium text-gray-300 mb-1">Sepia (<span
+                                id="sepia-value">0</span>%)</label>
+                        <input type="range" id="filter-sepia" min="0" max="100" value="0"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="sepia" data-unit="%">
+                    </div>
+                    <!-- Invert -->
+                    <div>
+                        <label for="filter-invert" class="block text-sm font-medium text-gray-300 mb-1">Invert (<span
+                                id="invert-value">0</span>%)</label>
+                        <input type="range" id="filter-invert" min="0" max="100" value="0"
+                            class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer filter-slider"
+                            data-filter="invert" data-unit="%">
+                    </div>
+                </div>
+                <div class="mt-6 space-y-2">
+                    <button id="apply-filters-btn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium">Apply
+                        Filters</button>
+                    <button id="reset-filters-btn"
+                        class="w-full bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded-lg font-medium">Reset
+                        Preview</button>
+                </div>
+            </div>
+
+            <!-- Transform Options -->
+            <div class="options-panel hidden" id="transform-options">
+                <!-- ... existing transform options ... -->
+                <h3 class="text-lg font-semibold mb-4 border-b border-gray-700 pb-2">Transform</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="rotate-left-btn"
+                        class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex flex-col items-center">
+                        <i data-lucide="rotate-ccw" width="20" height="20"></i>
+                        <span class="text-xs mt-1">Rotate Left</span>
+                    </button>
+                    <button id="rotate-right-btn"
+                        class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex flex-col items-center">
+                        <i data-lucide="rotate-cw" width="20" height="20"></i>
+                        <span class="text-xs mt-1">Rotate Right</span>
+                    </button>
+                    <button id="flip-h-btn"
+                        class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex flex-col items-center">
+                        <i data-lucide="flip-horizontal" width="20" height="20"></i>
+                        <span class="text-xs mt-1">Flip Horiz.</span>
+                    </button>
+                    <button id="flip-v-btn"
+                        class="bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex flex-col items-center">
+                        <i data-lucide="flip-vertical" width="20" height="20"></i>
+                        <span class="text-xs mt-1">Flip Vert.</span>
+                    </button>
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- Main Editor Script -->
+    <script type="module">
+        // --- DOM Elements ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const overlayCtx = overlayCanvas.getContext('2d');
+        const workspace = document.getElementById('workspace');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        // Header Buttons
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const saveBtn = document.getElementById('save-btn');
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Tools
+        const toolBtns = document.querySelectorAll('.tool-btn');
+        const optionsPanels = document.querySelectorAll('.options-panel');
+
+        // Draw Options
+        const brushColorInput = document.getElementById('brush-color');
+        const brushSizeInput = document.getElementById('brush-size');
+        const brushSizeValue = document.getElementById('brush-size-value');
+
+        // Text Options
+        const textInput = document.getElementById('text-input');
+        const textSizeInput = document.getElementById('text-size');
+        const textSizeValue = document.getElementById('text-size-value');
+        const textColorInput = document.getElementById('text-color');
+        const textFontInput = document.getElementById('text-font');
+        const applyTextBtn = document.getElementById('apply-text-btn');
+
+        // Adjust Options
+        const filterSliders = document.querySelectorAll('.filter-slider');
+        const applyFiltersBtn = document.getElementById('apply-filters-btn');
+        const resetFiltersBtn = document.getElementById('reset-filters-btn');
+
+        // Transform Options
+        const rotateLeftBtn = document.getElementById('rotate-left-btn');
+        const rotateRightBtn = document.getElementById('rotate-right-btn');
+        const flipHBtn = document.getElementById('flip-h-btn');
+        const flipVBtn = document.getElementById('flip-v-btn');
+
+        // Cropper
+        const cropper = document.getElementById('cropper');
+        const applyCropBtn = document.getElementById('apply-crop-btn');
+        const aspectRatioBtns = document.querySelectorAll('.aspect-ratio-btn');
+
+        // Zoom
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        const zoomLevelDisplay = document.getElementById('zoom-level-display');
+
+        // --- State ---
+        let originalImage = null;
+        let currentTool = 'select';
+        let isDrawing = false;
+        let isCropping = false;
+        let isResizing = false;
+        let isDragging = false;
+        let cropState = { x: 0, y: 0, width: 0, height: 0, startX: 0, startY: 0, handle: null };
+        let cropAspectRatio = null; // null for 'free'
+
+        let history = [];
+        let historyStep = -1;
+
+        let zoomLevel = 1.0;
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let lastPanX = 0;
+        let lastPanY = 0;
+
+        let pendingText = { text: '', x: 0, y: 0, size: 48, color: '#FFF', font: 'Arial', active: false };
+        let isDraggingText = false;
+
+        // --- Initialization ---
+        function init() {
+            // Set default tool
+            switchTool('select');
+            updateHistoryButtons();
+
+            // --- Event Listeners ---
+            // Header
+            uploadBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleImageUpload);
+            saveBtn.addEventListener('click', saveImage);
+            undoBtn.addEventListener('click', undo);
+            redoBtn.addEventListener('click', redo);
+            resetBtn.addEventListener('click', resetImage);
+
+            // Tools
+            toolBtns.forEach(btn => {
+                btn.addEventListener('click', () => switchTool(btn.dataset.tool));
+            });
+
+            // Workspace Drag/Drop
+            workspace.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                workspace.classList.add('bg-gray-700');
+            });
+            workspace.addEventListener('dragleave', () => {
+                workspace.classList.remove('bg-gray-700');
+            });
+            workspace.addEventListener('drop', (e) => {
+                e.preventDefault();
+                workspace.classList.remove('bg-gray-700');
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    handleImageUpload();
+                }
+            });
+
+            // Workspace (for Panning) & Canvas (for Drawing)
+            workspace.addEventListener('mousedown', handleMouseDown);
+            workspace.addEventListener('mousemove', handleMouseMove);
+            workspace.addEventListener('mouseup', handleMouseUp);
+            workspace.addEventListener('mouseout', handleMouseOut);
+
+            // Overlay Canvas (for Text)
+            overlayCanvas.addEventListener('mousedown', handleOverlayMouseDown);
+            overlayCanvas.addEventListener('mousemove', handleOverlayMouseMove);
+            overlayCanvas.addEventListener('mouseup', handleOverlayMouseUp);
+
+            // Draw Options
+            brushColorInput.addEventListener('input', (e) => ctx.strokeStyle = e.target.value);
+            brushSizeInput.addEventListener('input', (e) => {
+                ctx.lineWidth = e.target.value;
+                brushSizeValue.textContent = e.target.value;
+            });
+
+            // Text Options
+            [textInput, textSizeInput, textColorInput, textFontInput].forEach(el => {
+                el.addEventListener('input', updateTextPreview);
+            });
+            textSizeInput.addEventListener('input', (e) => textSizeValue.textContent = e.target.value);
+            applyTextBtn.addEventListener('click', applyText);
+
+            // Adjust Options
+            filterSliders.forEach(slider => {
+                slider.addEventListener('input', updateFilterPreview);
+            });
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            resetFiltersBtn.addEventListener('click', resetFilters);
+
+            // Transform Options
+            rotateLeftBtn.addEventListener('click', () => transformImage('rotate-left'));
+            rotateRightBtn.addEventListener('click', () => transformImage('rotate-right'));
+            flipHBtn.addEventListener('click', () => transformImage('flip-h'));
+            flipVBtn.addEventListener('click', () => transformImage('flip-v'));
+
+            // Crop Options
+            applyCropBtn.addEventListener('click', applyCrop);
+            cropper.addEventListener('mousedown', handleCropperMouseDown);
+            document.addEventListener('mousemove', handleCropperMouseMove); // Listen on document
+            document.addEventListener('mouseup', handleCropperMouseUp);     // Listen on document
+            aspectRatioBtns.forEach(btn => {
+                btn.addEventListener('click', () => setCropAspectRatio(btn.dataset.ratio));
+            });
+
+            // Zoom
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            // Zoom with mouse wheel
+            workspace.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) zoomIn();
+                else zoomOut();
+            }, { passive: false });
+        }
+
+        // --- File Handling ---
+        function handleImageUpload(e) {
+            const file = (e?.target?.files || fileInput.files)[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                originalImage = new Image();
+                originalImage.onload = () => {
+                    // Set canvas dimensions to image dimensions
+                    canvas.width = originalImage.width;
+                    canvas.height = originalImage.height;
+                    overlayCanvas.width = originalImage.width;
+                    overlayCanvas.height = originalImage.height;
+
+                    // Draw image
+                    ctx.drawImage(originalImage, 0, 0);
+
+                    // Show canvas, hide welcome
+                    canvasWrapper.style.display = 'block';
+                    welcomeMessage.style.display = 'none';
+
+                    // Reset history
+                    history = [];
+                    historyStep = -1;
+                    saveState();
+
+                    // Enable buttons
+                    resetBtn.disabled = false;
+                    saveBtn.disabled = false;
+
+                    // Reset view
+                    resetView();
+
+                    // Switch to select tool
+                    switchTool('select');
+                };
+                originalImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveImage() {
+            // Can't save with filters applied, need to bake them
+            if (canvas.style.filter !== 'none') {
+                applyFilters();
+            }
+
+            // Create a temporary canvas to save from (in case of zoom/pan)
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCtx.drawImage(canvas, 0, 0);
+
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function resetImage() {
+            if (!originalImage) return;
+            // Load the first state in history (the original image)
+            if (history.length > 0) {
+                historyStep = 0;
+                loadState(history[historyStep]);
+                // Clear all history after the first state
+                history.length = 1;
+                updateHistoryButtons();
+                resetView();
+            }
+        }
+
+        function resetView() {
+            zoomLevel = 1.0;
+            panX = 0;
+            panY = 0;
+            updateTransform();
+        }
+
+        // --- History (Undo/Redo) ---
+        function saveState() {
+            // Clear any "redo" history
+            if (historyStep < history.length - 1) {
+                history = history.slice(0, historyStep + 1);
+            }
+
+            // Add new state
+            history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
+            historyStep++;
+            updateHistoryButtons();
+        }
+
+        function loadState(imageData) {
+            if (!imageData) return;
+            canvas.width = imageData.width;
+            canvas.height = imageData.height;
+            overlayCanvas.width = imageData.width;
+            overlayCanvas.height = imageData.height;
+            ctx.putImageData(imageData, 0, 0);
+            updateHistoryButtons();
+        }
+
+        function undo() {
+            if (historyStep > 0) {
+                historyStep--;
+                loadState(history[historyStep]);
+            }
+        }
+
+        function redo() {
+            if (historyStep < history.length - 1) {
+                historyStep++;
+                loadState(history[historyStep]);
+            }
+        }
+
+        function updateHistoryButtons() {
+            undoBtn.disabled = historyStep <= 0;
+            redoBtn.disabled = historyStep >= history.length - 1;
+        }
+
+        // --- Tool Switching ---
+        function switchTool(tool) {
+            if (currentTool === 'crop') deactivateCrop();
+            if (currentTool === 'text') clearTextPreview();
+
+            currentTool = tool;
+
+            // Update tool button UI
+            toolBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tool === tool);
+            });
+
+            // Show relevant options panel
+            optionsPanels.forEach(panel => {
+                panel.classList.toggle('hidden', panel.id !== `${tool}-options`);
+            });
+
+            // Tool-specific activation
+            overlayCanvas.style.pointerEvents = 'none';
+            workspace.style.cursor = 'default';
+            canvasWrapper.style.transformOrigin = 'center center'; // For zoom
+
+            if (tool === 'select') {
+                workspace.style.cursor = 'grab';
+            }
+            if (tool === 'crop') {
+                activateCrop();
+            }
+            if (tool === 'draw') {
+                ctx.lineWidth = brushSizeInput.value;
+                ctx.strokeStyle = brushColorInput.value;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                workspace.style.cursor = 'crosshair';
+            }
+            if (tool === 'text') {
+                overlayCanvas.style.pointerEvents = 'auto'; // Enable mouse on overlay
+                workspace.style.cursor = 'text';
+                updateTextPreview(); // Show initial text
+            }
+        }
+
+        // --- Zoom & Pan ---
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel * 1.25, 8); // Max 800%
+            updateTransform();
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel / 1.25, 0.25); // Min 25%
+            updateTransform();
+        }
+
+        function updateTransform() {
+            canvasWrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+            zoomLevelDisplay.textContent = `${Math.round(zoomLevel * 100)}%`;
+        }
+
+        // --- Canvas Event Handlers (Draw & Pan) ---
+        function handleMouseDown(e) {
+            if (currentTool === 'draw') {
+                isDrawing = true;
+                const { x, y } = getCanvasCoords(e);
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+            if (currentTool === 'select') {
+                isPanning = true;
+                lastPanX = e.clientX;
+                lastPanY = e.clientY;
+                workspace.style.cursor = 'grabbing';
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (isDrawing && currentTool === 'draw') {
+                const { x, y } = getCanvasCoords(e);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
+            if (isPanning && currentTool === 'select') {
+                const dx = e.clientX - lastPanX;
+                const dy = e.clientY - lastPanY;
+
+                panX += dx;
+                panY += dy;
+
+                lastPanX = e.clientX;
+                lastPanY = e.clientY;
+
+                updateTransform();
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (isDrawing && currentTool === 'draw') {
+                isDrawing = false;
+                ctx.closePath();
+                saveState(); // Save state after drawing stroke
+            }
+            if (isPanning && currentTool === 'select') {
+                isPanning = false;
+                workspace.style.cursor = 'grab';
+            }
+        }
+
+        function handleMouseOut(e) {
+            // Stop drawing if mouse leaves workspace
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.closePath();
+                saveState();
+            }
+            if (isPanning) {
+                isPanning = false;
+                workspace.style.cursor = 'grab';
+            }
+        }
+
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect(); // This rect is ALREADY scaled and panned
+            return {
+                x: (e.clientX - rect.left) / zoomLevel,
+                y: (e.clientY - rect.top) / zoomLevel
+            };
+        }
+
+        // --- Overlay Canvas Event Handlers (Text) ---
+        function handleOverlayMouseDown(e) {
+            if (currentTool !== 'text') return;
+            const { x, y } = getCanvasCoords(e);
+            pendingText.x = x;
+            pendingText.y = y;
+            pendingText.active = true;
+            isDraggingText = true;
+            updateTextPreview();
+        }
+
+        function handleOverlayMouseMove(e) {
+            if (currentTool !== 'text') return;
+            const { x, y } = getCanvasCoords(e);
+
+            if (isDraggingText) {
+                pendingText.x = x;
+                pendingText.y = y;
+            }
+
+            // Always update preview for position hover
+            updateTextPreview({ previewX: x, previewY: y });
+        }
+
+        function handleOverlayMouseUp(e) {
+            if (currentTool !== 'text') return;
+            isDraggingText = false;
+        }
+
+        function updateTextPreview(options = {}) {
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+            const text = textInput.value;
+            const size = textSizeInput.value;
+            const color = textColorInput.value;
+            const font = textFontInput.value;
+
+            overlayCtx.font = `${size}px ${font}`;
+            overlayCtx.fillStyle = color;
+            overlayCtx.textBaseline = 'top'; // Consistent placement
+
+            if (pendingText.active) {
+                overlayCtx.globalAlpha = 1.0;
+                overlayCtx.fillText(text, pendingText.x, pendingText.y);
+            } else if (options.previewX) {
+                // Show ghost preview at mouse cursor
+                overlayCtx.globalAlpha = 0.5;
+                overlayCtx.fillText(text, options.previewX, options.previewY);
+            }
+        }
+
+        function applyText() {
+            if (!pendingText.active) return;
+
+            const { x, y } = pendingText;
+            const text = textInput.value;
+            const size = textSizeInput.value;
+            const color = textColorInput.value;
+            const font = textFontInput.value;
+
+            ctx.font = `${size}px ${font}`;
+            ctx.fillStyle = color;
+            ctx.textBaseline = 'top';
+            ctx.fillText(text, x, y);
+
+            saveState(); // Save state after adding text
+            clearTextPreview();
+        }
+
+        function clearTextPreview() {
+            pendingText.active = false;
+            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        }
+
+        // --- Tool: Adjustments (Filters) ---
+        function updateFilterPreview() {
+            // ... (existing function) ...
+            const filters = [];
+            filterSliders.forEach(slider => {
+                const filter = slider.dataset.filter;
+                const unit = slider.dataset.unit;
+                const value = slider.value;
+                filters.push(`${filter}(${value}${unit})`);
+
+                // Update value label
+                const label = document.getElementById(`${filter}-value`);
+                if (label) label.textContent = value;
+            });
+            canvas.style.filter = filters.join(' ');
+        }
+
+        function applyFilters() {
+            // ... (existing function) ...
+            const filterString = canvas.style.filter;
+            if (filterString === 'none' || !filterString) return;
+
+            // Create a temporary canvas to bake the filters
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+
+            // Apply filters to temp canvas
+            tempCtx.filter = filterString;
+            tempCtx.drawImage(canvas, 0, 0);
+
+            // Draw temp canvas back to main canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(tempCanvas, 0, 0);
+
+            // Reset preview
+            resetFilters();
+            saveState();
+        }
+
+        function resetFilters() {
+            // ... (existing function) ...
+            filterSliders.forEach(slider => {
+                slider.value = slider.id.includes('grayscale') || slider.id.includes('sepia') || slider.id.includes('invert') ? '0' : '100';
+                const label = document.getElementById(`${slider.dataset.filter}-value`);
+                if (label) label.textContent = slider.value;
+            });
+            canvas.style.filter = 'none';
+        }
+
+        // --- Tool: Transform ---
+        function transformImage(type) {
+            // ... (existing function) ...
+            // Create a temporary image from the current canvas state
+            const img = new Image();
+            img.onload = () => {
+                let w = canvas.width;
+                let h = canvas.height;
+
+                // Reset transform
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+                switch (type) {
+                    case 'rotate-left':
+                        canvas.width = h;
+                        canvas.height = w;
+                        overlayCanvas.width = h;
+                        overlayCanvas.height = w;
+                        ctx.rotate(-90 * Math.PI / 180);
+                        ctx.drawImage(img, -w, 0);
+                        break;
+                    case 'rotate-right':
+                        canvas.width = h;
+                        canvas.height = w;
+                        overlayCanvas.width = h;
+                        overlayCanvas.height = w;
+                        ctx.rotate(90 * Math.PI / 180);
+                        ctx.drawImage(img, 0, -h);
+                        break;
+                    case 'flip-h':
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.translate(w, 0);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(img, 0, 0);
+                        break;
+                    case 'flip-v':
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.translate(0, h);
+                        ctx.scale(1, -1);
+                        ctx.drawImage(img, 0, 0);
+                        break;
+                }
+
+                // Reset transform context for future operations
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                saveState();
+            };
+            img.src = canvas.toDataURL();
+        }
+
+        // --- Tool: Crop ---
+        function setCropAspectRatio(ratioStr) {
+            aspectRatioBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.ratio === ratioStr);
+            });
+
+            if (ratioStr === 'free') {
+                cropAspectRatio = null;
+                return;
+            }
+
+            const [w, h] = ratioStr.split(':').map(Number);
+            cropAspectRatio = w / h;
+
+            // Adjust current crop box
+            const currentAspect = cropState.width / cropState.height;
+            if (cropAspectRatio > currentAspect) { // New aspect is wider
+                cropState.height = cropState.width / cropAspectRatio;
+            } else { // New aspect is taller
+                cropState.width = cropState.height * cropAspectRatio;
+            }
+            updateCropperUI();
+        }
+
+        function activateCrop() {
+            if (!originalImage) return;
+            isCropping = true;
+
+            // Set default ratio to 'free'
+            setCropAspectRatio('free');
+
+            // Initial cropper size (50% of canvas, centered)
+            const w = canvas.width * 0.5;
+            const h = canvas.height * 0.5;
+            const x = (canvas.width - w) / 2;
+            const y = (canvas.height - h) / 2;
+
+            cropState = { ...cropState, x, y, width: w, height: h };
+            updateCropperUI();
+            cropper.style.display = 'block';
+        }
+
+        function deactivateCrop() {
+            isCropping = false;
+            isDragging = false;
+            isResizing = false;
+            cropper.style.display = 'none';
+        }
+
+        function updateCropperUI() {
+            cropper.style.left = `${cropState.x}px`;
+            cropper.style.top = `${cropState.y}px`;
+            cropper.style.width = `${cropState.width}px`;
+            cropper.style.height = `${cropState.height}px`;
+        }
+
+        function applyCrop() {
+            const { x, y, width, height } = cropState;
+
+            // Get data from crop area
+            const imageData = ctx.getImageData(x, y, width, height);
+
+            // Resize canvas to crop dimensions
+            canvas.width = width;
+            canvas.height = height;
+            overlayCanvas.width = width;
+            overlayCanvas.height = height;
+
+            // Put data back
+            ctx.putImageData(imageData, 0, 0);
+
+            deactivateCrop();
+            saveState();
+            resetView();
+            switchTool('select');
+        }
+
+        function handleCropperMouseDown(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const { x, y } = getCanvasCoords(e);
+            cropState.startX = x;
+            cropState.startY = y;
+
+            if (e.target.classList.contains('cropper-handle')) {
+                isResizing = true;
+                cropState.handle = e.target.dataset.handle;
+            } else {
+                isDragging = true;
+            }
+            workspace.classList.add('no-select');
+        }
+
+        function handleCropperMouseMove(e) {
+            if (!isCropping || (!isDragging && !isResizing)) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const { x: mouseX, y: mouseY } = getCanvasCoords(e);
+
+            const dx = mouseX - cropState.startX;
+            const dy = mouseY - cropState.startY;
+
+            let { x, y, width, height } = cropState;
+
+            if (isResizing) {
+                const handle = cropState.handle;
+
+                // Calculate new dimensions based on handle
+                if (handle.includes('e')) width = mouseX - x;
+                if (handle.includes('w')) {
+                    width = (x + width) - mouseX;
+                    x = mouseX;
+                }
+                if (handle.includes('s')) height = mouseY - y;
+                if (handle.includes('n')) {
+                    height = (y + height) - mouseY;
+                    y = mouseY;
+                }
+
+                // Constrain aspect ratio
+                if (cropAspectRatio) {
+                    if (handle === 'n' || handle === 's') {
+                        width = height * cropAspectRatio;
+                    } else if (handle === 'e' || handle === 'w') {
+                        height = width / cropAspectRatio;
+                    } else { // Corner handles
+                        const newAspect = width / height;
+                        if (newAspect > cropAspectRatio) {
+                            width = height * cropAspectRatio;
+                        } else {
+                            height = width / cropAspectRatio;
+                        }
+                    }
+
+                    // Recenter for single-axis handles
+                    if (handle === 'n') x = cropState.x + (cropState.width - width) / 2;
+                    if (handle === 's') x = cropState.x + (cropState.width - width) / 2;
+                    if (handle === 'e') y = cropState.y + (cropState.height - height) / 2;
+                    if (handle === 'w') y = cropState.y + (cropState.height - height) / 2;
+                }
+
+                // Constrain minimum size
+                cropState.width = Math.max(20, width);
+                cropState.height = Math.max(20, height);
+                cropState.x = x;
+                cropState.y = y;
+
+            } else if (isDragging) {
+                x = cropState.x + dx;
+                y = cropState.y + dy;
+
+                // Constrain dragging within canvas bounds
+                cropState.x = Math.max(0, Math.min(x, canvas.width - cropState.width));
+                cropState.y = Math.max(0, Math.min(y, canvas.height - cropState.height));
+            }
+
+            // Update start points for next move event
+            cropState.startX = mouseX;
+            cropState.startY = mouseY;
+
+            updateCropperUI();
+        }
+
+        function handleCropperMouseUp(e) {
+            if (!isCropping || (!isDragging && !isResizing)) return;
+            e.preventDefault();
+            e.stopPropagation();
+
+            isDragging = false;
+            isResizing = false;
+            cropState.handle = null;
+            workspace.classList.remove('no-select');
+        }
+
+        // --- Start the App ---
+        init();
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+    </script>
+
+</body>
+
+</html>

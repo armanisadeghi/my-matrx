@@ -27,20 +27,24 @@ export default function DynamicPage({ pageData, notFound }) {
     )
   }
 
-  // Extract title from HTML content if no meta_title exists
+  // Extract title from HTML content if no meta_title exists in database
   const extractTitleFromHTML = (htmlContent) => {
     const titleMatch = htmlContent.match(/<title[^>]*>([^<]+)<\/title>/i)
-    return titleMatch ? titleMatch[1] : pageData.title
+    return titleMatch ? titleMatch[1] : 'Untitled Page'
   }
 
-  // Extract description from HTML content if no meta_description exists
+  // Extract description from HTML content if no meta_description exists in database
   const extractDescriptionFromHTML = (htmlContent) => {
     const descMatch = htmlContent.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i)
-    return descMatch ? descMatch[1] : pageData.description
+    return descMatch ? descMatch[1] : ''
   }
 
-  const metaTitle = pageData.meta_title || extractTitleFromHTML(pageData.html_content) || pageData.title
-  const metaDescription = pageData.meta_description || extractDescriptionFromHTML(pageData.html_content) || pageData.description || `View ${pageData.title} on MyMatrx`
+  // Database values ALWAYS win if they exist, otherwise extract from HTML
+  const metaTitle = pageData.meta_title || extractTitleFromHTML(pageData.html_content)
+  const metaDescription = pageData.meta_description || extractDescriptionFromHTML(pageData.html_content)
+  
+  // Determine robots meta tag based on is_indexable field (defaults to noindex)
+  const robotsMeta = pageData.is_indexable ? 'index, follow' : 'noindex, nofollow'
 
   // Check if HTML already has complete head section
   const hasCompleteHead = pageData.html_content.includes('<html') && pageData.html_content.includes('<head>')
@@ -132,7 +136,7 @@ export default function DynamicPage({ pageData, notFound }) {
         )}
         
         {/* Additional SEO */}
-        <meta name="robots" content="index, follow" />
+        <meta name="robots" content={robotsMeta} />
         <meta name="author" content="MyMatrx" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
@@ -180,7 +184,7 @@ export async function getServerSideProps({ params }) {
       }
     }
 
-    console.log('Page found server-side:', data.title)
+    console.log('Page found server-side:', data.meta_title || 'Untitled')
 
     return {
       props: {
