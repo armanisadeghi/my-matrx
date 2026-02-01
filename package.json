@@ -7,7 +7,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\""
   },
   "keywords": [
@@ -22,14 +21,14 @@
     "url": "."
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.58.0",
+    "@supabase/supabase-js": "^2.93.3",
     "formidable": "^3.5.4",
-    "lucide-react": "^0.546.0",
-    "next": "^15.5.4",
-    "node-html-parser": "^6.1.13",
-    "nodemailer": "^7.0.9",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "sharp": "^0.34.4"
+    "lucide-react": "^0.563.0",
+    "next": "^16.1.6",
+    "node-html-parser": "^7.0.2",
+    "nodemailer": "^7.0.13",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sharp": "^0.34.5"
   }
 }

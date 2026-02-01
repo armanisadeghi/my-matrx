@@ -146,8 +146,9 @@ export default function DynamicPage({ pageData, notFound }) {
   )
 }
 
-export async function getServerSideProps({ params }) {
+export async function getServerSideProps(props) {
   try {
+    const params = await props.params
     console.log('=== SERVER SIDE PROPS DEBUG ===')
     console.log('Params:', params)
     console.log('Environment check:')

@@ -223,8 +223,10 @@ function renderPreviewBanner(client, page) {
   )
 }
 
-export async function getServerSideProps({ params, query }) {
+export async function getServerSideProps(props) {
   try {
+    const params = await props.params
+    const query = await props.query
     const { client: clientSlug, slug = [] } = params
     const isPreview = query.preview === 'true'
 
