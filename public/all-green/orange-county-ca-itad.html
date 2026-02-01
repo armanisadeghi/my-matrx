@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure ITAD Services in Orange County, California | All Green Electronics Recycling</title>
+<meta name="description" content="All Green provides enterprise-grade IT asset disposition, on-site data destruction, and certified electronics recycling for businesses across Orange County, California.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-950: #020817;
+    --navy-900: #0a1628;
+    --navy-850: #0d1f3c;
+    --navy-800: #111f3b;
+    --navy-700: #1a2f55;
+    --navy-600: #24406e;
+    --navy-500: #3461a0;
+    --steel-400: #5b8fd9;
+    --steel-300: #7daaeb;
+    --steel-200: #a8c8f5;
+    --steel-100: #d4e4fa;
+    --steel-50: #edf3fc;
+    --slate-900: #0c0f1a;
+    --slate-800: #161b2e;
+    --slate-700: #2a3150;
+    --slate-600: #475573;
+    --slate-500: #64748b;
+    --slate-400: #8896ab;
+    --slate-300: #b0bdd0;
+    --slate-200: #d1dae6;
+    --slate-100: #e9eef4;
+    --slate-50: #f4f6f9;
+    --white: #ffffff;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --section-pad: clamp(5rem, 9vw, 8rem);
+    --content-max: 1260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    color: var(--slate-800);
+    background: var(--white);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  .container { max-width: var(--content-max); margin: 0 auto; }
+
+  /* ===== NAV ===== */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    padding: 1.1rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .nav.scrolled {
+    background: rgba(10, 22, 40, 0.97);
+    backdrop-filter: blur(24px) saturate(1.2);
+    padding: 0.7rem 2.5rem;
+    box-shadow: 0 1px 0 rgba(91,143,217,0.08), 0 8px 40px rgba(0,0,0,0.25);
+  }
+  .nav-logo {
+    font-family: var(--font-body); font-weight: 800; font-size: 1.05rem;
+    color: var(--white); text-decoration: none; letter-spacing: -0.03em;
+    display: flex; align-items: center; gap: 0.65rem;
+  }
+  .logo-mark {
+    width: 34px; height: 34px; border-radius: 7px;
+    background: linear-gradient(135deg, var(--steel-400) 0%, var(--navy-600) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; color: var(--white); font-weight: 800;
+    box-shadow: 0 0 0 1px rgba(91,143,217,0.3);
+  }
+  .nav-links { display: flex; gap: 2.25rem; list-style: none; align-items: center; }
+  .nav-links a {
+    color: rgba(255,255,255,0.65); text-decoration: none;
+    font-size: 0.82rem; font-weight: 600; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--steel-300); }
+  .nav-cta-link {
+    background: var(--white) !important; color: var(--navy-900) !important;
+    padding: 0.55rem 1.4rem; border-radius: 6px; font-weight: 700 !important;
+    font-size: 0.82rem !important; transition: all 0.2s !important;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .nav-cta-link:hover { background: var(--steel-100) !important; transform: translateY(-1px); }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative; min-height: 100vh;
+    background: var(--navy-950);
+    display: flex; align-items: center; overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(91,143,217,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,143,217,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 60% at 60% 40%, black 10%, transparent 70%);
+  }
+  .hero-sweep {
+    position: absolute; top: -30%; right: -10%; width: 900px; height: 900px;
+    background: conic-gradient(from 200deg at 50% 50%, transparent 0deg, rgba(91,143,217,0.07) 40deg, transparent 80deg);
+    animation: slowSpin 40s linear infinite; pointer-events: none;
+  }
+  @keyframes slowSpin { to { transform: rotate(360deg); } }
+  .hero-accent-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--steel-400) 30%, var(--steel-300) 50%, var(--steel-400) 70%, transparent 100%);
+    opacity: 0.5;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: var(--content-max); margin: 0 auto;
+    padding: 9rem 2.5rem 6rem; width: 100%;
+    display: grid; grid-template-columns: 1fr 400px; gap: 5rem; align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--steel-400);
+    margin-bottom: 1.5rem;
+    padding: 0.4rem 1rem 0.4rem 0.5rem;
+    border: 1px solid rgba(91,143,217,0.2);
+    border-radius: 100px; background: rgba(91,143,217,0.06);
+    width: fit-content;
+  }
+  .eyebrow-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--steel-400);
+    box-shadow: 0 0 8px rgba(91,143,217,0.6);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(91,143,217,0.6); }
+    50% { opacity: 0.5; box-shadow: 0 0 4px rgba(91,143,217,0.3); }
+  }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2.6rem, 5vw, 3.8rem);
+    color: var(--white); line-height: 1.12; letter-spacing: -0.03em;
+    margin-bottom: 1.75rem;
+  }
+  .hero h1 em { font-style: italic; font-weight: 300; color: var(--steel-300); }
+  .hero-sub {
+    font-size: 1rem; color: var(--slate-400); line-height: 1.75;
+    margin-bottom: 1.25rem; max-width: 560px;
+  }
+  .hero-actions { display: flex; gap: 0.75rem; margin-top: 2.5rem; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: var(--white); color: var(--navy-900);
+    padding: 0.85rem 2rem; border-radius: 7px;
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 700;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1); letter-spacing: -0.01em;
+  }
+  .btn-primary:hover {
+    background: var(--steel-100); transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    background: transparent; color: var(--slate-300);
+    padding: 0.85rem 2rem; border-radius: 7px;
+    font-family: var(--font-body); font-size: 0.9rem; font-weight: 600;
+    text-decoration: none; cursor: pointer; transition: all 0.25s;
+    border: 1px solid rgba(255,255,255,0.12); letter-spacing: -0.01em;
+  }
+  .btn-outline:hover {
+    border-color: var(--steel-400); color: var(--steel-300);
+    background: rgba(91,143,217,0.05);
+  }
+
+  /* Hero metrics */
+  .hero-metrics {
+    display: flex; flex-direction: column; gap: 1px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px; overflow: hidden;
+    backdrop-filter: blur(12px);
+  }
+  .metric-item {
+    padding: 1.5rem 2rem; background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex; align-items: flex-start; gap: 1.15rem;
+    transition: background 0.2s;
+  }
+  .metric-item:last-child { border-bottom: none; }
+  .metric-item:hover { background: rgba(91,143,217,0.04); }
+  .metric-icon {
+    width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(91,143,217,0.15);
+    background: rgba(91,143,217,0.06); color: var(--steel-400);
+  }
+  .metric-label { font-size: 0.85rem; font-weight: 700; color: var(--white); margin-bottom: 0.15rem; }
+  .metric-desc { font-size: 0.78rem; color: var(--slate-400); line-height: 1.55; }
+
+  /* ===== SECTION SHARED ===== */
+  .section { padding: var(--section-pad) 2.5rem; }
+  .section-label {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--navy-500); margin-bottom: 0.85rem;
+    display: inline-flex; align-items: center; gap: 0.65rem;
+  }
+  .section-label::before {
+    content: ''; width: 20px; height: 2px; background: var(--steel-400);
+  }
+  .section-heading {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(1.9rem, 3.5vw, 2.7rem);
+    color: var(--navy-950); line-height: 1.15;
+    letter-spacing: -0.025em; margin-bottom: 1rem;
+  }
+  .section-heading em { font-style: italic; font-weight: 300; color: var(--navy-600); }
+  .section-sub { font-size: 1rem; color: var(--slate-500); line-height: 1.7; max-width: 620px; }
+
+  /* ===== REGULATORY ===== */
+  .regulatory {
+    background: var(--slate-50);
+    border-top: 1px solid var(--slate-200);
+    border-bottom: 1px solid var(--slate-200);
+  }
+  .reg-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .reg-card {
+    background: var(--white); border: 1px solid var(--slate-200);
+    border-radius: 12px; padding: 2rem; position: relative;
+    transition: all 0.3s; overflow: hidden;
+  }
+  .reg-card:hover {
+    border-color: var(--steel-200);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .reg-card-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--navy-600), var(--steel-400));
+  }
+  .reg-icon-wrap {
+    width: 44px; height: 44px; border-radius: 10px; margin-bottom: 1.25rem;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--steel-50); border: 1px solid var(--steel-100); color: var(--navy-600);
+  }
+  .reg-card h3 {
+    font-family: var(--font-body); font-size: 1.05rem; font-weight: 800;
+    color: var(--navy-950); margin-bottom: 0.7rem; letter-spacing: -0.02em;
+  }
+  .reg-card p { font-size: 0.88rem; color: var(--slate-600); line-height: 1.65; }
+  .reg-tag {
+    display: inline-block; margin-top: 0.85rem;
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--navy-700); background: var(--steel-50);
+    border: 1px solid var(--steel-100); padding: 0.2rem 0.65rem; border-radius: 4px;
+  }
+  .reg-cta-bar {
+    margin-top: 2rem; padding: 1.35rem 2rem;
+    background: var(--navy-900); border-radius: 10px;
+    display: flex; align-items: center; gap: 1.25rem; color: var(--white);
+  }
+  .reg-cta-icon {
+    width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0;
+    background: rgba(91,143,217,0.12); display: flex; align-items: center; justify-content: center;
+    color: var(--steel-300);
+  }
+  .reg-cta-bar p { font-size: 0.88rem; color: rgba(255,255,255,0.75); line-height: 1.55; }
+  .reg-cta-bar a { color: var(--steel-300); font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .reg-cta-bar a:hover { text-decoration: underline; color: var(--steel-200); }
+
+  /* ===== INDUSTRIES — REDESIGNED LAYOUT ===== */
+  .industries-section { background: var(--white); }
+
+  .industry-block {
+    margin-top: 1.75rem;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .industry-block:hover {
+    box-shadow: 0 8px 40px rgba(0,0,0,0.05);
+    border-color: var(--steel-200);
+  }
+
+  .industry-header {
+    display: grid; grid-template-columns: 52px 1fr 40px;
+    gap: 1.15rem; align-items: center;
+    padding: 1.35rem 1.75rem;
+    background: var(--white);
+    border-bottom: 1px solid transparent;
+    cursor: pointer; user-select: none;
+    transition: background 0.2s;
+  }
+  .industry-block.open .industry-header {
+    background: var(--slate-50);
+    border-bottom-color: var(--slate-200);
+  }
+
+  .industry-icon {
+    width: 52px; height: 52px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+  }
+  .ind-tech .industry-icon    { background: #eef2ff; color: #4338ca; border: 1px solid #e0e7ff; }
+  .ind-health .industry-icon  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .ind-finance .industry-icon { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+  .ind-mfg .industry-icon     { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+  .ind-logistics .industry-icon { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+
+  .industry-header h3 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 1.3rem; color: var(--navy-950); letter-spacing: -0.02em;
+  }
+  .industry-cities { font-size: 0.77rem; color: var(--slate-500); margin-top: 0.2rem; }
+
+  .industry-toggle {
+    width: 40px; height: 40px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    color: var(--slate-400); transition: all 0.3s;
+  }
+  .industry-block.open .industry-toggle {
+    transform: rotate(180deg);
+    background: var(--navy-900); border-color: var(--navy-900); color: var(--white);
+  }
+
+  .industry-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .industry-block.open .industry-body { max-height: 2400px; }
+
+  /* NEW: Two-column grid for Challenge + Solution */
+  .industry-content {
+    padding: 1.75rem;
+  }
+  .ind-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  .ind-col {
+    padding: 1.5rem;
+    border-radius: 10px;
+  }
+  .ind-col-challenge {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fde68a;
+  }
+  .ind-col-solution {
+    background: linear-gradient(135deg, #eef2ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+  }
+  .ind-col-label {
+    font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .ind-col-challenge .ind-col-label { color: #92400e; }
+  .ind-col-solution .ind-col-label  { color: #1e40af; }
+  .ind-col p { font-size: 0.86rem; line-height: 1.7; color: var(--slate-700); }
+
+  /* NEW: Local Experience proof bar */
+  .ind-proof-bar {
+    margin-top: 1.25rem;
+    padding: 1rem 1.35rem;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .ind-proof-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: var(--navy-900);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--steel-300);
+  }
+  .ind-proof-content {
+    display: flex; flex-direction: column; gap: 0.1rem;
+  }
+  .ind-proof-label {
+    font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--navy-600);
+  }
+  .ind-proof-text {
+    font-size: 0.84rem; color: var(--slate-600); line-height: 1.55;
+  }
+
+  /* ===== SOLUTIONS ===== */
+  .solutions-section {
+    background: var(--navy-950); position: relative; overflow: hidden;
+  }
+  .solutions-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(91,143,217,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,143,217,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 60% 60% at 40% 50%, black 10%, transparent 70%);
+  }
+  .solutions-section .section-label { color: var(--steel-400); }
+  .solutions-section .section-heading { color: var(--white); }
+  .solutions-section .section-heading em { color: var(--steel-300); }
+  .solutions-section .section-sub { color: var(--slate-400); }
+
+  .solutions-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem; margin-top: 3rem; position: relative; z-index: 2;
+  }
+  .solution-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; padding: 1.75rem;
+    transition: all 0.3s; position: relative; overflow: hidden;
+  }
+  .solution-card:hover {
+    background: rgba(91,143,217,0.05);
+    border-color: rgba(91,143,217,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  }
+  .solution-card-line {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--steel-400), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .solution-card:hover .solution-card-line { opacity: 1; }
+  .sol-icon {
+    width: 44px; height: 44px; border-radius: 9px;
+    background: rgba(91,143,217,0.08); border: 1px solid rgba(91,143,217,0.12);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.15rem; color: var(--steel-400);
+  }
+  .solution-card h3 {
+    font-family: var(--font-body); font-size: 0.95rem; font-weight: 800;
+    color: var(--white); margin-bottom: 0.65rem;
+  }
+  .solution-card p { font-size: 0.82rem; color: var(--slate-400); line-height: 1.65; }
+  .sol-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.85rem; }
+  .sol-tag {
+    font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.55rem;
+    border-radius: 3px; background: rgba(91,143,217,0.08);
+    border: 1px solid rgba(91,143,217,0.12); color: var(--steel-400);
+  }
+
+  /* ===== SERVICE AREA ===== */
+  .area-section {
+    background: var(--white); border-top: 1px solid var(--slate-200);
+  }
+  .area-layout {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+    margin-top: 2.5rem; align-items: start;
+  }
+  .area-text p {
+    font-size: 0.92rem; color: var(--slate-600); line-height: 1.75; margin-bottom: 1rem;
+  }
+  .area-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+  .zone-card {
+    background: var(--slate-50); border: 1px solid var(--slate-200);
+    border-radius: 9px; padding: 1.15rem; transition: all 0.2s;
+  }
+  .zone-card:hover { border-color: var(--steel-200); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .zone-card h4 {
+    font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--navy-600); margin-bottom: 0.35rem;
+  }
+  .zone-card p { font-size: 0.8rem; color: var(--slate-500); line-height: 1.55; }
+
+  /* ===== CTA ===== */
+  .cta-section {
+    background: linear-gradient(160deg, var(--navy-850) 0%, var(--navy-950) 100%);
+    position: relative; overflow: hidden; text-align: center;
+  }
+  .cta-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(91,143,217,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,143,217,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at 50% 50%, black 20%, transparent 60%);
+  }
+  .cta-inner { position: relative; z-index: 2; max-width: 620px; margin: 0 auto; }
+  .cta-section h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+    color: var(--white); line-height: 1.15; margin-bottom: 1rem;
+  }
+  .cta-section h2 em { font-style: italic; font-weight: 300; color: var(--steel-300); }
+  .cta-desc { font-size: 1rem; color: var(--slate-400); line-height: 1.7; margin-bottom: 2.5rem; }
+  .cta-btns { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 3rem; }
+  .cta-badges { display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+  .cta-badge {
+    display: flex; align-items: center; gap: 0.45rem;
+    font-size: 0.78rem; color: rgba(255,255,255,0.4); font-weight: 500;
+  }
+  .cta-badge svg { width: 15px; height: 15px; color: var(--steel-400); }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    background: var(--navy-950); border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 2.5rem 2.5rem;
+  }
+  .footer-inner {
+    max-width: var(--content-max); margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer p { font-size: 0.78rem; color: var(--slate-500); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a { font-size: 0.78rem; color: var(--slate-400); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--steel-300); }
+
+  /* ===== ANIMATIONS ===== */
+  .fade-up {
+    opacity: 0; transform: translateY(28px);
+    transition: all 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fade-up.vis { opacity: 1; transform: translateY(0); }
+  .s1 { transition-delay: 0.04s; } .s2 { transition-delay: 0.08s; }
+  .s3 { transition-delay: 0.12s; } .s4 { transition-delay: 0.14s; }
+  .s5 { transition-delay: 0.18s; } .s6 { transition-delay: 0.22s; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1080px) {
+    .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-metrics { max-width: 480px; }
+    .ind-main-grid { grid-template-columns: 1fr; }
+    .solutions-grid { grid-template-columns: repeat(2, 1fr); }
+    .area-layout { grid-template-columns: 1fr; }
+    .reg-columns { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero h1 { font-size: 2.1rem; }
+    .hero-content { padding: 7rem 1.5rem 4rem; }
+    .section { padding: 3.5rem 1.5rem; }
+    .solutions-grid { grid-template-columns: 1fr; }
+    .industry-header { grid-template-columns: 42px 1fr 36px; gap: 0.85rem; padding: 1.15rem 1.25rem; }
+    .industry-icon { width: 42px; height: 42px; font-size: 1rem; }
+    .industry-header h3 { font-size: 1.1rem; }
+    .industry-content { padding: 1.25rem; }
+    .ind-proof-bar { flex-direction: column; text-align: center; }
+    .footer-inner { flex-direction: column; gap: 1rem; text-align: center; }
+    .area-zones { grid-template-columns: 1fr; }
+    .hero-actions { flex-direction: column; }
+    .btn-primary, .btn-outline { text-align: center; justify-content: center; }
+    .reg-cta-bar { flex-direction: column; text-align: center; }
+    .cta-badges { flex-direction: column; align-items: center; gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <a href="/" class="nav-logo">
+    <span class="logo-mark">AG</span>
+    All Green Electronics Recycling
+  </a>
+  <ul class="nav-links">
+    <li><a href="#regulations">Compliance</a></li>
+    <li><a href="#industries">Industries</a></li>
+    <li><a href="#solutions">Solutions</a></li>
+    <li><a href="#coverage">Service Area</a></li>
+    <li><a href="#contact" class="nav-cta-link">Get a Quote</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-sweep"></div>
+  <div class="hero-accent-line"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-eyebrow"><span class="eyebrow-dot"></span> Certified ITAD Provider — Orange County, CA</div>
+      <h1>Secure IT Asset Disposition Services in <em>Orange County, California</em></h1>
+      <p class="hero-sub">All Green provides enterprise-grade IT asset disposition, on-site data destruction, and certified electronics recycling for businesses across the entire Orange County region. From Irvine's tech corridor to Anaheim's logistics hubs and Newport Beach's financial district, we deliver secure chain-of-custody documentation, certified data destruction, and compliant e-waste processing under California and Federal law.</p>
+      <p class="hero-sub">Whether your organization is decommissioning a data center, refreshing 500 employee laptops, or managing reverse logistics for returned electronics — All Green handles the full lifecycle so your IT team can focus on what's next.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          Schedule a Pickup
+        </a>
+        <a href="#industries" class="btn-outline">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+          Explore Industries Served
+        </a>
+      </div>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric-item">
+        <div class="metric-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="metric-label">Certified &amp; Auditable</div>
+          <div class="metric-desc">Certified processing facilities with full chain-of-custody documentation for every engagement.</div>
+        </div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+          <div class="metric-label">NIST 800-88 Compliant</div>
+          <div class="metric-desc">Data sanitization aligned to federal standards with serialized Certificates of Destruction.</div>
+        </div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div>
+          <div class="metric-label">Zero-Landfill Processing</div>
+          <div class="metric-desc">Responsible domestic recycling compliant with California's Electronic Waste Recycling Act.</div>
+        </div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        </div>
+        <div>
+          <div class="metric-label">Value Recovery</div>
+          <div class="metric-desc">Certified remarketing channels turn retired assets into measurable ROI for your organization.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGULATORY -->
+<section class="section regulatory" id="regulations">
+  <div class="container">
+    <div class="section-label fade-up">Compliance</div>
+    <h2 class="section-heading fade-up">The Regulatory Landscape <em>in Orange County</em></h2>
+    <p class="section-sub fade-up">California imposes some of the nation's strictest requirements on IT asset disposal. Two areas demand immediate attention from any Orange County organization retiring IT equipment.</p>
+
+    <div class="reg-columns">
+      <div class="reg-card fade-up s1">
+        <div class="reg-card-bar"></div>
+        <div class="reg-icon-wrap">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </div>
+        <h3>E-Waste Disposal</h3>
+        <p>The Electronic Waste Recycling Act (SB 20/SB 1215) prohibits landfill disposal of computers, monitors, and other covered devices. All end-of-life electronics must be handled as Universal Waste under DTSC regulations — authorized recyclers, labeled containers, documented inventory, and trained personnel. Violations carry DTSC fines and environmental penalties.</p>
+        <span class="reg-tag">SB 20 · SB 1215 · DTSC Universal Waste</span>
+      </div>
+      <div class="reg-card fade-up s2">
+        <div class="reg-card-bar"></div>
+        <div class="reg-icon-wrap">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3>Data Destruction</h3>
+        <p>California Civil Code §1798.81 requires businesses to destroy personal information records so they are unreadable and irrecoverable. CCPA/CPRA add further obligations. Regulated industries face additional federal overlaps — HIPAA for healthcare, GLBA for financial services, DFARS/NIST 800-171 for defense contractors. Noncompliance exposes your organization to enforcement actions, breach liability, and reputational damage.</p>
+        <span class="reg-tag">Civil Code §1798.81 · CCPA/CPRA · NIST 800-88</span>
+      </div>
+    </div>
+
+    <div class="reg-cta-bar fade-up">
+      <div class="reg-cta-icon">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8m8 4H8m2-8H8"/></svg>
+      </div>
+      <p>All Green's certified ITAD process satisfies all of these requirements in a single engagement, with full documentation for your compliance and audit teams. <a href="/itad-regulations/california/">View our California ITAD Regulations page&nbsp;→</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- INDUSTRIES -->
+<section class="section industries-section" id="industries">
+  <div class="container">
+    <div class="section-label fade-up">Industry Expertise</div>
+    <h2 class="section-heading fade-up">Key Industries Served <em>in Orange County</em></h2>
+    <p class="section-sub fade-up">All Green works with IT departments across Orange County's dominant sectors, delivering solutions built for each industry's specific compliance pressures and operational realities.</p>
+
+    <!-- TECH -->
+    <div class="industry-block ind-tech open fade-up s1">
+      <div class="industry-header" onclick="toggleIndustry(this)">
+        <div class="industry-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+        </div>
+        <div>
+          <h3>Technology &amp; Software</h3>
+          <div class="industry-cities">Irvine · Aliso Viejo · Lake Forest · Santa Ana · Newport Beach</div>
+        </div>
+        <div class="industry-toggle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="industry-body">
+        <div class="industry-content">
+          <div class="ind-main-grid">
+            <div class="ind-col ind-col-challenge">
+              <div class="ind-col-label">⚠ The Challenge</div>
+              <p>Tech companies along the Irvine Spectrum corridor and throughout Aliso Viejo, Lake Forest, and Santa Ana cycle through hardware faster than almost any other sector. Development workstations, test servers, and prototyping equipment reach end-of-life on compressed 2–3 year refresh cycles. These machines routinely contain proprietary source code, API credentials, customer data from staging environments, and trade secrets. Many OC tech firms maintain SOC 2 or ISO 27001 certifications that require documented, auditable asset disposition with full chain-of-custody records.</p>
+            </div>
+            <div class="ind-col ind-col-solution">
+              <div class="ind-col-label">✓ Our Solution</div>
+              <p>All Green provides high-volume hardware pickups on a scheduled or on-demand basis, with NIST 800-88-compliant data sanitization or physical shredding depending on your security requirements. Every asset is tracked from pickup through final disposition, and your team receives serialized Certificates of Destruction that satisfy third-party audit requirements. For large-scale server decommissioning or office-wide refreshes, our Enterprise Decommissioning service handles the full project — rack-to-truck — with minimal disruption to your operations.</p>
+            </div>
+          </div>
+          <div class="ind-proof-bar">
+            <div class="ind-proof-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ind-proof-content">
+              <span class="ind-proof-label">Local Experience</span>
+              <span class="ind-proof-text">We have extensive experience serving SaaS companies, semiconductor firms, and enterprise software organizations throughout the Irvine–Aliso Viejo–Lake Forest technology corridor.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEALTHCARE -->
+    <div class="industry-block ind-health fade-up s2">
+      <div class="industry-header" onclick="toggleIndustry(this)">
+        <div class="industry-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div>
+          <h3>Healthcare &amp; Biotech/Medtech</h3>
+          <div class="industry-cities">Irvine · Lake Forest · San Clemente · Laguna Hills · Rancho Santa Margarita · Anaheim</div>
+        </div>
+        <div class="industry-toggle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="industry-body">
+        <div class="industry-content">
+          <div class="ind-main-grid">
+            <div class="ind-col ind-col-challenge">
+              <div class="ind-col-label">⚠ The Challenge</div>
+              <p>Orange County's healthcare sector — spanning major hospital systems, medical device manufacturers, biotech research firms, and large physician groups — faces the most stringent data destruction requirements of any industry. HIPAA mandates verifiable, documented destruction of any device that has ever stored, processed, or transmitted electronic protected health information (ePHI). This extends well beyond standard office computers to diagnostic imaging systems, lab workstations, embedded medical devices, patient check-in tablets, and portable equipment. A single unwiped hard drive from a decommissioned MRI controller or pharmacy system can trigger a reportable breach.</p>
+            </div>
+            <div class="ind-col ind-col-solution">
+              <div class="ind-col-label">✓ Our Solution</div>
+              <p>All Green offers On-Site Hard Drive Shredding performed at your facility's loading dock or secure area, ensuring ePHI never leaves your custody intact. For large hospital system refreshes and medical device manufacturer cleanouts, we deploy full Enterprise Decommissioning teams with HIPAA-trained personnel. Every asset is inventoried, every drive destroyed to NIST 800-88 standards, and every action documented with serialized Certificates of Destruction that satisfy HHS audit requirements.</p>
+            </div>
+          </div>
+          <div class="ind-proof-bar">
+            <div class="ind-proof-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ind-proof-content">
+              <span class="ind-proof-label">Local Experience</span>
+              <span class="ind-proof-text">We proudly serve major hospital networks, medical device manufacturers, and clinical research organizations across Orange County's healthcare corridor, from large Anaheim-area medical centers to specialized biotech campuses in South County.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCIAL -->
+    <div class="industry-block ind-finance fade-up s3">
+      <div class="industry-header" onclick="toggleIndustry(this)">
+        <div class="industry-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        </div>
+        <div>
+          <h3>Financial Services &amp; Insurance</h3>
+          <div class="industry-cities">Newport Beach · Irvine · Costa Mesa · Orange</div>
+        </div>
+        <div class="industry-toggle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="industry-body">
+        <div class="industry-content">
+          <div class="ind-main-grid">
+            <div class="ind-col ind-col-challenge">
+              <div class="ind-col-label">⚠ The Challenge</div>
+              <p>The Newport Beach–Irvine–Costa Mesa financial corridor is home to one of Southern California's highest concentrations of investment firms, wealth management companies, regional banks, insurance carriers, and fintech startups. IT departments in financial services operate under overlapping federal mandates — GLBA, FACTA, SEC record retention rules, and in many cases SOX compliance — each with specific requirements for how data must be destroyed and documented when hardware is retired. Regulators expect not just secure destruction, but detailed certificates and audit trails proving exactly what was destroyed, when, and how.</p>
+            </div>
+            <div class="ind-col ind-col-solution">
+              <div class="ind-col-label">✓ Our Solution</div>
+              <p>All Green delivers data destruction services aligned to NIST 800-88 with the granular documentation financial compliance teams require. Our IT Asset Tracking &amp; Reporting portal provides serialized records for every device — make, model, serial number, destruction method, date, and technician — formatted for regulatory audit submission. For firms requiring the highest level of assurance, On-Site Hard Drive Shredding ensures sensitive financial data never leaves your premises.</p>
+            </div>
+          </div>
+          <div class="ind-proof-bar">
+            <div class="ind-proof-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ind-proof-content">
+              <span class="ind-proof-label">Local Experience</span>
+              <span class="ind-proof-text">We serve investment firms, insurance carriers, and banking institutions throughout the Newport Beach financial district, Irvine's corporate centers, and the Costa Mesa business corridor.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANUFACTURING -->
+    <div class="industry-block ind-mfg fade-up s4">
+      <div class="industry-header" onclick="toggleIndustry(this)">
+        <div class="industry-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 20h20M5 20V10l4-6v6l4-6v6l4-6v6h3v10"/></svg>
+        </div>
+        <div>
+          <h3>Manufacturing &amp; Aerospace/Defense</h3>
+          <div class="industry-cities">Huntington Beach · Anaheim · Fullerton · Santa Ana · Irvine</div>
+        </div>
+        <div class="industry-toggle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="industry-body">
+        <div class="industry-content">
+          <div class="ind-main-grid">
+            <div class="ind-col ind-col-challenge">
+              <div class="ind-col-label">⚠ The Challenge</div>
+              <p>Orange County's deep manufacturing base — anchored by aerospace and defense contractors and their precision supply chains in Huntington Beach, Anaheim, Fullerton, and Santa Ana — operates under some of the most demanding security requirements in any commercial sector. Defense contractors handling Controlled Unclassified Information (CUI) must comply with NIST SP 800-171 and DFARS, which often mandate physical destruction rather than data wiping. ITAR-regulated firms face additional restrictions on how and where assets can be processed. Even non-defense manufacturers manage proprietary CAD files, tooling specifications, and trade secrets requiring secure end-of-life handling.</p>
+            </div>
+            <div class="ind-col ind-col-solution">
+              <div class="ind-col-label">✓ Our Solution</div>
+              <p>All Green provides high-security decommissioning and physical destruction services that meet NIST 800-88 Purge and Destroy standards. For defense contractors and ITAR-regulated manufacturers, we offer controlled chain-of-custody protocols with restricted-access processing and detailed destruction documentation. Our teams are experienced in handling specialized equipment beyond standard IT — including engineering workstations, CNC controllers, and embedded industrial systems.</p>
+            </div>
+          </div>
+          <div class="ind-proof-bar">
+            <div class="ind-proof-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ind-proof-content">
+              <span class="ind-proof-label">Local Experience</span>
+              <span class="ind-proof-text">We serve aerospace contractors, defense subcontractors, and advanced manufacturers across the Huntington Beach–Anaheim–Fullerton industrial corridor, with the documentation and security protocols these organizations require.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGISTICS -->
+    <div class="industry-block ind-logistics fade-up s5">
+      <div class="industry-header" onclick="toggleIndustry(this)">
+        <div class="industry-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 5v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div>
+          <h3>Logistics, Warehousing &amp; Supply Chain</h3>
+          <div class="industry-cities">Anaheim · Buena Park · Fullerton · Brea · Cypress · Santa Ana</div>
+        </div>
+        <div class="industry-toggle">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+      <div class="industry-body">
+        <div class="industry-content">
+          <div class="ind-main-grid">
+            <div class="ind-col ind-col-challenge">
+              <div class="ind-col-label">⚠ The Challenge</div>
+              <p>Orange County's position adjacent to the ports of Long Beach and Los Angeles makes the Anaheim–Buena Park–Fullerton–Brea corridor one of Southern California's busiest logistics and distribution zones. IT departments manage warehouse management systems, handheld scanners, ruggedized tablets, IoT sensors, and fleet tracking devices — all subject to the same e-waste and data security regulations as standard IT equipment. Many 3PL providers and distribution companies also handle returned, defective, or end-of-life electronic products on behalf of their clients, creating compliance exposure that logistics companies often underestimate.</p>
+            </div>
+            <div class="ind-col ind-col-solution">
+              <div class="ind-col-label">✓ Our Solution</div>
+              <p>All Green serves logistics companies on two fronts. For your internal IT refresh cycles, we provide standard ITAD services — secure pickup, data destruction, and certified recycling. For the client electronics flowing through your facilities, we offer Reverse Logistics processing that keeps your operation compliant with DTSC Universal Waste rules and California data destruction requirements. Our IT Asset Tracking &amp; Reporting system documents every unit with the records you need for both internal compliance and client accountability.</p>
+            </div>
+          </div>
+          <div class="ind-proof-bar">
+            <div class="ind-proof-icon">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ind-proof-content">
+              <span class="ind-proof-label">Local Experience</span>
+              <span class="ind-proof-text">We work with distribution centers, third-party logistics providers, and supply chain companies throughout the Anaheim–Buena Park–Cypress–Brea warehouse district and across Orange County's major industrial zones.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTIONS -->
+<section class="section solutions-section" id="solutions">
+  <div class="solutions-grid-bg"></div>
+  <div class="container" style="position:relative;z-index:2;">
+    <div class="section-label fade-up">Capabilities</div>
+    <h2 class="section-heading fade-up">Our Core <em>ITAD Solutions</em></h2>
+    <p class="section-sub fade-up">Enterprise-grade services covering every stage of the IT asset lifecycle — from secure data destruction to value recovery.</p>
+
+    <div class="solutions-grid">
+      <div class="solution-card fade-up s1">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3>Secure Data Destruction</h3>
+        <p>Full compliance with NIST SP 800-88 sanitization guidelines. Services include software-based data wiping (Clear/Purge), degaussing for magnetic media, and physical hard drive shredding. Every method produces a serialized Certificate of Destruction.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">NIST 800-88</span>
+          <span class="sol-tag">Degaussing</span>
+          <span class="sol-tag">Physical Shredding</span>
+        </div>
+      </div>
+      <div class="solution-card fade-up s2">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <h3>Electronics Recycling &amp; E-Waste</h3>
+        <p>Certified processing facilities ensure responsible, zero-landfill recycling of all non-remarketing electronics. All materials are processed domestically in compliance with California's Electronic Waste Recycling Act and DTSC Universal Waste regulations.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">Certified Facilities</span>
+          <span class="sol-tag">Zero-Landfill</span>
+          <span class="sol-tag">Environmental Stewardship</span>
+        </div>
+      </div>
+      <div class="solution-card fade-up s3">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        </div>
+        <h3>IT Asset Remarketing</h3>
+        <p>Retired equipment with remaining market value is refurbished, tested, and resold through certified remarketing channels. All Green returns recovered value to your organization, turning a cost center into measurable ROI.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">Value Recovery</span>
+          <span class="sol-tag">ROI</span>
+          <span class="sol-tag">Refurbishment</span>
+        </div>
+      </div>
+      <div class="solution-card fade-up s4">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m-7.07-2.93l4.24-4.24m2.83-2.83l4.24-4.24M1 12h6m6 0h6M4.93 4.93l4.24 4.24m2.83 2.83l4.24 4.24"/></svg>
+        </div>
+        <h3>On-Site Hard Drive Shredding</h3>
+        <p>For organizations requiring data never leave their premises, we deploy mobile shredding units directly to your facility. Physical destruction is performed on-site with witnessed verification and immediate certificate issuance.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">Mobile Units</span>
+          <span class="sol-tag">Witnessed Destruction</span>
+        </div>
+      </div>
+      <div class="solution-card fade-up s5">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><path d="M6 6h.01M6 18h.01"/></svg>
+        </div>
+        <h3>Enterprise Decommissioning</h3>
+        <p>Large-scale server room cleanouts, office relocations, and multi-site refresh projects managed end-to-end. Rack removal, asset inventorying, secure transport, and final processing — coordinated to your timeline.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">Data Centers</span>
+          <span class="sol-tag">Multi-Site</span>
+          <span class="sol-tag">Full Project Mgmt</span>
+        </div>
+      </div>
+      <div class="solution-card fade-up s6">
+        <div class="solution-card-line"></div>
+        <div class="sol-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </div>
+        <h3>Laptop &amp; Mobile Device Processing</h3>
+        <p>Portable devices require specialized handling for battery safety, data extraction from embedded storage, and DOT shipping compliance. Dedicated protocols for laptops, tablets, and mobile devices.</p>
+        <div class="sol-tags">
+          <span class="sol-tag">Battery Safety</span>
+          <span class="sol-tag">DOT Compliant</span>
+          <span class="sol-tag">Embedded Storage</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE AREA -->
+<section class="section area-section" id="coverage">
+  <div class="container">
+    <div class="section-label fade-up">Coverage</div>
+    <h2 class="section-heading fade-up">Serving <em>Orange County</em> and Surrounding Business Districts</h2>
+    <div class="area-layout">
+      <div class="area-text fade-up">
+        <p>All Green's fleet services the entire Orange County metro and surrounding Southern California region. From the technology campuses along the Irvine Spectrum and Aliso Viejo Town Center to the financial towers of Fashion Island and Newport Center, we pick up where your IT assets end.</p>
+        <p>Our trucks reach the aerospace and manufacturing plants of Huntington Beach and Fullerton, the medical device campuses of Lake Forest and San Clemente, the distribution warehouses of Anaheim and Buena Park, and the corporate parks of Costa Mesa, Brea, and Cypress.</p>
+        <p>We also serve businesses in neighboring regions including South Orange County communities like Dana Point, Laguna Niguel, and Mission Viejo, as well as North County operations in Yorba Linda, Placentia, and La Habra. If your business is in the OC or greater Southern California area, we're already nearby.</p>
+      </div>
+      <div class="area-zones fade-up s2">
+        <div class="zone-card">
+          <h4>Technology Corridor</h4>
+          <p>Irvine, Aliso Viejo, Lake Forest, Santa Ana, Newport Beach</p>
+        </div>
+        <div class="zone-card">
+          <h4>Healthcare Hub</h4>
+          <p>Irvine, Lake Forest, San Clemente, Laguna Hills, Rancho Santa Margarita</p>
+        </div>
+        <div class="zone-card">
+          <h4>Financial District</h4>
+          <p>Newport Beach, Irvine, Costa Mesa, Orange</p>
+        </div>
+        <div class="zone-card">
+          <h4>Industrial Corridor</h4>
+          <p>Huntington Beach, Anaheim, Fullerton, Santa Ana</p>
+        </div>
+        <div class="zone-card">
+          <h4>Logistics Zone</h4>
+          <p>Anaheim, Buena Park, Fullerton, Brea, Cypress</p>
+        </div>
+        <div class="zone-card">
+          <h4>South County</h4>
+          <p>Dana Point, Laguna Niguel, Mission Viejo, San Juan Capistrano</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section cta-section" id="contact">
+  <div class="cta-grid-bg"></div>
+  <div class="container">
+    <div class="cta-inner fade-up">
+      <h2>Schedule Your Pickup in <em>Orange County</em></h2>
+      <p class="cta-desc">Protect your data, your compliance posture, and your brand. Contact All Green today for a custom ITAD quote tailored to your organization's size, industry, and security requirements.</p>
+      <div class="cta-btns">
+        <a href="#" class="btn-primary" style="font-size:0.95rem;padding:0.95rem 2.5rem;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          Request a Quote
+        </a>
+        <a href="mailto:" class="btn-outline" style="border-color:rgba(255,255,255,0.15);">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          Email Us
+        </a>
+      </div>
+      <div class="cta-badges">
+        <div class="cta-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          Certified Processing Facilities
+        </div>
+        <div class="cta-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          Full Chain-of-Custody Documentation
+        </div>
+        <div class="cta-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          Serialized Certificates of Destruction
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <p>&copy; 2025 All Green Electronics Recycling. All rights reserved.</p>
+    <ul class="footer-links">
+      <li><a href="/itad-regulations/california/">California Regulations</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">Terms of Service</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+function toggleIndustry(header) {
+  header.parentElement.classList.toggle('open');
+}
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
