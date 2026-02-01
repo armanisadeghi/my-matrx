@@ -21,6 +21,53 @@ Your core identity colors - use these prominently in all materials:
 
 ---
 
+## Quick Start Guide (PowerPoint, Documents, Simple Materials)
+
+**If you're making a presentation or document and just need the basics, use these colors:**
+
+### The Simple Palette
+
+| Use Case | Color | Hex Code | Visual |
+|----------|-------|----------|--------|
+| **Dark backgrounds** | Navy Primary | `#0a1628` | ![#0a1628](https://via.placeholder.com/80x30/0a1628/0a1628.png) |
+| **Body text (on white)** | Dark Gray | `#475573` | ![#475573](https://via.placeholder.com/80x30/475573/475573.png) |
+| **Headlines** | Navy Primary | `#0a1628` | ![#0a1628](https://via.placeholder.com/80x30/0a1628/0a1628.png) |
+| **Accent color / Highlights** | Steel Blue | `#5b8fd9` | ![#5b8fd9](https://via.placeholder.com/80x30/5b8fd9/5b8fd9.png) |
+| **Light backgrounds** | White or Light Gray | `#ffffff` or `#f4f6f9` | ![#f4f6f9](https://via.placeholder.com/80x30/f4f6f9/f4f6f9.png) |
+| **Text on dark backgrounds** | White | `#ffffff` | ![#ffffff](https://via.placeholder.com/80x30/ffffff/ffffff.png) |
+
+### PowerPoint Template Example
+
+**Slide Option 1: Light Theme**
+- Background: White `#ffffff`
+- Title: Navy `#0a1628`
+- Body text: Dark Gray `#475573`
+- Accent shapes/icons: Steel Blue `#5b8fd9`
+
+**Slide Option 2: Dark Theme**
+- Background: Navy `#0a1628`
+- Title: White `#ffffff`
+- Body text: Light Gray `#d1dae6`
+- Accent shapes/icons: Steel Blue `#5b8fd9`
+
+### Simple Rules
+✅ **DO:**
+- Use Navy for titles and important text
+- Use Steel Blue sparingly as an accent (not for large areas)
+- Use plenty of white space
+- Keep text Dark Gray (`#475573`) for easy reading
+
+❌ **DON'T:**
+- Don't use Steel Blue for body text (hard to read)
+- Don't mix too many colors - stick to these 4-5
+- Don't use light gray text on white backgrounds (hard to see)
+
+### Need One More Color?
+If you need a light background for emphasis boxes or callouts:
+- Light Blue: `#edf3fc` with Navy text
+
+---
+
 ## Extended Navy Scale
 
 For backgrounds, depth, and hierarchy in dark sections:
