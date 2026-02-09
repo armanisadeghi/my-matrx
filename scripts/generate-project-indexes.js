@@ -72,7 +72,7 @@ function generateIndexPage(projectName, pages) {
       });
 
       return `
-      <a href="${page.filename}" class="page-card">
+      <a href="/${projectName}/${page.filename}" class="page-card">
         <div class="card-header">
           <h3 class="page-title">${page.title}</h3>
           <svg class="arrow-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
