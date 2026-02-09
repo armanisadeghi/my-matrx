@@ -31,8 +31,8 @@ export default async function handler(req, res) {
 
     // Initialize Supabase client
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY // Using service role to bypass RLS for insert
+      process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE || process.env.SUPABASE_SERVICE_ROLE_KEY // Using service role to bypass RLS for insert
     );
 
     // Get IP address and user agent for tracking

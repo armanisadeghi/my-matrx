@@ -1502,10 +1502,14 @@
 
       if (response.ok) {
         lastSavedState = currentStateJson;
-        console.log('Auto-saved at', new Date().toLocaleTimeString());
+        console.log('✓ Auto-saved at', new Date().toLocaleTimeString());
+      } else {
+        const result = await response.json();
+        console.warn('Auto-save failed:', result.error || result.message);
       }
     } catch (error) {
-      console.error('Auto-save failed:', error);
+      // Silent fail for auto-save - don't spam console
+      // User will still get the download backup on manual export
     }
   }
 
@@ -1652,7 +1656,14 @@
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to save');
+        console.error('Database save failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: result.error,
+          details: result.details,
+          message: result.message
+        });
+        throw new Error(result.details || result.error || result.message || 'Failed to save');
       }
 
       showToast('✓ Saved to database! ID: ' + result.id.substring(0, 8) + '...');
@@ -1662,8 +1673,11 @@
       
     } catch (error) {
       console.error('Failed to save to database:', error);
-      showToast('⚠️ Database save failed, but downloading backup file...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.error('Check console for details. If you see network errors, make sure your dev server is running.');
+      showToast('⚠️ Database save failed: ' + error.message);
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      showToast('Downloading backup file instead...');
+      await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
     // Always download the text file as backup
