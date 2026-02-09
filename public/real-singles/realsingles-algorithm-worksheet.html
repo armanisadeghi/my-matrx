@@ -1393,6 +1393,8 @@
   // ── State ──
   const state = {};
   let totalQuestions = 0;
+  let autoSaveTimer = null;
+  let lastSavedState = null;
 
   // ── Init ──
   function init() {
@@ -1426,6 +1428,7 @@
     allTextareas.forEach(ta => {
       ta.addEventListener('input', () => {
         state[ta.dataset.question] = ta.value;
+        scheduleAutoSave();
       });
     });
 
@@ -1450,6 +1453,60 @@
     document.getElementById('progressText').textContent = `${answered} of ${totalQuestions} answered`;
     const pct = Math.round((answered / totalQuestions) * 100);
     document.getElementById('progressFill').style.width = pct + '%';
+    
+    // Trigger auto-save when progress changes
+    scheduleAutoSave();
+  }
+
+  function scheduleAutoSave() {
+    // Clear existing timer
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer);
+    }
+    
+    // Schedule save for 2 seconds after last change
+    autoSaveTimer = setTimeout(() => {
+      autoSave();
+    }, 2000);
+  }
+
+  async function autoSave() {
+    // Don't save if nothing has changed
+    const currentStateJson = JSON.stringify(state);
+    if (currentStateJson === lastSavedState) {
+      return;
+    }
+
+    // Don't save if completely empty
+    if (Object.keys(state).length === 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/form-submissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_type: 'realsingles_algorithm_worksheet_autosave',
+          data: {
+            ...state,
+            autosaved_at: new Date().toISOString(),
+            completed_by: 'Silva',
+            is_draft: true
+          },
+          source_url: window.location.href
+        })
+      });
+
+      if (response.ok) {
+        lastSavedState = currentStateJson;
+        console.log('Auto-saved at', new Date().toLocaleTimeString());
+      }
+    } catch (error) {
+      console.error('Auto-save failed:', error);
+    }
   }
 
   function showToast(msg) {
@@ -1480,7 +1537,7 @@
     showToast('All answers have been reset');
   }
 
-  function exportSummary() {
+  async function exportSummary() {
     const lines = [];
     lines.push('╔══════════════════════════════════════════════════╗');
     lines.push('║   REALSINGLES — MATCH ALGORITHM DECISIONS        ║');
@@ -1572,15 +1629,51 @@
       lines.push('');
     });
 
-    // Create and download
+    // Save to database via API
+    try {
+      showToast('Saving to database...');
+      
+      const response = await fetch('/api/form-submissions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_type: 'realsingles_algorithm_worksheet',
+          data: {
+            ...state,
+            submitted_at: new Date().toISOString(),
+            completed_by: 'Silva'
+          },
+          source_url: window.location.href
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save');
+      }
+
+      showToast('✓ Saved to database! ID: ' + result.id.substring(0, 8) + '...');
+      
+      // Wait a moment before downloading file
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+    } catch (error) {
+      console.error('Failed to save to database:', error);
+      showToast('⚠️ Database save failed, but downloading backup file...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    // Always download the text file as backup
     const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'RealSingles_Algorithm_Decisions.txt';
+    a.download = 'RealSingles_Algorithm_Decisions_' + new Date().toISOString().split('T')[0] + '.txt';
     a.click();
     URL.revokeObjectURL(url);
-    showToast('Summary exported! Send the file to Arman.');
   }
 
   init();

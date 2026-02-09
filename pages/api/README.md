@@ -1,5 +1,42 @@
 # API Routes
 
+## Form Submissions API
+
+See [/docs/FORM_SUBMISSIONS_SYSTEM.md](../../docs/FORM_SUBMISSIONS_SYSTEM.md) for complete documentation.
+
+### Quick Reference
+
+#### `POST /api/form-submissions`
+Submit form data to the database.
+
+```javascript
+await fetch('/api/form-submissions', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    form_type: 'my_form',
+    data: { field1: 'value1', field2: 'value2' },
+    source_url: window.location.href
+  })
+});
+```
+
+#### `GET /api/form-submissions/[id]`
+Retrieve a specific submission, latest submission, or list submissions.
+
+```javascript
+// Get specific submission
+GET /api/form-submissions/550e8400-e29b-41d4-a716-446655440000
+
+// Get latest submission of a type
+GET /api/form-submissions/latest?form_type=my_form
+
+// List submissions
+GET /api/form-submissions/list?form_type=my_form&limit=10
+```
+
+---
+
 ## Image Optimization API
 
 ### `POST /api/convert-to-webp`
