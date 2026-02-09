@@ -1,10 +1,48 @@
-# Image Optimization Scripts
+# Utility Scripts
 
-This folder contains reusable scripts for optimizing images for web performance.
+This folder contains reusable scripts for project automation and optimization.
 
 ## 📄 Available Scripts
 
-### 1. `convert-to-webp.js` - WebP Converter
+### 1. `generate-project-indexes.js` - Project Index Generator
+
+Automatically generates beautiful index pages for project directories in `public/`.
+
+**What it does:**
+- Scans all subdirectories in `public/`
+- Finds all HTML files in each directory
+- Extracts page titles and descriptions from HTML metadata
+- Creates a professional index.html page with links to all pages
+- Includes last modified dates and file information
+
+**Usage:**
+
+```bash
+# Generate all project index pages
+npm run generate-indexes
+
+# Or run directly
+node scripts/generate-project-indexes.js
+```
+
+**Output:**
+- Creates `index.html` in each project directory
+- Modern, responsive design with hover animations
+- Shows page count, titles, descriptions, and last updated dates
+- No JavaScript required - pure HTML/CSS
+
+**Example:** After running the script:
+- `/all-green/` shows index of All Green pages
+- `/real-singles/` shows index of Real Singles pages
+- `/games/` shows index of game demos
+- `/iopbm/` shows index of IOPBM pages
+- `/samples/` shows index of sample pages
+
+**See:** [PROJECT_INDEXES.md](./PROJECT_INDEXES.md) for detailed documentation.
+
+---
+
+### 2. `convert-to-webp.js` - WebP Converter
 
 Converts PNG/JPG images to WebP format with high compression and quality.
 
@@ -45,7 +83,7 @@ node scripts/convert-to-webp.js "public/images/thumbnail.png" "" 75
 
 ---
 
-### 2. `convert-to-webp.ps1` - PowerShell WebP Converter (Alternative)
+### 3. `convert-to-webp.ps1` - PowerShell WebP Converter (Alternative)
 
 Windows PowerShell script that uses Google's `cwebp` encoder.
 

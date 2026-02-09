@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
+    "generate-indexes": "node scripts/generate-project-indexes.js",
     "env:pull": "doppler secrets download --project my-matrx --config dev --no-file --format env > .env.local",
     "env:push": "doppler secrets upload --project my-matrx --config dev .env.local"
   },

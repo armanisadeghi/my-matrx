@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RealSingles — Match Algorithm Workshop</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --text: #2C2520;
+    --text-soft: #7A7067;
+    --accent: #C4533A;
+    --accent-light: #F4E8E4;
+    --accent-hover: #A8412C;
+    --green: #3A8A5C;
+    --green-light: #E4F2EA;
+    --blue: #3A6B8A;
+    --blue-light: #E4EDF2;
+    --gold: #B8943E;
+    --gold-light: #F5F0E1;
+    --border: #E8E2DA;
+    --shadow: 0 2px 12px rgba(44,37,32,0.06);
+    --shadow-hover: 0 4px 20px rgba(44,37,32,0.1);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #2C2520 0%, #4A3F37 100%);
+    color: white;
+    padding: 48px 32px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(196,83,58,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .header .subtitle {
+    font-size: 1.05rem;
+    font-weight: 300;
+    opacity: 0.75;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .header .logo-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  /* ── Progress ── */
+  .progress-bar-container {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-soft);
+    white-space: nowrap;
+  }
+
+  /* ── Main ── */
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px 120px;
+  }
+
+  /* ── Intro ── */
+  .intro {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow);
+  }
+  .intro h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  .intro p {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+  }
+  .intro p:last-child { margin-bottom: 0; }
+
+  .key-terms {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .key-term {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .key-term .term-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .key-term .term-def {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+  }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-number {
+    background: var(--text);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+  }
+  .section-desc {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    padding-left: 40px;
+  }
+
+  /* ── Factor Card ── */
+  .factor-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .factor-card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+  .factor-card.answered {
+    border-left: 3px solid var(--green);
+  }
+
+  .factor-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .factor-name {
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .factor-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .factor-badge.prefilled {
+    background: var(--green-light);
+    color: var(--green);
+  }
+  .factor-badge.needs-input {
+    background: var(--gold-light);
+    color: var(--gold);
+  }
+  .factor-badge.decided {
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  .factor-context {
+    color: var(--text-soft);
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    line-height: 1.55;
+  }
+
+  .factor-example {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    border-left: 3px solid var(--border);
+  }
+  .factor-example strong {
+    color: var(--text);
+  }
+
+  /* ── Questions inside factor cards ── */
+  .question-group {
+    margin-bottom: 18px;
+  }
+  .question-group:last-child {
+    margin-bottom: 0;
+  }
+  .question-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  /* Radio/Check options */
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .option-btn {
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: white;
+  }
+
+  /* Importance options — color coded */
+  .option-btn.importance-dealbreaker.selected {
+    background: #C4533A;
+    border-color: #C4533A;
+    color: white;
+  }
+  .option-btn.importance-very.selected {
+    background: #B8943E;
+    border-color: #B8943E;
+    color: white;
+  }
+  .option-btn.importance-somewhat.selected {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+  .option-btn.importance-nice.selected {
+    background: #7A7067;
+    border-color: #7A7067;
+    color: white;
+  }
+  .option-btn.importance-ignore.selected {
+    background: #AAA29A;
+    border-color: #AAA29A;
+    color: white;
+  }
+
+  /* Textarea for notes */
+  .notes-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: var(--text);
+    background: var(--card);
+    resize: vertical;
+    min-height: 60px;
+    transition: border-color 0.15s ease;
+  }
+  .notes-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .notes-input::placeholder {
+    color: #C4BBB2;
+  }
+
+  /* ── Prefilled explanation ── */
+  .prefilled-box {
+    background: var(--green-light);
+    border: 1px solid #B8DECA;
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--green);
+    margin-bottom: 14px;
+  }
+  .prefilled-box strong {
+    font-weight: 700;
+  }
+
+  /* ── Divider ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── Special Rules Section ── */
+  .special-card {
+    background: linear-gradient(135deg, #2C2520 0%, #4A3F37 100%);
+    color: white;
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .special-card .factor-name {
+    color: white;
+  }
+  .special-card .factor-context {
+    color: rgba(255,255,255,0.7);
+  }
+  .special-card .question-label {
+    color: rgba(255,255,255,0.9);
+  }
+  .special-card .option-btn {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+  }
+  .special-card .option-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.4);
+  }
+  .special-card .option-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .special-card .notes-input {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.2);
+    color: white;
+  }
+  .special-card .notes-input::placeholder {
+    color: rgba(255,255,255,0.4);
+  }
+  .special-card .notes-input:focus {
+    border-color: var(--accent);
+  }
+
+  /* ── Export bar ── */
+  .export-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 200;
+    box-shadow: 0 -4px 20px rgba(44,37,32,0.08);
+  }
+  .export-bar .status {
+    font-size: 0.88rem;
+    color: var(--text-soft);
+  }
+  .export-bar .status strong {
+    color: var(--text);
+  }
+  .btn-group {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    background: var(--border);
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 300;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .header { padding: 32px 20px; }
+    .header h1 { font-size: 1.8rem; }
+    .main { padding: 24px 16px 120px; }
+    .intro, .factor-card, .special-card { padding: 22px 18px; }
+    .key-terms { grid-template-columns: 1fr; }
+    .options { gap: 6px; }
+    .option-btn { padding: 8px 14px; font-size: 0.82rem; }
+    .export-bar { padding: 12px 16px; flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo-badge">RealSingles</div>
+  <h1>Match Algorithm Workshop</h1>
+  <p class="subtitle">Hi Silva — this worksheet will help us build the perfect matching system for RealSingles. Just answer each question with your gut feeling — Arman handles the technical part.</p>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar-container">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+  <div class="progress-text" id="progressText">0 of 24 answered</div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Intro -->
+  <div class="intro">
+    <h2>Before We Begin</h2>
+    <p>We're going to go through every piece of information our members share on their profile. For each one, you'll tell us how important it should be when deciding who to show someone as a potential match.</p>
+    <p>Throughout this worksheet, we use two simple terms:</p>
+    <div class="key-terms">
+      <div class="key-term">
+        <div class="term-label">Seeker</div>
+        <div class="term-def">The person using the app — scrolling through and looking at potential matches.</div>
+      </div>
+      <div class="key-term">
+        <div class="term-label">Match</div>
+        <div class="term-def">A person being shown to the Seeker as a potential match.</div>
+      </div>
+    </div>
+    <p>There are no right or wrong answers. Your instincts about what makes a good match are exactly what we need.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 1: THE ESSENTIALS (Pre-filled) -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-1">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">The Essentials</div>
+    </div>
+    <p class="section-desc">These are the foundational rules. We've pre-filled the obvious answers, but please confirm they feel right to you.</p>
+
+    <!-- Gender & Orientation -->
+    <div class="factor-card answered" data-factor="gender_orientation">
+      <div class="factor-top">
+        <div class="factor-name">Gender & Who They're Interested In</div>
+        <div class="factor-badge prefilled">Pre-filled</div>
+      </div>
+      <div class="factor-context">The Seeker selects their own gender and who they're interested in. Matches must go both ways.</div>
+      <div class="prefilled-box">
+        <strong>Pre-filled Rule:</strong> This is always a deal-breaker. If a Seeker is a man looking for women, we only show women who are also looking for men. This works in all directions and combinations.
+      </div>
+      <div class="question-group">
+        <div class="question-label">Does this feel right?</div>
+        <div class="options" data-question="gender_confirm" data-type="single">
+          <button class="option-btn selected" data-value="yes">Yes, this is correct</button>
+          <button class="option-btn" data-value="adjust">I'd like to adjust this</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Any notes or edge cases you're thinking about?</div>
+        <textarea class="notes-input" data-question="gender_notes" placeholder="e.g., How should we handle 'Other' or 'Non-Binary' selections?"></textarea>
+      </div>
+    </div>
+
+    <!-- Location / Distance -->
+    <div class="factor-card" data-factor="distance">
+      <div class="factor-top">
+        <div class="factor-name">Distance / Location</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">The Seeker can set a maximum distance filter (e.g., "within 25 miles"). But what happens when a Match is slightly outside that range?</div>
+      <div class="factor-example">
+        <strong>Example:</strong> Sarah set her filter to 25 miles. David is 28 miles away and is a great match in every other way. Should we show him to Sarah?
+      </div>
+      <div class="question-group">
+        <div class="question-label">Should distance be a hard line or flexible?</div>
+        <div class="options" data-question="distance_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard line — never show anyone outside their distance</button>
+          <button class="option-btn" data-value="soft">Flexible — show great matches even if slightly outside the range</button>
+          <button class="option-btn" data-value="very_soft">Very flexible — distance is just a preference, not a limit</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Should there be an absolute maximum distance no matter what? (e.g., never show someone 500+ miles away)</div>
+        <div class="options" data-question="distance_max" data-type="single">
+          <button class="option-btn" data-value="100">100 miles max</button>
+          <button class="option-btn" data-value="250">250 miles max</button>
+          <button class="option-btn" data-value="500">500 miles max</button>
+          <button class="option-btn" data-value="none">No maximum — let the filter handle it</button>
+          <button class="option-btn" data-value="country">Same country only</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Any notes?</div>
+        <textarea class="notes-input" data-question="distance_notes" placeholder="e.g., Should long-distance matches be lower priority?"></textarea>
+      </div>
+    </div>
+
+    <!-- Age -->
+    <div class="factor-card" data-factor="age">
+      <div class="factor-top">
+        <div class="factor-name">Age</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">The Seeker sets an age range they prefer (e.g., 28–40). But what if a Match is just outside that range?</div>
+      <div class="factor-example">
+        <strong>Example:</strong> Lisa wants men aged 30–45. Michael is 47 but matches her perfectly in every other way. Should we show him?
+      </div>
+      <div class="question-group">
+        <div class="question-label">Should age range be a hard line or flexible?</div>
+        <div class="options" data-question="age_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard line — never show outside their age range</button>
+          <button class="option-btn" data-value="soft">Flexible — allow a little outside (1–3 years)</button>
+          <button class="option-btn" data-value="very_soft">Very flexible — age is just a preference</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is a close age match in the overall scoring?</div>
+        <div class="options" data-question="age_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical — one of the most important factors</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Any notes?</div>
+        <textarea class="notes-input" data-question="age_notes" placeholder="e.g., Should the age range flex differently for older vs. younger seekers?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 2: PHYSICAL & APPEARANCE       -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-2">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Physical & Appearance</div>
+    </div>
+    <p class="section-desc">These are the factors related to physical attributes. People have preferences here, but being too strict can dramatically reduce matches for a small app.</p>
+
+    <!-- Height -->
+    <div class="factor-card" data-factor="height">
+      <div class="factor-top">
+        <div class="factor-name">Height</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users can share their height and may filter by it. This is a common filter but can be very limiting.</div>
+      <div class="question-group">
+        <div class="question-label">How should height preferences work?</div>
+        <div class="options" data-question="height_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show Matches within their height preference</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer their range but allow some flexibility</button>
+          <button class="option-btn" data-value="scoring">Scoring only — height affects ranking, never hides anyone</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is height match overall?</div>
+        <div class="options" data-question="height_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Type -->
+    <div class="factor-card" data-factor="body_type">
+      <div class="factor-top">
+        <div class="factor-name">Body Type</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users select their body type (Slim, Athletic, Average, Muscular, Curvy, A few extra pounds). They might also filter by this.</div>
+      <div class="question-group">
+        <div class="question-label">Should body type preferences be a filter or just influence ranking?</div>
+        <div class="options" data-question="bodytype_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show preferred body types</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer their selection but don't hide others</button>
+          <button class="option-btn" data-value="scoring">Scoring only — matching body type preference boosts ranking</button>
+          <button class="option-btn" data-value="ignore">Ignore — don't use body type in matching at all</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is matching body type preference overall?</div>
+        <div class="options" data-question="bodytype_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ethnicity -->
+    <div class="factor-card" data-factor="ethnicity">
+      <div class="factor-top">
+        <div class="factor-name">Ethnicity</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users can share their ethnicity and may have preferences. This is a sensitive area — some apps include ethnicity filtering, others don't.</div>
+      <div class="question-group">
+        <div class="question-label">Should ethnicity preferences influence matching?</div>
+        <div class="options" data-question="ethnicity_type" data-type="single">
+          <button class="option-btn" data-value="filter">Yes — as a filter (only show preferred ethnicities)</button>
+          <button class="option-btn" data-value="scoring">Mildly — boost matches with preferred ethnicity but show everyone</button>
+          <button class="option-btn" data-value="ignore">No — don't use ethnicity in matching at all</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Any notes on how to handle this sensitively?</div>
+        <textarea class="notes-input" data-question="ethnicity_notes" placeholder="e.g., Any thoughts on how this should work?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 3: RELATIONSHIP & FAMILY       -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-3">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Relationship & Family</div>
+    </div>
+    <p class="section-desc">These factors often carry strong feelings. A mismatch here can be a real deal-breaker for many users.</p>
+
+    <!-- Marital Status -->
+    <div class="factor-card" data-factor="marital_status">
+      <div class="factor-top">
+        <div class="factor-name">Marital Status</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options: Never Married, Currently Separated, Divorced, Widow/Widower, Prefer not to say.</div>
+      <div class="factor-example">
+        <strong>Example:</strong> Karen only wants to date men who have never been married. Tom is divorced but otherwise a perfect match. What do we do?
+      </div>
+      <div class="question-group">
+        <div class="question-label">How should marital status preferences work?</div>
+        <div class="options" data-question="marital_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show what they selected</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer their selection but still show others, ranked lower</button>
+          <button class="option-btn" data-value="scoring">Scoring only — matching status gives a bonus</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is marital status match?</div>
+        <div class="options" data-question="marital_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dating Intentions -->
+    <div class="factor-card" data-factor="dating_intentions">
+      <div class="factor-top">
+        <div class="factor-name">Dating Intentions</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">What they're looking for: Long term, Short term, Open to either, Still figuring it out. Mismatched intentions can waste everyone's time — or sometimes people change their minds.</div>
+      <div class="factor-example">
+        <strong>Example:</strong> Rachel wants long-term only. Jake selected "Short term, open to long." Should we show Jake to Rachel?
+      </div>
+      <div class="question-group">
+        <div class="question-label">How should dating intention matching work?</div>
+        <div class="options" data-question="intentions_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only match people with the same intention</button>
+          <button class="option-btn" data-value="compatible">Smart matching — show compatible intentions (e.g., "open to long" matches with "long term")</button>
+          <button class="option-btn" data-value="scoring">Scoring only — matching intentions gives a boost but we show everyone</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is matching intentions?</div>
+        <div class="options" data-question="intentions_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Has Children -->
+    <div class="factor-card" data-factor="has_children">
+      <div class="factor-top">
+        <div class="factor-name">Has Children</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Whether the Match already has children. For some Seekers, this is a deal-breaker in either direction.</div>
+      <div class="question-group">
+        <div class="question-label">How should "has children" preferences work?</div>
+        <div class="options" data-question="has_children_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — respect their filter strictly</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer their preference but allow exceptions</button>
+          <button class="option-btn" data-value="scoring">Scoring only — boost matching preferences</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is this factor?</div>
+        <div class="options" data-question="has_children_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wants Children -->
+    <div class="factor-card" data-factor="wants_children">
+      <div class="factor-top">
+        <div class="factor-name">Wants Children</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Whether the person wants children in the future. Options: Yes, No, No (OK if partner has), Not sure. A "Yes" and "No" is often considered a fundamental incompatibility.</div>
+      <div class="factor-example">
+        <strong>Example:</strong> Amy definitely wants kids. Ben says "No." Should we show Ben to Amy? What about someone who said "Not sure"?
+      </div>
+      <div class="question-group">
+        <div class="question-label">How should "wants children" matching work?</div>
+        <div class="options" data-question="wants_children_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — Yes/No mismatch should never show</button>
+          <button class="option-btn" data-value="compatible">Smart matching — Yes/No don't match, but "Not sure" matches with either</button>
+          <button class="option-btn" data-value="scoring">Scoring only — compatibility gives a boost but we still show everyone</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is this factor?</div>
+        <div class="options" data-question="wants_children_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 4: LIFESTYLE                   -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-4">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div class="section-title">Lifestyle</div>
+    </div>
+    <p class="section-desc">These say a lot about compatibility but are usually more flexible than the "hard" factors above.</p>
+
+    <!-- Religion -->
+    <div class="factor-card" data-factor="religion">
+      <div class="factor-top">
+        <div class="factor-name">Religion</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users can share their religion and may prefer to match with someone of the same (or different) faith.</div>
+      <div class="question-group">
+        <div class="question-label">How should religion preferences work?</div>
+        <div class="options" data-question="religion_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show matching religions</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer matching but don't hide others</button>
+          <button class="option-btn" data-value="scoring">Scoring only — matching religion gives a bonus</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is religion match?</div>
+        <div class="options" data-question="religion_importance" data-type="single">
+          <button class="option-btn importance-dealbreaker" data-value="critical">Critical</button>
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Political Views -->
+    <div class="factor-card" data-factor="political_views">
+      <div class="factor-top">
+        <div class="factor-name">Political Views</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options include Conservative, Liberal, Libertarian, Moderate, Not political, Undecided. This can be a sensitive but important compatibility factor.</div>
+      <div class="question-group">
+        <div class="question-label">How should political views work in matching?</div>
+        <div class="options" data-question="political_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show matching views</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer matching but show everyone</button>
+          <button class="option-btn" data-value="scoring">Scoring only — small bonus for matching</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is political alignment?</div>
+        <div class="options" data-question="political_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education -->
+    <div class="factor-card" data-factor="education">
+      <div class="factor-top">
+        <div class="factor-name">Education Level</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Ranges from High School to PhD. Some people care about this a lot, others don't at all.</div>
+      <div class="question-group">
+        <div class="question-label">How should education preferences work?</div>
+        <div class="options" data-question="education_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — only show matching education level</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer matching but don't hide others</button>
+          <button class="option-btn" data-value="scoring">Scoring only — small bonus for matching</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is education match?</div>
+        <div class="options" data-question="education_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Smoking -->
+    <div class="factor-card" data-factor="smoking">
+      <div class="factor-top">
+        <div class="factor-name">Smoking</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options: Never, Occasionally, Daily, Trying to quit. For non-smokers, a daily smoker can be a big turn-off.</div>
+      <div class="question-group">
+        <div class="question-label">How should smoking preferences work?</div>
+        <div class="options" data-question="smoking_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter — respect the filter strictly</button>
+          <button class="option-btn" data-value="soft">Flexible — prefer matching but show everyone</button>
+          <button class="option-btn" data-value="scoring">Scoring only — mismatch lowers ranking</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is smoking compatibility?</div>
+        <div class="options" data-question="smoking_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drinking -->
+    <div class="factor-card" data-factor="drinking">
+      <div class="factor-top">
+        <div class="factor-name">Drinking</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options: Never, Social, Moderately, Regular. A non-drinker and a regular drinker might have different lifestyles.</div>
+      <div class="question-group">
+        <div class="question-label">How should drinking preferences work?</div>
+        <div class="options" data-question="drinking_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter</button>
+          <button class="option-btn" data-value="soft">Flexible</button>
+          <button class="option-btn" data-value="scoring">Scoring only</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is drinking compatibility?</div>
+        <div class="options" data-question="drinking_importance" data-type="single">
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Marijuana -->
+    <div class="factor-card" data-factor="marijuana">
+      <div class="factor-top">
+        <div class="factor-name">Marijuana Use</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options: Never, Occasionally, Yes. Similar to smoking but more polarizing for some demographics.</div>
+      <div class="question-group">
+        <div class="question-label">How should marijuana preferences work?</div>
+        <div class="options" data-question="marijuana_type" data-type="single">
+          <button class="option-btn" data-value="hard">Hard filter</button>
+          <button class="option-btn" data-value="soft">Flexible</button>
+          <button class="option-btn" data-value="scoring">Scoring only</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important is this?</div>
+        <div class="options" data-question="marijuana_importance" data-type="single">
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+          <button class="option-btn importance-ignore" data-value="ignore">Not Important</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercise -->
+    <div class="factor-card" data-factor="exercise">
+      <div class="factor-top">
+        <div class="factor-name">Exercise Habits</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options: Never, Sometimes, Regularly, Daily. Can indicate lifestyle compatibility.</div>
+      <div class="question-group">
+        <div class="question-label">Should exercise habits affect matching?</div>
+        <div class="options" data-question="exercise_type" data-type="single">
+          <button class="option-btn" data-value="soft">Flexible — prefer similar habits</button>
+          <button class="option-btn" data-value="scoring">Scoring only — small bonus for similar habits</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="factor-card" data-factor="languages">
+      <div class="factor-top">
+        <div class="factor-name">Languages</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users can select multiple languages. Having at least one language in common seems important for communication.</div>
+      <div class="question-group">
+        <div class="question-label">How should language matching work?</div>
+        <div class="options" data-question="languages_type" data-type="single">
+          <button class="option-btn" data-value="gate">Require at least one shared language</button>
+          <button class="option-btn" data-value="scoring">Bonus for shared languages, but don't hide anyone</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 5: INTERESTS & PERSONALITY     -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-5">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div class="section-title">Interests & Personality</div>
+    </div>
+    <p class="section-desc">These create the "spark" factor — shared interests and life goals can make people feel more connected before they even meet.</p>
+
+    <!-- Interests -->
+    <div class="factor-card" data-factor="interests">
+      <div class="factor-top">
+        <div class="factor-name">Shared Interests</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users select from interests like: Dining out, Sports, Music, Travel, Fitness, Cooking, Hiking, etc. More overlap usually means more to talk about.</div>
+      <div class="question-group">
+        <div class="question-label">How should shared interests work in matching?</div>
+        <div class="options" data-question="interests_type" data-type="single">
+          <button class="option-btn" data-value="strong_scoring">Strong bonus — the more shared interests, the higher the score</button>
+          <button class="option-btn" data-value="mild_scoring">Mild bonus — a small boost for shared interests</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching — just show on profile</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">How important are shared interests overall?</div>
+        <div class="options" data-question="interests_importance" data-type="single">
+          <button class="option-btn importance-very" data-value="very">Very Important</button>
+          <button class="option-btn importance-somewhat" data-value="somewhat">Somewhat Important</button>
+          <button class="option-btn importance-nice" data-value="nice">Nice to Have</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Life Goals -->
+    <div class="factor-card" data-factor="life_goals">
+      <div class="factor-top">
+        <div class="factor-name">Life Goals</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users select up to 10 life goals (e.g., "Start a family," "Visit every continent," "Start my own company"). Aligned life goals can signal deep compatibility.</div>
+      <div class="question-group">
+        <div class="question-label">How should shared life goals work in matching?</div>
+        <div class="options" data-question="lifegoals_type" data-type="single">
+          <button class="option-btn" data-value="strong_scoring">Strong bonus — shared life goals mean a lot</button>
+          <button class="option-btn" data-value="mild_scoring">Mild bonus — nice to have but not critical</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pets -->
+    <div class="factor-card" data-factor="pets">
+      <div class="factor-top">
+        <div class="factor-name">Pets</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Options include: Dog, Cat, Fish, Other, Love pets but don't have, Pet-free, Allergic. An animal lover and someone allergic to pets could be a real conflict.</div>
+      <div class="question-group">
+        <div class="question-label">How should pet preferences work?</div>
+        <div class="options" data-question="pets_type" data-type="single">
+          <button class="option-btn" data-value="scoring">Scoring — compatible pet situations get a bonus</button>
+          <button class="option-btn" data-value="conflict_only">Only penalize clear conflicts (e.g., has dog + allergic to pets)</button>
+          <button class="option-btn" data-value="ignore">Don't use in matching</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 6: PROFILE QUALITY             -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-6">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Profile Quality & Behavior</div>
+    </div>
+    <p class="section-desc">These aren't about compatibility — they're about rewarding users who put effort into their profiles and who are actively using the app. These help keep the experience feeling alive and high-quality.</p>
+
+    <!-- Photo count -->
+    <div class="factor-card" data-factor="photos">
+      <div class="factor-top">
+        <div class="factor-name">Number of Photos</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users with more photos tend to get more engagement. Should we reward them with better visibility?</div>
+      <div class="question-group">
+        <div class="question-label">Should more photos boost a person's ranking?</div>
+        <div class="options" data-question="photos_boost" data-type="single">
+          <button class="option-btn" data-value="yes">Yes — more photos = higher ranking</button>
+          <button class="option-btn" data-value="mild">Mildly — a small boost</button>
+          <button class="option-btn" data-value="no">No — number of photos shouldn't matter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification -->
+    <div class="factor-card" data-factor="verification">
+      <div class="factor-top">
+        <div class="factor-name">Verified Profile</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Users can verify their identity with a selfie. Verified profiles feel safer and more trustworthy.</div>
+      <div class="question-group">
+        <div class="question-label">Should verified profiles rank higher?</div>
+        <div class="options" data-question="verification_boost" data-type="single">
+          <button class="option-btn" data-value="strong">Yes — significant boost for verified users</button>
+          <button class="option-btn" data-value="mild">Mild boost</button>
+          <button class="option-btn" data-value="no">No boost — verification is just a badge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Completeness -->
+    <div class="factor-card" data-factor="completeness">
+      <div class="factor-top">
+        <div class="factor-name">Profile Completeness</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">A user who filled out their bio, prompts, interests, and all details has put in more effort. Should that effort be rewarded?</div>
+      <div class="question-group">
+        <div class="question-label">Should more complete profiles rank higher?</div>
+        <div class="options" data-question="completeness_boost" data-type="single">
+          <button class="option-btn" data-value="strong">Yes — significantly higher</button>
+          <button class="option-btn" data-value="mild">Mild boost</button>
+          <button class="option-btn" data-value="no">No — completeness shouldn't affect ranking</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="factor-card" data-factor="activity">
+      <div class="factor-top">
+        <div class="factor-name">User Activity</div>
+        <div class="factor-badge needs-input">Your Input Needed</div>
+      </div>
+      <div class="factor-context">Should we prioritize showing people who have been active recently? Matching with someone who hasn't logged in for weeks feels bad.</div>
+      <div class="question-group">
+        <div class="question-label">Should active users rank higher?</div>
+        <div class="options" data-question="activity_boost" data-type="single">
+          <button class="option-btn" data-value="strong">Yes — strongly favor active users</button>
+          <button class="option-btn" data-value="mild">Mild boost for recently active</button>
+          <button class="option-btn" data-value="no">No — show everyone equally</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Should we ever stop showing someone who hasn't been active?</div>
+        <div class="options" data-question="activity_hide" data-type="single">
+          <button class="option-btn" data-value="30">Yes — hide after 30 days inactive</button>
+          <button class="option-btn" data-value="60">Yes — hide after 60 days inactive</button>
+          <button class="option-btn" data-value="90">Yes — hide after 90 days inactive</button>
+          <button class="option-btn" data-value="never">Never hide — always show everyone</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 7: SPECIAL RULES               -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-7">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div class="section-title">Special Rules</div>
+    </div>
+    <p class="section-desc">These are important behavioral decisions that shape the overall experience of the app. Take your time with these.</p>
+
+    <!-- Someone liked you -->
+    <div class="special-card" data-factor="liked_you">
+      <div class="factor-top">
+        <div class="factor-name">When Someone Likes You</div>
+      </div>
+      <div class="factor-context">If someone has already liked the Seeker, should we always show them — even if they don't match the Seeker's filters?</div>
+      <div class="factor-example" style="background: rgba(255,255,255,0.08); border-left-color: rgba(255,255,255,0.2);">
+        <strong>Example:</strong> Maria set her age range to 25–35. Carlos is 42 but liked Maria's profile. Should Maria see Carlos?
+      </div>
+      <div class="question-group">
+        <div class="question-label">When someone likes the Seeker, should we override the Seeker's filters?</div>
+        <div class="options" data-question="liked_override" data-type="single">
+          <button class="option-btn" data-value="always">Yes — always show people who liked them, regardless of filters</button>
+          <button class="option-btn" data-value="except_gender">Show them, but still respect gender preference</button>
+          <button class="option-btn" data-value="separate">Show in a separate "Likes You" section, not in the main feed</button>
+          <button class="option-btn" data-value="never">No — filters should always apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Previously passed -->
+    <div class="special-card" data-factor="passed">
+      <div class="factor-top">
+        <div class="factor-name">Previously Passed / Swiped Left</div>
+      </div>
+      <div class="factor-context">If the Seeker already passed on someone, should they ever see that person again?</div>
+      <div class="question-group">
+        <div class="question-label">Should passed profiles come back?</div>
+        <div class="options" data-question="passed_return" data-type="single">
+          <button class="option-btn" data-value="never">Never — once passed, they're gone</button>
+          <button class="option-btn" data-value="time">Yes — after some time has passed (e.g., 30 days)</button>
+          <button class="option-btn" data-value="liked">Only if that person has now liked the Seeker</button>
+          <button class="option-btn" data-value="updated">Only if they've updated their profile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passed on you -->
+    <div class="special-card" data-factor="passed_on_you">
+      <div class="factor-top">
+        <div class="factor-name">Someone Passed on the Seeker</div>
+      </div>
+      <div class="factor-context">If someone already passed on the Seeker, should we still show the Seeker to them?</div>
+      <div class="question-group">
+        <div class="question-label">Should we show the Seeker to people who already passed on them?</div>
+        <div class="options" data-question="passed_on_you_show" data-type="single">
+          <button class="option-btn" data-value="never">No — don't show the Seeker to someone who passed on them</button>
+          <button class="option-btn" data-value="time">Yes — after some time has passed</button>
+          <button class="option-btn" data-value="updated">Yes — if the Seeker has updated their profile</button>
+          <button class="option-btn" data-value="always">Yes — always show, people change their minds</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prefer Not to Say -->
+    <div class="special-card" data-factor="prefer_not_to_say">
+      <div class="factor-top">
+        <div class="factor-name">"Prefer Not to Say" Answers</div>
+      </div>
+      <div class="factor-context">When someone chooses "Prefer not to say" for things like religion, marital status, children, etc. — and a Seeker has set a filter for that category — what should happen?</div>
+      <div class="factor-example" style="background: rgba(255,255,255,0.08); border-left-color: rgba(255,255,255,0.2);">
+        <strong>Example:</strong> John filters for "Never Married." Kelly chose "Prefer not to say" for marital status. Should John see Kelly?
+      </div>
+      <div class="question-group">
+        <div class="question-label">How should we handle "Prefer not to say"?</div>
+        <div class="options" data-question="pnts_handling" data-type="single">
+          <button class="option-btn" data-value="include">Show them — give them the benefit of the doubt</button>
+          <button class="option-btn" data-value="lower">Show them, but rank them lower than people who answered</button>
+          <button class="option-btn" data-value="exclude">Don't show them — if someone set a filter, respect it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- New user boost -->
+    <div class="special-card" data-factor="new_user">
+      <div class="factor-top">
+        <div class="factor-name">New User Boost</div>
+      </div>
+      <div class="factor-context">When someone first joins, should they get a temporary boost so they start seeing matches right away and get seen by others?</div>
+      <div class="question-group">
+        <div class="question-label">Should new users get a visibility boost?</div>
+        <div class="options" data-question="new_user_boost" data-type="single">
+          <button class="option-btn" data-value="strong">Yes — strong boost for the first week</button>
+          <button class="option-btn" data-value="mild">Yes — mild boost for a few days</button>
+          <button class="option-btn" data-value="no">No — treat everyone the same from day one</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mutual like boost -->
+    <div class="special-card" data-factor="mutual_interest">
+      <div class="factor-top">
+        <div class="factor-name">Showing Interest Signals</div>
+      </div>
+      <div class="factor-context">If someone has liked the Seeker, should we boost that person in the Seeker's feed (even without telling them they've been liked)?</div>
+      <div class="question-group">
+        <div class="question-label">Should people who liked the Seeker appear higher in their feed?</div>
+        <div class="options" data-question="mutual_boost" data-type="single">
+          <button class="option-btn" data-value="strong">Yes — significantly higher</button>
+          <button class="option-btn" data-value="mild">Yes — slightly higher</button>
+          <button class="option-btn" data-value="no">No — don't influence the order</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 8: FINAL THOUGHTS              -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="section" id="section-8">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div class="section-title">Final Thoughts</div>
+    </div>
+
+    <div class="factor-card" data-factor="overall_philosophy">
+      <div class="factor-top">
+        <div class="factor-name">Overall Matching Philosophy</div>
+      </div>
+      <div class="factor-context">This is the big-picture question. It guides everything else.</div>
+      <div class="question-group">
+        <div class="question-label">When in doubt, what should RealSingles prioritize?</div>
+        <div class="options" data-question="philosophy" data-type="single">
+          <button class="option-btn" data-value="quality">Quality over quantity — show fewer, better matches</button>
+          <button class="option-btn" data-value="quantity">Quantity over quality — show more people, let them decide</button>
+          <button class="option-btn" data-value="balanced">Balanced — best matches first, but don't hide anyone viable</button>
+        </div>
+      </div>
+      <div class="question-group">
+        <div class="question-label">Any final thoughts, concerns, or things you want Arman to know about how matching should feel?</div>
+        <textarea class="notes-input" data-question="final_notes" placeholder="Share any thoughts about what makes RealSingles special and how matching should reflect that..."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Export Bar -->
+<div class="export-bar">
+  <div class="status"><strong id="answeredCount">0</strong> of <strong id="totalCount">0</strong> questions answered</div>
+  <div class="btn-group">
+    <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
+    <button class="btn btn-primary" onclick="exportSummary()">Export Summary</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──
+  const state = {};
+  let totalQuestions = 0;
+
+  // ── Init ──
+  function init() {
+    // Count all question groups
+    const allOptionGroups = document.querySelectorAll('.options[data-question]');
+    const allTextareas = document.querySelectorAll('.notes-input[data-question]');
+    // Only count option groups (not textareas) for progress
+    totalQuestions = allOptionGroups.length;
+    document.getElementById('totalCount').textContent = totalQuestions;
+
+    // Pre-fill gender confirmation
+    state['gender_confirm'] = 'yes';
+
+    // Set up option button clicks
+    allOptionGroups.forEach(group => {
+      const question = group.dataset.question;
+      const buttons = group.querySelectorAll('.option-btn');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          // Deselect others in group
+          buttons.forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          state[question] = btn.dataset.value;
+          updateProgress();
+          markCardAnswered(btn);
+        });
+      });
+    });
+
+    // Set up textarea saves
+    allTextareas.forEach(ta => {
+      ta.addEventListener('input', () => {
+        state[ta.dataset.question] = ta.value;
+      });
+    });
+
+    updateProgress();
+  }
+
+  function markCardAnswered(btn) {
+    const card = btn.closest('.factor-card, .special-card');
+    if (card) {
+      card.classList.add('answered');
+      const badge = card.querySelector('.factor-badge');
+      if (badge) {
+        badge.textContent = 'Decided';
+        badge.className = 'factor-badge decided';
+      }
+    }
+  }
+
+  function updateProgress() {
+    const answered = Object.keys(state).filter(k => !k.endsWith('_notes') && state[k]).length;
+    document.getElementById('answeredCount').textContent = answered;
+    document.getElementById('progressText').textContent = `${answered} of ${totalQuestions} answered`;
+    const pct = Math.round((answered / totalQuestions) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function resetAll() {
+    if (!confirm('Are you sure you want to reset all answers? This cannot be undone.')) return;
+    Object.keys(state).forEach(k => delete state[k]);
+    document.querySelectorAll('.option-btn.selected').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('.notes-input').forEach(ta => ta.value = '');
+    document.querySelectorAll('.factor-card, .special-card').forEach(card => {
+      card.classList.remove('answered');
+      const badge = card.querySelector('.factor-badge.decided');
+      if (badge) {
+        badge.textContent = 'Your Input Needed';
+        badge.className = 'factor-badge needs-input';
+      }
+    });
+    // Re-apply gender pre-fill
+    state['gender_confirm'] = 'yes';
+    const genderBtn = document.querySelector('[data-question="gender_confirm"] [data-value="yes"]');
+    if (genderBtn) genderBtn.classList.add('selected');
+    updateProgress();
+    showToast('All answers have been reset');
+  }
+
+  function exportSummary() {
+    const lines = [];
+    lines.push('╔══════════════════════════════════════════════════╗');
+    lines.push('║   REALSINGLES — MATCH ALGORITHM DECISIONS        ║');
+    lines.push('║   Completed by: Silva                            ║');
+    lines.push('║   Date: ' + new Date().toLocaleDateString() + '                               ║');
+    lines.push('╚══════════════════════════════════════════════════╝');
+    lines.push('');
+
+    const sections = [
+      { title: 'THE ESSENTIALS', questions: ['gender_confirm','gender_notes','distance_type','distance_max','distance_notes','age_type','age_importance','age_notes'] },
+      { title: 'PHYSICAL & APPEARANCE', questions: ['height_type','height_importance','bodytype_type','bodytype_importance','ethnicity_type','ethnicity_notes'] },
+      { title: 'RELATIONSHIP & FAMILY', questions: ['marital_type','marital_importance','intentions_type','intentions_importance','has_children_type','has_children_importance','wants_children_type','wants_children_importance'] },
+      { title: 'LIFESTYLE', questions: ['religion_type','religion_importance','political_type','political_importance','education_type','education_importance','smoking_type','smoking_importance','drinking_type','drinking_importance','marijuana_type','marijuana_importance','exercise_type','languages_type'] },
+      { title: 'INTERESTS & PERSONALITY', questions: ['interests_type','interests_importance','lifegoals_type','pets_type'] },
+      { title: 'PROFILE QUALITY & BEHAVIOR', questions: ['photos_boost','verification_boost','completeness_boost','activity_boost','activity_hide'] },
+      { title: 'SPECIAL RULES', questions: ['liked_override','passed_return','passed_on_you_show','pnts_handling','new_user_boost','mutual_boost'] },
+      { title: 'FINAL THOUGHTS', questions: ['philosophy','final_notes'] },
+    ];
+
+    const labels = {
+      gender_confirm: 'Gender/Orientation Rule Confirmed',
+      gender_notes: 'Gender Notes',
+      distance_type: 'Distance Flexibility',
+      distance_max: 'Absolute Maximum Distance',
+      distance_notes: 'Distance Notes',
+      age_type: 'Age Range Flexibility',
+      age_importance: 'Age Importance',
+      age_notes: 'Age Notes',
+      height_type: 'Height Preference Type',
+      height_importance: 'Height Importance',
+      bodytype_type: 'Body Type Preference Type',
+      bodytype_importance: 'Body Type Importance',
+      ethnicity_type: 'Ethnicity in Matching',
+      ethnicity_notes: 'Ethnicity Notes',
+      marital_type: 'Marital Status Preference Type',
+      marital_importance: 'Marital Status Importance',
+      intentions_type: 'Dating Intentions Matching',
+      intentions_importance: 'Intentions Importance',
+      has_children_type: 'Has Children Preference Type',
+      has_children_importance: 'Has Children Importance',
+      wants_children_type: 'Wants Children Matching',
+      wants_children_importance: 'Wants Children Importance',
+      religion_type: 'Religion Preference Type',
+      religion_importance: 'Religion Importance',
+      political_type: 'Political Views Matching',
+      political_importance: 'Political Importance',
+      education_type: 'Education Preference Type',
+      education_importance: 'Education Importance',
+      smoking_type: 'Smoking Preference Type',
+      smoking_importance: 'Smoking Importance',
+      drinking_type: 'Drinking Preference Type',
+      drinking_importance: 'Drinking Importance',
+      marijuana_type: 'Marijuana Preference Type',
+      marijuana_importance: 'Marijuana Importance',
+      exercise_type: 'Exercise in Matching',
+      languages_type: 'Language Matching',
+      interests_type: 'Shared Interests Matching',
+      interests_importance: 'Interests Importance',
+      lifegoals_type: 'Life Goals Matching',
+      pets_type: 'Pet Compatibility',
+      photos_boost: 'Photo Count Boost',
+      verification_boost: 'Verification Boost',
+      completeness_boost: 'Profile Completeness Boost',
+      activity_boost: 'Activity Boost',
+      activity_hide: 'Hide Inactive Users',
+      liked_override: 'Override Filters When Liked',
+      passed_return: 'Passed Profiles Return',
+      passed_on_you_show: 'Show to Those Who Passed on You',
+      pnts_handling: 'Prefer Not to Say Handling',
+      new_user_boost: 'New User Boost',
+      mutual_boost: 'Mutual Interest Boost',
+      philosophy: 'Overall Philosophy',
+      final_notes: 'Final Notes',
+    };
+
+    sections.forEach(sec => {
+      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      lines.push(sec.title);
+      lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      sec.questions.forEach(q => {
+        const label = labels[q] || q;
+        const value = state[q] || '(not answered)';
+        if (value && value !== '(not answered)') {
+          lines.push(`  ${label}: ${value}`);
+        } else {
+          lines.push(`  ${label}: ⚠️ Not answered`);
+        }
+      });
+      lines.push('');
+    });
+
+    // Create and download
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'RealSingles_Algorithm_Decisions.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Summary exported! Send the file to Arman.');
+  }
+
+  init();
+</script>
+</body>
+</html>
