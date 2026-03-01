@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AI Matrx — Admin Platform</title>
+
+  <!--
+    FOUC Prevention: Reads theme from localStorage before first paint.
+    Maintains static cacheability by running inline before render.
+  -->
+  <script>
+    (function(){
+      try{
+        var stored = localStorage.getItem('matrx-theme');
+        var preferred = stored || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+        document.documentElement.className = preferred;
+      } catch(e) {
+        document.documentElement.className = 'dark';
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════════════
+       §1  RESET
+    ═══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    a { text-decoration: none; color: inherit; }
+    button { border: none; background: none; font: inherit; cursor: pointer; }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §2  CSS GEOMETRY TOKENS
+       All structural dimensions are CSS custom properties.
+       Change one variable → entire shell adapts.
+    ═══════════════════════════════════════════════════════════════ */
+    :root {
+      --sidebar-w-expanded:  240px;
+      --sidebar-w-collapsed:  64px;
+      --header-height:        60px;
+      --dock-height:          76px;
+      --icon-size:            36px;
+      --radius-glass:         14px;
+      --radius-pill:          10px;
+
+      /* iOS-grade spring easing */
+      --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+      --dur:          300ms;
+
+      /* Z-layer map */
+      --z-content:   1;
+      --z-header:   40;
+      --z-sidebar:  50;
+      --z-dock:     50;
+      --z-overlay:  60;
+      --z-sheet:    70;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §3  LIGHT THEME
+    ═══════════════════════════════════════════════════════════════ */
+    html.light {
+      --bg-base:          #e8eef6;
+      --bg-subtle:        #dde5f0;
+      --glass:            rgba(255, 255, 255, 0.52);
+      --glass-strong:     rgba(255, 255, 255, 0.74);
+      --glass-border:     rgba(0, 0, 0, 0.07);
+      --glass-shadow:     0 4px 28px rgba(0,0,0,0.09), 0 1px 3px rgba(0,0,0,0.05);
+      --sidebar-bg:       rgba(255, 255, 255, 0.60);
+      --sidebar-border:   rgba(0, 0, 0, 0.07);
+      --text-1:           #0c1424;
+      --text-2:           #374b65;
+      --text-3:           #7b8fa8;
+      --accent:           #1a56db;
+      --accent-soft:      rgba(26,  86, 219, 0.11);
+      --accent-text:      #1a56db;
+      --icon-dim:         #6a7d96;
+      --icon-active:      #1a56db;
+      --pill-bg:          rgba(26, 86, 219, 0.11);
+      --scrollbar:        rgba(0,0,0,0.15);
+      --toggle-line:      rgba(0,0,0,0.12);
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §4  DARK THEME
+    ═══════════════════════════════════════════════════════════════ */
+    html.dark {
+      --bg-base:          #070c16;
+      --bg-subtle:        #0b1120;
+      --glass:            rgba(255, 255, 255, 0.040);
+      --glass-strong:     rgba(255, 255, 255, 0.068);
+      --glass-border:     rgba(255, 255, 255, 0.068);
+      --glass-shadow:     0 4px 28px rgba(0,0,0,0.50), 0 1px 3px rgba(0,0,0,0.30);
+      --sidebar-bg:       rgba(8, 14, 28, 0.80);
+      --sidebar-border:   rgba(255, 255, 255, 0.052);
+      --text-1:           #e6edf8;
+      --text-2:           #8ba0bc;
+      --text-3:           #47607a;
+      --accent:           #4d8cff;
+      --accent-soft:      rgba(77, 140, 255, 0.14);
+      --accent-text:      #6aa3ff;
+      --icon-dim:         #47607a;
+      --icon-active:      #6aa3ff;
+      --pill-bg:          rgba(77, 140, 255, 0.13);
+      --scrollbar:        rgba(255,255,255,0.09);
+      --toggle-line:      rgba(255,255,255,0.08);
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §5  BODY / HTML — Viewport Lock
+    ═══════════════════════════════════════════════════════════════ */
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: var(--bg-base);
+      color: var(--text-1);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient background glow */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 20%, var(--accent-soft) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 40% at 85% 85%, rgba(120, 60, 255, 0.07) 0%, transparent 65%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Subtle noise grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §6  STATE CONTROLS — Hidden Checkbox Architecture
+       Checkboxes precede .shell in DOM so CSS ~ combinator reaches
+       all shell descendants without JavaScript.
+    ═══════════════════════════════════════════════════════════════ */
+    .state-ctrl {
+      position: fixed;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px;
+      height: 1px;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §7  GLASS MATERIAL UTILITY
+    ═══════════════════════════════════════════════════════════════ */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-strong {
+      background: var(--glass-strong);
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §8  SHELL — Primary Layout Container
+    ═══════════════════════════════════════════════════════════════ */
+    .shell {
+      position: relative;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      z-index: var(--z-content);
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §9  SIDEBAR
+    ═══════════════════════════════════════════════════════════════ */
+    .sidebar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: var(--sidebar-w-collapsed);
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      z-index: var(--z-sidebar);
+      transition: width var(--dur) var(--ease-spring);
+      overflow: hidden;
+    }
+
+    /* ── Sidebar expanded via CSS-only checkbox state ── */
+    #nav-toggle:checked ~ .shell .sidebar {
+      width: var(--sidebar-w-expanded);
+    }
+
+    /* ── Main area pushes right ── */
+    .main-area {
+      flex: 1;
+      min-width: 0;
+      margin-left: var(--sidebar-w-collapsed);
+      transition: margin-left var(--dur) var(--ease-spring);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #nav-toggle:checked ~ .shell .main-area {
+      margin-left: var(--sidebar-w-expanded);
+    }
+
+
+    /* ─────────────────────────────────
+       Sidebar: Top — Logo + Toggle
+    ───────────────────────────────── */
+    .sidebar-top {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      padding: 0 14px;
+      flex-shrink: 0;
+      gap: 10px;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    /* The toggle label must hold exact spatial position at all times */
+    .sidebar-toggle-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      min-width: var(--icon-size);
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--icon-dim);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      transition: background 180ms ease, color 180ms ease, transform 200ms var(--ease-spring);
+    }
+
+    .sidebar-toggle-label:hover { background: var(--glass-strong); color: var(--text-1); transform: scale(1.07); }
+    .sidebar-toggle-label:active { transform: scale(0.93); }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 180ms ease 80ms, transform 180ms ease 80ms;
+      pointer-events: none;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    #nav-toggle:checked ~ .shell .sidebar-logo {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    .logo-wordmark {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-1);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-wordmark em {
+      font-style: normal;
+      color: var(--accent-text);
+    }
+
+
+    /* ─────────────────────────────────
+       Sidebar: Nav — Self-scrolling container
+    ───────────────────────────────── */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar) transparent;
+    }
+
+    .sidebar-nav::-webkit-scrollbar { width: 3px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 99px; }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 10px 0 4px 4px;
+      white-space: nowrap;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+      transition: opacity 150ms ease 50ms, height 200ms ease;
+    }
+
+    #nav-toggle:checked ~ .shell .nav-section-label {
+      opacity: 1;
+      height: 30px;
+    }
+
+    /* Nav Item */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+      border-radius: var(--radius-pill);
+      color: var(--icon-dim);
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      overflow: hidden;
+      transition: color 200ms ease, background 200ms ease;
+      view-transition-name: none; /* set on active item only */
+    }
+
+    /* Icon container — always perfectly centered when collapsed */
+    .nav-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      min-width: var(--icon-size);
+      border-radius: 50%;
+      margin: 0 2px;
+      transition: background 200ms ease, transform 200ms var(--ease-spring);
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-item:hover .nav-icon { background: var(--glass-strong); transform: scale(1.06); }
+    .nav-item:active .nav-icon { transform: scale(0.92); }
+
+    .nav-label {
+      font-size: 13.5px;
+      font-weight: 450;
+      color: var(--text-2);
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 160ms ease 70ms, transform 160ms ease 70ms;
+      pointer-events: none;
+    }
+
+    #nav-toggle:checked ~ .shell .nav-label {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Active State — Magic Pill */
+    .nav-item.active {
+      background: var(--pill-bg);
+      color: var(--icon-active);
+    }
+
+    .nav-item.active .nav-label {
+      color: var(--accent-text);
+      font-weight: 500;
+    }
+
+    .nav-item.active .nav-icon {
+      view-transition-name: nav-pill;
+    }
+
+
+    /* ─────────────────────────────────
+       Sidebar: Bottom — Theme + Settings
+    ───────────────────────────────── */
+    .sidebar-bottom {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-top: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    /* Theme toggle row */
+    .theme-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+      overflow: hidden;
+    }
+
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      min-width: var(--icon-size);
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--icon-dim);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      margin: 0 2px;
+      transition: background 180ms ease, color 180ms ease, transform 200ms var(--ease-spring);
+    }
+
+    .theme-btn:hover { background: var(--glass-strong); color: var(--text-1); transform: scale(1.07); }
+    .theme-btn:active { transform: scale(0.93); }
+
+    .theme-label-text {
+      font-size: 13.5px;
+      font-weight: 450;
+      color: var(--text-2);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 160ms ease 70ms, transform 160ms ease 70ms;
+    }
+
+    #nav-toggle:checked ~ .shell .theme-label-text {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Sun/Moon icon visibility per theme */
+    .icon-sun  { display: none;  }
+    .icon-moon { display: block; }
+    html.dark  .icon-sun  { display: block; }
+    html.dark  .icon-moon { display: none;  }
+    html.light .icon-sun  { display: none;  }
+    html.light .icon-moon { display: block; }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §10  HEADER — Transparent container, glass only on child nodes
+    ═══════════════════════════════════════════════════════════════ */
+    .app-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: var(--header-height);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent; /* ← explicitly transparent, glass is on children */
+      z-index: var(--z-header);
+      pointer-events: none;
+    }
+
+    /* All direct interactive children restore pointer events */
+    .app-header > * { pointer-events: auto; }
+
+    /* Mobile hamburger — shown only on mobile */
+    .mobile-menu-label {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--icon-dim);
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      transition: transform 200ms var(--ease-spring), background 180ms ease;
+    }
+
+    .mobile-menu-label:hover  { transform: scale(1.07); }
+    .mobile-menu-label:active { transform: scale(0.93); }
+
+    /* Center: Dynamic injection zone — strictly empty at dashboard root */
+    .header-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .header-injection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    /* Route breadcrumb (injected by route layouts, hidden on root) */
+    .route-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 99px;
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+
+    .header-right {
+      margin-left: auto;
+    }
+
+
+    /* ─────────────────────────────────
+       Auth Island
+       Immutable glass container — internal nodes swap on hydration
+    ───────────────────────────────── */
+    .auth-island {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: var(--icon-size);
+      padding: 0 12px 0 8px;
+      border-radius: 99px;
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      cursor: pointer;
+      transition: transform 200ms var(--ease-spring), background 180ms ease;
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 450;
+      white-space: nowrap;
+    }
+
+    .auth-island:hover  { background: var(--glass-strong); transform: scale(1.04); }
+    .auth-island:active { transform: scale(0.96); }
+
+    .auth-icon-wrap {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-strong);
+      color: var(--icon-dim);
+      flex-shrink: 0;
+      transition: background 300ms ease;
+    }
+
+    /* Hydrated: avatar replaces icon, class swaps */
+    .auth-icon-wrap.avatar {
+      background: linear-gradient(135deg, #1a56db 0%, #7c3aed 100%);
+      color: #fff;
+      font-family: 'Sora', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §11  CONTENT AREA — Independent scroll context
+    ═══════════════════════════════════════════════════════════════ */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: calc(var(--header-height) + 24px) 28px 28px;
+      position: relative;
+      z-index: var(--z-content);
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar) transparent;
+    }
+
+    .content-area::-webkit-scrollbar { width: 4px; }
+    .content-area::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 99px; }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §12  DEMO CONTENT — Dashboard
+    ═══════════════════════════════════════════════════════════════ */
+    .page-eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .page-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 24px;
+      font-weight: 650;
+      color: var(--text-1);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 24px;
+    }
+
+    /* Stat Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius-glass);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 200ms var(--ease-spring), box-shadow 200ms ease;
+      animation: fadeUp 480ms var(--ease-spring) both;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0ms;   }
+    .stat-card:nth-child(2) { animation-delay: 60ms;  }
+    .stat-card:nth-child(3) { animation-delay: 120ms; }
+    .stat-card:nth-child(4) { animation-delay: 180ms; }
+
+    .stat-card:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
+    }
+
+    .stat-icon {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .stat-value {
+      font-family: 'Sora', sans-serif;
+      font-size: 28px;
+      font-weight: 650;
+      color: var(--text-1);
+      letter-spacing: -0.6px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-delta {
+      font-size: 11px;
+      font-weight: 500;
+      color: #22c55e;
+    }
+
+    .stat-delta.neg { color: #f87171; }
+
+    /* Content Cards */
+    .content-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+      animation: fadeUp 480ms var(--ease-spring) both;
+      animation-delay: 240ms;
+    }
+
+    .content-row.three {
+      grid-template-columns: 1fr 1fr 1fr;
+      animation-delay: 340ms;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: var(--radius-glass);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-1);
+      letter-spacing: -0.2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: var(--accent-soft);
+      color: var(--accent-text);
+    }
+
+    .badge.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+    .badge.amber { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .badge.live  {
+      background: rgba(34,197,94,0.12); color: #22c55e;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    .badge.live::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s ease infinite;
+    }
+
+    /* Activity List */
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .dot.green { background: #22c55e; }
+    .dot.amber { background: #f59e0b; }
+    .dot.red   { background: #f87171; }
+    .dot.dim   { background: var(--text-3); }
+
+    .act-text {
+      flex: 1;
+      font-size: 12.5px;
+      color: var(--text-2);
+      line-height: 1.4;
+    }
+
+    .act-time {
+      font-size: 11px;
+      color: var(--text-3);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+    }
+
+    /* Bar Chart */
+    .mini-chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 80px;
+      padding-top: 8px;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(to top, var(--accent), color-mix(in srgb, var(--accent) 50%, transparent));
+      min-height: 4px;
+      transition: opacity 200ms ease;
+      opacity: 0.65;
+    }
+
+    .bar:hover { opacity: 1; }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+
+    .chart-label {
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Model pills */
+    .model-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .model-row:last-child { border-bottom: none; }
+
+    .model-name {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--text-2);
+    }
+
+    .model-bar-wrap {
+      width: 80px;
+      height: 4px;
+      background: var(--glass-border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .model-bar {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--accent);
+      opacity: 0.8;
+    }
+
+    .model-pct {
+      font-size: 11px;
+      color: var(--text-3);
+      font-family: 'JetBrains Mono', monospace;
+      width: 28px;
+      text-align: right;
+    }
+
+    /* Uptime row */
+    .uptime-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .uptime-row:last-child { border-bottom: none; }
+
+    .uptime-name {
+      flex: 1;
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+
+    .uptime-pct {
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-2);
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §13  MOBILE OVERLAY (CSS-only, triggered by checkbox)
+    ═══════════════════════════════════════════════════════════════ */
+    .mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: var(--z-overlay);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 280ms ease;
+    }
+
+    #mobile-nav:checked ~ .mobile-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §14  MOBILE SIDE SHEET
+    ═══════════════════════════════════════════════════════════════ */
+    .mobile-sheet {
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      width: 280px;
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(32px) saturate(220%);
+      -webkit-backdrop-filter: blur(32px) saturate(220%);
+      border-right: 1px solid var(--sidebar-border);
+      z-index: var(--z-sheet);
+      transform: translateX(-100%);
+      transition: transform 320ms var(--ease-spring);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #mobile-nav:checked ~ .mobile-sheet {
+      transform: translateX(0);
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: var(--header-height);
+      border-bottom: 1px solid var(--sidebar-border);
+      flex-shrink: 0;
+    }
+
+    .sheet-wordmark {
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-1);
+    }
+
+    .sheet-wordmark em { font-style: normal; color: var(--accent-text); }
+
+    .sheet-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      color: var(--icon-dim);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      transition: transform 200ms var(--ease-spring);
+    }
+
+    .sheet-close:hover  { transform: scale(1.07); }
+    .sheet-close:active { transform: scale(0.93); }
+
+    .sheet-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .sheet-section {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 10px 10px 4px;
+    }
+
+    .sheet-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 44px;
+      padding: 0 12px;
+      border-radius: 10px;
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 450;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .sheet-item:hover  { background: var(--glass-strong); color: var(--text-1); }
+    .sheet-item.active { background: var(--pill-bg); color: var(--accent-text); }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §15  MOBILE DOCK — Bottom-fixed iOS-style glass dock
+    ═══════════════════════════════════════════════════════════════ */
+    .mobile-dock {
+      display: none;  /* visible via media query */
+      position: fixed;
+      bottom: 12px;
+      left: 10px;
+      right: 10px;
+      height: var(--dock-height);
+      background: var(--glass-strong);
+      backdrop-filter: blur(28px) saturate(200%);
+      -webkit-backdrop-filter: blur(28px) saturate(200%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.10);
+      border-radius: 24px;
+      z-index: var(--z-dock);
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex: 1;
+      height: 56px;
+      border-radius: 16px;
+      color: var(--icon-dim);
+      cursor: pointer;
+      transition: transform 200ms var(--ease-spring), color 200ms ease, background 200ms ease;
+    }
+
+    .dock-item:hover  { transform: scale(1.12) translateY(-3px); }
+    .dock-item:active { transform: scale(0.88); }
+    .dock-item.active { color: var(--icon-active); background: var(--pill-bg); }
+
+    .dock-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §16  RESPONSIVE — Cacheable Adaptive Delivery
+    ═══════════════════════════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      /* Hide desktop sidebar entirely */
+      .sidebar { display: none; }
+
+      /* Collapse main area to full width */
+      .main-area { margin-left: 0 !important; }
+
+      /* Show mobile controls */
+      .mobile-menu-label { display: flex; }
+      .mobile-dock       { display: flex; }
+
+      /* Content bottom padding for dock clearance */
+      .content-area {
+        padding: calc(var(--header-height) + 16px) 16px calc(var(--dock-height) + 20px);
+      }
+
+      /* Stack grid */
+      .content-row, .content-row.three {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §17  ANIMATIONS
+    ═══════════════════════════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §18  VIEW TRANSITIONS API — Spatial nav pill movement
+    ═══════════════════════════════════════════════════════════════ */
+    @view-transition { navigation: auto; }
+
+    ::view-transition-old(nav-pill) {
+      animation: 300ms var(--ease-spring) both vt-out;
+    }
+
+    ::view-transition-new(nav-pill) {
+      animation: 300ms var(--ease-spring) both vt-in;
+    }
+
+    @keyframes vt-out {
+      to { opacity: 0; transform: scale(0.9); }
+    }
+
+    @keyframes vt-in {
+      from { opacity: 0; transform: scale(0.9); }
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §19  LUCIDE ICON SIZING — Uniform stroke, circular bounds
+    ═══════════════════════════════════════════════════════════════ */
+    [data-lucide] {
+      width: 17px;
+      height: 17px;
+      stroke-width: 1.75;
+      flex-shrink: 0;
+    }
+
+    .dock-item [data-lucide] {
+      width: 20px;
+      height: 20px;
+    }
+
+    .stat-icon [data-lucide] {
+      width: 16px;
+      height: 16px;
+    }
+
+
+    /* ═══════════════════════════════════════════════════════════════
+       §20  SCROLLBAR (WebKit)
+    ═══════════════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 99px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       STATE CONTROLS — Precede .shell for CSS sibling targeting
+  ══════════════════════════════════════════════════════════ -->
+  <input type="checkbox" id="nav-toggle" class="state-ctrl" aria-label="Toggle sidebar">
+  <input type="checkbox" id="mobile-nav" class="state-ctrl" aria-label="Toggle mobile nav">
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       PRIMARY SHELL
+  ══════════════════════════════════════════════════════════ -->
+  <div class="shell">
+
+
+    <!-- ╔══════════════════════════════════════╗
+         ║  SIDEBAR                             ║
+         ╚══════════════════════════════════════╝ -->
+    <aside class="sidebar" role="navigation" aria-label="Primary navigation">
+
+      <!-- Top: Toggle + Wordmark -->
+      <div class="sidebar-top">
+        <!-- Toggle label — immovable spatial anchor -->
+        <label for="nav-toggle" class="sidebar-toggle-label" aria-label="Toggle sidebar">
+          <i data-lucide="panel-left"></i>
+        </label>
+        <!-- Logo: appears right of toggle on expand -->
+        <div class="sidebar-logo" aria-hidden="true">
+          <span class="logo-wordmark">AI&nbsp;<em>Matrx</em></span>
+        </div>
+      </div>
+
+      <!-- Middle: Primary nav — self-scrolling -->
+      <nav class="sidebar-nav" aria-label="Main navigation">
+
+        <span class="nav-section-label" aria-hidden="true">Platform</span>
+
+        <a class="nav-item active" href="#" data-route="dashboard" aria-current="page">
+          <div class="nav-icon"><i data-lucide="layout-dashboard"></i></div>
+          <span class="nav-label">Dashboard</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="analytics">
+          <div class="nav-icon"><i data-lucide="bar-chart-3"></i></div>
+          <span class="nav-label">Analytics</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="projects">
+          <div class="nav-icon"><i data-lucide="folder-open"></i></div>
+          <span class="nav-label">Projects</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="workflows">
+          <div class="nav-icon"><i data-lucide="workflow"></i></div>
+          <span class="nav-label">Workflows</span>
+        </a>
+
+        <span class="nav-section-label" aria-hidden="true">AI Platform</span>
+
+        <a class="nav-item" href="#" data-route="models">
+          <div class="nav-icon"><i data-lucide="brain-circuit"></i></div>
+          <span class="nav-label">AI Models</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="prompts">
+          <div class="nav-icon"><i data-lucide="message-square-code"></i></div>
+          <span class="nav-label">Prompts</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="agents">
+          <div class="nav-icon"><i data-lucide="bot"></i></div>
+          <span class="nav-label">Agents</span>
+        </a>
+
+        <span class="nav-section-label" aria-hidden="true">Management</span>
+
+        <a class="nav-item" href="#" data-route="users">
+          <div class="nav-icon"><i data-lucide="users"></i></div>
+          <span class="nav-label">Users</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="billing">
+          <div class="nav-icon"><i data-lucide="credit-card"></i></div>
+          <span class="nav-label">Billing</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="security">
+          <div class="nav-icon"><i data-lucide="shield-check"></i></div>
+          <span class="nav-label">Security</span>
+        </a>
+
+        <a class="nav-item" href="#" data-route="logs">
+          <div class="nav-icon"><i data-lucide="scroll-text"></i></div>
+          <span class="nav-label">Audit Logs</span>
+        </a>
+
+      </nav>
+
+      <!-- Bottom: Theme toggle + Settings -->
+      <div class="sidebar-bottom">
+
+        <!-- Light / Dark toggle -->
+        <div class="theme-row">
+          <button class="theme-btn" id="theme-button" aria-label="Toggle color theme" type="button">
+            <!-- Sun shown in dark mode (click to go light) -->
+            <i data-lucide="sun"  class="icon-sun"></i>
+            <!-- Moon shown in light mode (click to go dark) -->
+            <i data-lucide="moon" class="icon-moon"></i>
+          </button>
+          <span class="theme-label-text" id="theme-label-text" aria-live="polite">Dark mode</span>
+        </div>
+
+        <!-- Settings — always last item -->
+        <a class="nav-item" href="#" data-route="settings">
+          <div class="nav-icon"><i data-lucide="settings-2"></i></div>
+          <span class="nav-label">Settings</span>
+        </a>
+
+      </div>
+    </aside>
+
+
+    <!-- ╔══════════════════════════════════════╗
+         ║  MAIN AREA                           ║
+         ╚══════════════════════════════════════╝ -->
+    <div class="main-area">
+
+      <!-- Transparent header — glass on child nodes only -->
+      <header class="app-header" role="banner">
+
+        <!-- Left: Mobile hamburger (desktop has sidebar) -->
+        <div class="header-left">
+          <label for="mobile-nav" class="mobile-menu-label" aria-label="Open navigation menu">
+            <i data-lucide="menu"></i>
+          </label>
+        </div>
+
+        <!-- Center: Route injection zone — empty at dashboard root -->
+        <div class="header-center">
+          <div class="header-injection" id="header-injection">
+            <!--
+              Route layouts inject contextual controls or title here.
+              This zone is intentionally empty at the root dashboard.
+              Example injection (from a child route layout):
+              <div class="route-breadcrumb">
+                <i data-lucide="folder-open"></i>
+                Projects
+              </div>
+            -->
+          </div>
+        </div>
+
+        <!-- Right: Auth Island — immutable container, internal nodes hydrate -->
+        <div class="header-right">
+          <div class="auth-island" id="auth-island" role="button" tabindex="0"
+               aria-label="Account menu" aria-haspopup="true">
+            <!-- Icon: left-anchored, always present -->
+            <div class="auth-icon-wrap" id="auth-icon-wrap">
+              <i data-lucide="user"></i>
+            </div>
+            <!-- Text: right of icon, swaps on hydration -->
+            <span id="auth-label">Login</span>
+          </div>
+        </div>
+
+      </header>
+
+      <!-- Scrollable content — independent scroll context -->
+      <main class="content-area" id="main-content" role="main">
+
+        <div class="page-eyebrow">Friday, February 27, 2026</div>
+        <div class="page-title">Platform Overview</div>
+
+        <!-- KPI Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Active Models</div>
+            <div class="stat-icon"><i data-lucide="brain-circuit"></i></div>
+            <div class="stat-value">24</div>
+            <div class="stat-delta">↑ 3 this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">API Requests</div>
+            <div class="stat-icon"><i data-lucide="zap"></i></div>
+            <div class="stat-value">1.4M</div>
+            <div class="stat-delta">↑ 18.2% vs last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Users</div>
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+            <div class="stat-value">8,412</div>
+            <div class="stat-delta">↑ 5.7% this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Cost / 1K Tokens</div>
+            <div class="stat-icon"><i data-lucide="dollar-sign"></i></div>
+            <div class="stat-value">$0.042</div>
+            <div class="stat-delta neg">↑ 2.1% vs baseline</div>
+          </div>
+        </div>
+
+        <!-- Row 1: Activity + Volume -->
+        <div class="content-row">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Activity</div>
+              <div class="badge live">Live</div>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">claude-sonnet-4-6 deployment successful</div>
+                <div class="act-time">2m</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot"></div>
+                <div class="act-text">Workflow "Research Pipeline v2" created by Arman K.</div>
+                <div class="act-time">14m</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot amber"></div>
+                <div class="act-text">Rate limit threshold reached — Tier 2 queue active</div>
+                <div class="act-time">1h</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">RealSingles matching engine redeployed successfully</div>
+                <div class="act-time">2h</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot red"></div>
+                <div class="act-text">Scheduled backup failed — retry queued for 03:00</div>
+                <div class="act-time">3h</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">23 new users onboarded via public API</div>
+                <div class="act-time">4h</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Request Volume</div>
+              <div class="badge">7 days</div>
+            </div>
+            <div class="mini-chart" role="img" aria-label="Bar chart: request volume over 7 days">
+              <div class="bar" style="height:40%"></div>
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:48%"></div>
+              <div class="bar" style="height:72%"></div>
+              <div class="bar" style="height:62%"></div>
+              <div class="bar" style="height:85%"></div>
+              <div class="bar" style="height:100%"></div>
+              <div class="bar" style="height:68%"></div>
+              <div class="bar" style="height:88%"></div>
+              <div class="bar" style="height:81%"></div>
+              <div class="bar" style="height:93%"></div>
+              <div class="bar" style="height:78%"></div>
+              <div class="bar" style="height:86%"></div>
+              <div class="bar" style="height:95%"></div>
+            </div>
+            <div class="chart-labels">
+              <span class="chart-label">Feb 21</span>
+              <span class="chart-label">Feb 27</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Models + System Health + Infra -->
+        <div class="content-row three">
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Top Models by Usage</div>
+            </div>
+            <div class="model-row">
+              <div class="dot"></div>
+              <div class="model-name">claude-sonnet-4-6</div>
+              <div class="model-bar-wrap"><div class="model-bar" style="width:42%"></div></div>
+              <div class="model-pct">42%</div>
+            </div>
+            <div class="model-row">
+              <div class="dot amber"></div>
+              <div class="model-name">gpt-4o-mini</div>
+              <div class="model-bar-wrap"><div class="model-bar" style="width:28%;background:var(--accent);opacity:.5"></div></div>
+              <div class="model-pct">28%</div>
+            </div>
+            <div class="model-row">
+              <div class="dot green"></div>
+              <div class="model-name">gemini-2.0-flash</div>
+              <div class="model-bar-wrap"><div class="model-bar" style="width:19%;background:#22c55e;opacity:.7"></div></div>
+              <div class="model-pct">19%</div>
+            </div>
+            <div class="model-row">
+              <div class="dot red"></div>
+              <div class="model-name">claude-opus-4-6</div>
+              <div class="model-bar-wrap"><div class="model-bar" style="width:11%;background:#f87171;opacity:.7"></div></div>
+              <div class="model-pct">11%</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">System Health</div>
+              <div class="badge green">All Operational</div>
+            </div>
+            <div class="uptime-row">
+              <div class="dot green"></div>
+              <div class="uptime-name">API Gateway</div>
+              <div class="uptime-pct">99.98%</div>
+            </div>
+            <div class="uptime-row">
+              <div class="dot green"></div>
+              <div class="uptime-name">Database Cluster</div>
+              <div class="uptime-pct">100.00%</div>
+            </div>
+            <div class="uptime-row">
+              <div class="dot green"></div>
+              <div class="uptime-name">CDN / Edge Network</div>
+              <div class="uptime-pct">99.99%</div>
+            </div>
+            <div class="uptime-row">
+              <div class="dot amber"></div>
+              <div class="uptime-name">File Storage (S3)</div>
+              <div class="uptime-pct">99.82%</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Active Applications</div>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">AI Matrx Core</div>
+                <div class="act-time">v4.1</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">RealSingles</div>
+                <div class="act-time">v2.8</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot green"></div>
+                <div class="act-text">All Green ITAD</div>
+                <div class="act-time">v1.4</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot amber"></div>
+                <div class="act-text">Workflow Engine</div>
+                <div class="act-time">beta</div>
+              </div>
+              <div class="activity-item">
+                <div class="dot dim"></div>
+                <div class="act-text">Mobile App (Expo)</div>
+                <div class="act-time">v0.9</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom spacer for dock on mobile -->
+        <div style="height:8px"></div>
+
+      </main>
+    </div> <!-- /.main-area -->
+  </div> <!-- /.shell -->
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       MOBILE OVERLAY — CSS-driven via #mobile-nav checkbox
+  ══════════════════════════════════════════════════════════ -->
+  <label for="mobile-nav" class="mobile-overlay" aria-hidden="true"></label>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       MOBILE SIDE SHEET — mirrors desktop nav inventory
+  ══════════════════════════════════════════════════════════ -->
+  <div class="mobile-sheet" role="dialog" aria-modal="true" aria-label="Navigation menu">
+    <div class="sheet-head">
+      <span class="sheet-wordmark">AI&nbsp;<em>Matrx</em></span>
+      <label for="mobile-nav" class="sheet-close" aria-label="Close navigation">
+        <i data-lucide="x"></i>
+      </label>
+    </div>
+    <nav class="sheet-nav">
+      <div class="sheet-section">Platform</div>
+      <a class="sheet-item active" href="#"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a class="sheet-item" href="#"><i data-lucide="bar-chart-3"></i> Analytics</a>
+      <a class="sheet-item" href="#"><i data-lucide="folder-open"></i> Projects</a>
+      <a class="sheet-item" href="#"><i data-lucide="workflow"></i> Workflows</a>
+      <div class="sheet-section">AI Platform</div>
+      <a class="sheet-item" href="#"><i data-lucide="brain-circuit"></i> AI Models</a>
+      <a class="sheet-item" href="#"><i data-lucide="message-square-code"></i> Prompts</a>
+      <a class="sheet-item" href="#"><i data-lucide="bot"></i> Agents</a>
+      <div class="sheet-section">Management</div>
+      <a class="sheet-item" href="#"><i data-lucide="users"></i> Users</a>
+      <a class="sheet-item" href="#"><i data-lucide="credit-card"></i> Billing</a>
+      <a class="sheet-item" href="#"><i data-lucide="shield-check"></i> Security</a>
+      <a class="sheet-item" href="#"><i data-lucide="scroll-text"></i> Audit Logs</a>
+      <a class="sheet-item" href="#"><i data-lucide="settings-2"></i> Settings</a>
+    </nav>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       MOBILE DOCK — Strictly 6 primary routes
+  ══════════════════════════════════════════════════════════ -->
+  <nav class="mobile-dock" role="navigation" aria-label="Mobile dock">
+    <a class="dock-item active" href="#" aria-label="Dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span class="dock-label">Home</span>
+    </a>
+    <a class="dock-item" href="#" aria-label="Analytics">
+      <i data-lucide="bar-chart-3"></i>
+      <span class="dock-label">Analytics</span>
+    </a>
+    <a class="dock-item" href="#" aria-label="Projects">
+      <i data-lucide="folder-open"></i>
+      <span class="dock-label">Projects</span>
+    </a>
+    <a class="dock-item" href="#" aria-label="AI Models">
+      <i data-lucide="brain-circuit"></i>
+      <span class="dock-label">Models</span>
+    </a>
+    <a class="dock-item" href="#" aria-label="Users">
+      <i data-lucide="users"></i>
+      <span class="dock-label">Users</span>
+    </a>
+    <a class="dock-item" href="#" aria-label="Settings">
+      <i data-lucide="settings-2"></i>
+      <span class="dock-label">Settings</span>
+    </a>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SCRIPTS
+       Minimal JS for:
+       1. Lucide icon init
+       2. Theme persistence + toggle sync
+       3. Nav active state (CSS-ready, JS-enhanced)
+       4. Auth island hydration simulation
+  ══════════════════════════════════════════════════════════ -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    // ── 1. Initialize Lucide icons ──
+    lucide.createIcons();
+
+    // ── 2. Theme toggle ──
+    const themeBtn   = document.getElementById('theme-button');
+    const themeLabel = document.getElementById('theme-label-text');
+
+    function syncThemeLabel() {
+      const isDark = document.documentElement.classList.contains('dark');
+      themeLabel.textContent = isDark ? 'Dark mode' : 'Light mode';
+    }
+
+    themeBtn.addEventListener('click', function() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const next   = isDark ? 'light' : 'dark';
+      document.documentElement.className = next;
+      try { localStorage.setItem('matrx-theme', next); } catch(e) {}
+      syncThemeLabel();
+      lucide.createIcons();  // re-init icons after DOM swap of sun/moon
+    });
+
+    syncThemeLabel();
+
+    // ── 3. Nav active state — magic pill migration ──
+    const navItems = document.querySelectorAll('.nav-item[data-route]');
+    const dockItems = document.querySelectorAll('.dock-item');
+    const sheetItems = document.querySelectorAll('.sheet-item');
+
+    navItems.forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        navItems.forEach(function(el) { el.classList.remove('active'); el.removeAttribute('aria-current'); });
+        this.classList.add('active');
+        this.setAttribute('aria-current', 'page');
+      });
+    });
+
+    dockItems.forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        dockItems.forEach(function(el) { el.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+
+    // ── 4. Auth island hydration simulation ──
+    // In production Next.js hydrates this via server component → client boundary.
+    // Static pre-hydration shell: (icon | "Login")
+    // Post-hydration shell:       (avatar | "Arman K.")  ← same container, only internals swap
+    setTimeout(function() {
+      const iconWrap   = document.getElementById('auth-icon-wrap');
+      const authLabel  = document.getElementById('auth-label');
+
+      iconWrap.classList.add('avatar');
+      iconWrap.innerHTML = 'AK';
+      authLabel.textContent = 'Arman K.';
+    }, 900);
+  </script>
+
+</body>
+</html>
