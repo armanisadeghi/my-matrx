@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Brain Boost for Dad</title>
+    <style>
+      /* --- MODERN MOBILE-FIRST UI --- */
+      :root {
+        --primary: #4a90e2;
+        --success: #2ecc71;
+        --danger: #e74c3c;
+        --dark: #2c3e50;
+        --light: #f8f9fa;
+        --card-bg: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        /* Disable text selection to prevent accidental zooming/highlighting on mobile */
+        user-select: none;
+      }
+
+      body {
+        background-color: var(--light);
+        color: var(--dark);
+        display: flex;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+      }
+
+      /* Constrain to mobile width on larger screens */
+      #app-container {
+        width: 100%;
+        max-width: 450px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: var(--light);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      header {
+        background-color: var(--primary);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+      }
+
+      .screen {
+        display: none;
+        flex: 1;
+        flex-direction: column;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .screen.active {
+        display: flex;
+      }
+
+      /* --- TYPOGRAPHY & BUTTONS (LARGE FOR SENIORS) --- */
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      p.instructions {
+        font-size: 1.2rem;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #555;
+      }
+
+      .menu-btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 25px 20px;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.1s;
+      }
+
+      .menu-btn:active {
+        transform: scale(0.98);
+      }
+
+      .back-btn {
+        background-color: var(--dark);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 1.2rem;
+        margin-top: auto; /* Pushes to bottom */
+        cursor: pointer;
+        width: 100%;
+      }
+
+      /* --- GAME 1: VOCAB MATCH --- */
+      #card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border: 3px solid var(--primary);
+        border-radius: 15px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.6rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 10px;
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+
+      .card.hidden {
+        background-color: var(--primary);
+        color: var(--primary); /* Hide text */
+      }
+
+      .card.matched {
+        background-color: var(--success);
+        border-color: var(--success);
+        color: white;
+        pointer-events: none;
+      }
+
+      /* --- GAME 2: PATTERN RECALL --- */
+      #pattern-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin: auto 0;
+        padding: 20px;
+      }
+
+      .pattern-btn {
+        border-radius: 20px;
+        height: 130px;
+        border: none;
+        opacity: 0.6;
+        cursor: pointer;
+      }
+
+      .pattern-btn.active-flash {
+        opacity: 1;
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      }
+
+      #btn-red {
+        background-color: #e74c3c;
+      }
+      #btn-blue {
+        background-color: #3498db;
+      }
+      #btn-green {
+        background-color: #2ecc71;
+      }
+      #btn-yellow {
+        background-color: #f1c40f;
+      }
+
+      #pattern-status {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <header>Brain Boost</header>
+
+      <div id="home-screen" class="screen active">
+        <h2>Welcome!</h2>
+        <p class="instructions">Choose a game to train your memory.</p>
+        <button class="menu-btn" onclick="startVocabMatch()">
+          Word Match (English & Farsi)
+        </button>
+        <button class="menu-btn" onclick="startPatternRecall()">
+          Pattern Memory
+        </button>
+      </div>
+
+      <div id="vocab-screen" class="screen">
+        <h2>Word Match</h2>
+        <p class="instructions" id="vocab-instructions">
+          Find the matching English and Farsi words.
+        </p>
+        <div id="card-grid"></div>
+        <button class="back-btn" onclick="goHome()">Back to Menu</button>
+      </div>
+
+      <div id="pattern-screen" class="screen">
+        <h2>Pattern Memory</h2>
+        <p class="instructions">Watch the colors, then repeat the pattern.</p>
+        <div id="pattern-status">Get Ready...</div>
+        <div id="pattern-grid">
+          <button
+            class="pattern-btn"
+            id="btn-red"
+            onclick="handlePatternInput(0)"
+          ></button>
+          <button
+            class="pattern-btn"
+            id="btn-blue"
+            onclick="handlePatternInput(1)"
+          ></button>
+          <button
+            class="pattern-btn"
+            id="btn-green"
+            onclick="handlePatternInput(2)"
+          ></button>
+          <button
+            class="pattern-btn"
+            id="btn-yellow"
+            onclick="handlePatternInput(3)"
+          ></button>
+        </div>
+        <button class="back-btn" onclick="goHome()">Back to Menu</button>
+      </div>
+    </div>
+
+    <script>
+      /* =========================================
+       DATA STORE (Ready for your API later)
+       ========================================= */
+      const appData = {
+        vocabList: [
+          { english: "Apple", farsi: "سیب" },
+          { english: "Water", farsi: "آب" },
+          { english: "Book", farsi: "کتاب" },
+          { english: "House", farsi: "خانه" },
+        ],
+        // You can add more data arrays here later (e.g., math problems, trivia)
+      };
+
+      /* =========================================
+       NAVIGATION LOGIC
+       ========================================= */
+      function showScreen(screenId) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(screenId).classList.add("active");
+      }
+
+      function goHome() {
+        showScreen("home-screen");
+        // Reset any game state if needed
+        clearTimeout(patternTimeout);
+      }
+
+      /* =========================================
+       GAME 1: VOCAB MATCH LOGIC
+       ========================================= */
+      let firstCard = null;
+      let secondCard = null;
+      let lockBoard = false;
+      let matchedPairs = 0;
+
+      function startVocabMatch() {
+        showScreen("vocab-screen");
+        const grid = document.getElementById("card-grid");
+        grid.innerHTML = "";
+        firstCard = null;
+        secondCard = null;
+        lockBoard = false;
+        matchedPairs = 0;
+        document.getElementById("vocab-instructions").innerText =
+          "Find the matching English and Farsi words.";
+
+        // Create a flat array of cards from the data object
+        let cards = [];
+        appData.vocabList.forEach((pair, index) => {
+          cards.push({ text: pair.english, matchId: index, lang: "eng" });
+          cards.push({ text: pair.farsi, matchId: index, lang: "fa" });
+        });
+
+        // Shuffle cards
+        cards.sort(() => Math.random() - 0.5);
+
+        // Render cards
+        cards.forEach((cardData) => {
+          const cardEl = document.createElement("div");
+          cardEl.classList.add("card", "hidden");
+          cardEl.innerText = cardData.text;
+          cardEl.dataset.matchId = cardData.matchId;
+
+          cardEl.addEventListener("click", () => flipCard(cardEl));
+          grid.appendChild(cardEl);
+        });
+      }
+
+      function flipCard(card) {
+        if (
+          lockBoard ||
+          card === firstCard ||
+          card.classList.contains("matched")
+        )
+          return;
+
+        card.classList.remove("hidden");
+
+        if (!firstCard) {
+          firstCard = card;
+          return;
+        }
+
+        secondCard = card;
+        checkForMatch();
+      }
+
+      function checkForMatch() {
+        let isMatch = firstCard.dataset.matchId === secondCard.dataset.matchId;
+
+        if (isMatch) {
+          firstCard.classList.add("matched");
+          secondCard.classList.add("matched");
+          matchedPairs++;
+          resetBoard();
+
+          if (matchedPairs === appData.vocabList.length) {
+            document.getElementById("vocab-instructions").innerText =
+              "Excellent job! You found all matches.";
+            // Here is where you would trigger your API call to send results and fetch new vocab!
+          }
+        } else {
+          lockBoard = true;
+          setTimeout(() => {
+            firstCard.classList.add("hidden");
+            secondCard.classList.add("hidden");
+            resetBoard();
+          }, 1200); // Give him a bit over a second to memorize
+        }
+      }
+
+      function resetBoard() {
+        [firstCard, secondCard] = [null, null];
+        lockBoard = false;
+      }
+
+      /* =========================================
+       GAME 2: PATTERN RECALL LOGIC
+       ========================================= */
+      let sequence = [];
+      let playerSequence = [];
+      let level = 0;
+      let isPlayerTurn = false;
+      let patternTimeout;
+      const buttons = [
+        document.getElementById("btn-red"),
+        document.getElementById("btn-blue"),
+        document.getElementById("btn-green"),
+        document.getElementById("btn-yellow"),
+      ];
+
+      function startPatternRecall() {
+        showScreen("pattern-screen");
+        sequence = [];
+        level = 0;
+        document.getElementById("pattern-status").innerText = "Get Ready...";
+        setTimeout(nextLevel, 1000);
+      }
+
+      function nextLevel() {
+        playerSequence = [];
+        level++;
+        document.getElementById("pattern-status").innerText =
+          `Level ${level}: Watch...`;
+        isPlayerTurn = false;
+
+        // Add a new random button to sequence (0 to 3)
+        sequence.push(Math.floor(Math.random() * 4));
+
+        playSequence();
+      }
+
+      function playSequence() {
+        let delay = 0;
+        sequence.forEach((btnIndex, i) => {
+          patternTimeout = setTimeout(() => {
+            flashButton(btnIndex);
+          }, delay);
+          // Slow down the flash sequence to be senior-friendly
+          delay += 800;
+        });
+
+        patternTimeout = setTimeout(() => {
+          document.getElementById("pattern-status").innerText = "Your Turn!";
+          isPlayerTurn = true;
+        }, delay);
+      }
+
+      function flashButton(index) {
+        const btn = buttons[index];
+        btn.classList.add("active-flash");
+        setTimeout(() => {
+          btn.classList.remove("active-flash");
+        }, 400); // 400ms flash duration
+      }
+
+      function handlePatternInput(index) {
+        if (!isPlayerTurn) return;
+
+        flashButton(index);
+        playerSequence.push(index);
+
+        const currentMove = playerSequence.length - 1;
+
+        if (playerSequence[currentMove] !== sequence[currentMove]) {
+          // Wrong move
+          document.getElementById("pattern-status").innerText =
+            `Game Over! You reached Level ${level}.`;
+          isPlayerTurn = false;
+          // Here you could send the 'level' reached to your API
+          return;
+        }
+
+        if (playerSequence.length === sequence.length) {
+          // Completed the sequence successfully
+          isPlayerTurn = false;
+          document.getElementById("pattern-status").innerText = "Correct!";
+          setTimeout(nextLevel, 1000);
+        }
+      }
+    </script>
+  </body>
+</html>
