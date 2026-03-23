@@ -6,7 +6,28 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Brain Boost</title>
+    <title>Hāfeza · حافظه — Persian Memory Game</title>
+    <meta name="description" content="Hāfeza (حافظه) — a brain training game blending Farsi and English vocabulary with classic Persian spirit. Match words, remember patterns, and sharpen your mind." />
+    <meta name="keywords" content="Farsi, Persian, memory game, brain training, vocabulary, English Farsi, Iran, حافظه, language learning" />
+    <meta name="author" content="AI Matrx" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hāfeza · حافظه — Persian Memory Game" />
+    <meta property="og:description" content="A brain training game with Farsi & English word pairs, inspired by the great Persian poet Hafez. Train your memory with the wisdom of Persia." />
+    <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/3/30/Court_of_Gayumars_Persian_miniature.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="900" />
+    <meta property="og:image:alt" content="Court of Gayumars — Persian Shahnameh miniature painting, 16th century" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hāfeza · حافظه — Persian Memory Game" />
+    <meta name="twitter:description" content="A brain training game with Farsi & English word pairs, inspired by the great Persian poet Hafez. Train your memory with the wisdom of Persia." />
+    <meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/3/30/Court_of_Gayumars_Persian_miniature.jpg" />
+    <meta name="twitter:image:alt" content="Court of Gayumars — Persian Shahnameh miniature painting, 16th century" />
     <style>
       :root {
         --primary: #4a90e2;
@@ -396,8 +417,9 @@
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
         padding: 6px 10px 10px;
-        overflow-y: auto;
+        overflow: hidden;
         flex: 1;
+        align-content: stretch;
       }
 
       .card {
@@ -411,14 +433,14 @@
         font-weight: 700;
         cursor: pointer;
         text-align: center;
-        padding: 12px 8px;
+        padding: 8px 6px;
         transition:
           background-color 0.25s,
           color 0.25s,
           border-color 0.25s,
           transform 0.1s;
-        min-height: 80px;
-        line-height: 1.25;
+        min-height: 52px;
+        line-height: 1.2;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
         word-break: break-word;
       }
@@ -776,7 +798,7 @@
   <body>
     <div id="app-container">
       <header>
-        <div class="title">🧠 Brain Boost</div>
+        <div class="title">🧠 Hāfeza · حافظه</div>
         <div class="score-area">
           <div class="score-badge">
             <span class="icon">⭐</span>
@@ -1343,17 +1365,21 @@
         });
         cards = fisherYates(cards);
 
-        // Dynamic card sizing: make cards fill the visible area
+        // Dynamic card sizing: make cards fill the visible area without scrolling
         const pairCount = currentBatchWords.length;
         const cardCount = pairCount * 2;
         // 2 columns, so rows = ceil(cardCount/2)
         const rows = Math.ceil(cardCount / 2);
-        const availH = window.innerHeight - 230; // rough header/bar height
+        // Measure actual available height from the grid element's parent
+        const gameContent = document.querySelector('#vocab-screen .game-content');
+        const availH = gameContent ? gameContent.clientHeight : (window.innerHeight - 230);
+        const gap = 8;
+        const gridPadV = 16; // top + bottom padding of #card-grid
         const cardH = Math.max(
-          75,
-          Math.floor((availH - (rows - 1) * 8 - 12) / rows),
+          52,
+          Math.floor((availH - gridPadV - (rows - 1) * gap) / rows),
         );
-        const fontSize = cardH < 90 ? "1.1rem" : "1.3rem";
+        const fontSize = cardH < 65 ? "0.95rem" : cardH < 85 ? "1.1rem" : "1.3rem";
 
         cards.forEach((cd) => {
           const el = document.createElement("div");
@@ -1361,6 +1387,7 @@
           el.textContent = cd.text;
           el.dataset.matchId = cd.matchId;
           el.style.minHeight = `${cardH}px`;
+          el.style.height = `${cardH}px`;
           el.style.fontSize = fontSize;
           el.addEventListener("click", () => flipVocabCard(el));
           grid.appendChild(el);
