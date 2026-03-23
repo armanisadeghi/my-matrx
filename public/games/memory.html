@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Brain Boost</title>
     <style>
       :root {
@@ -27,12 +30,14 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         -webkit-tap-highlight-color: transparent;
         user-select: none;
       }
 
-      html, body {
+      html,
+      body {
         width: 100%;
         height: 100%;
         overflow: hidden;
@@ -57,13 +62,17 @@
 
       /* ---- HEADER ---- */
       header {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
         color: white;
         padding: 14px 12px 10px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
         z-index: 10;
         flex-shrink: 0;
       }
@@ -81,7 +90,7 @@
       }
 
       .score-badge {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255, 255, 255, 0.2);
         border-radius: 20px;
         padding: 6px 14px;
         font-size: 1.1rem;
@@ -91,7 +100,9 @@
         gap: 4px;
       }
 
-      .score-badge .icon { font-size: 1.1rem; }
+      .score-badge .icon {
+        font-size: 1.1rem;
+      }
 
       /* ---- SCREENS ---- */
       .screen {
@@ -135,7 +146,7 @@
         margin-bottom: 16px;
         display: flex;
         justify-content: space-around;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
       }
 
       .stat-item {
@@ -181,25 +192,45 @@
         transition: all 0.15s;
         background: white;
         color: var(--text-muted);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.07);
       }
 
-      .diff-btn.easy   { border-color: #d5e8d4; }
-      .diff-btn.medium { border-color: #ffe6cc; }
-      .diff-btn.hard   { border-color: #f8cecc; }
+      .diff-btn.easy {
+        border-color: #d5e8d4;
+      }
+      .diff-btn.medium {
+        border-color: #ffe6cc;
+      }
+      .diff-btn.hard {
+        border-color: #f8cecc;
+      }
 
-      .diff-btn.selected.easy   { background: #2ecc71; color: white; border-color: #2ecc71; }
-      .diff-btn.selected.medium { background: #f39c12; color: white; border-color: #f39c12; }
-      .diff-btn.selected.hard   { background: #e74c3c; color: white; border-color: #e74c3c; }
+      .diff-btn.selected.easy {
+        background: #2ecc71;
+        color: white;
+        border-color: #2ecc71;
+      }
+      .diff-btn.selected.medium {
+        background: #f39c12;
+        color: white;
+        border-color: #f39c12;
+      }
+      .diff-btn.selected.hard {
+        background: #e74c3c;
+        color: white;
+        border-color: #e74c3c;
+      }
 
       .game-card {
         background: white;
         border-radius: 18px;
         padding: 22px 16px;
         margin-bottom: 14px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.09);
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.09);
         cursor: pointer;
-        transition: transform 0.12s, box-shadow 0.12s;
+        transition:
+          transform 0.12s,
+          box-shadow 0.12s;
         display: flex;
         align-items: center;
         gap: 14px;
@@ -207,7 +238,7 @@
 
       .game-card:active {
         transform: scale(0.98);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       }
 
       .game-icon {
@@ -221,8 +252,12 @@
         flex-shrink: 0;
       }
 
-      .game-icon.vocab   { background: #e8f4fd; }
-      .game-icon.pattern { background: #fef9e7; }
+      .game-icon.vocab {
+        background: #e8f4fd;
+      }
+      .game-icon.pattern {
+        background: #fef9e7;
+      }
 
       .game-info h3 {
         font-size: 1.3rem;
@@ -249,7 +284,7 @@
         align-items: center;
         gap: 10px;
         flex-shrink: 0;
-        border-bottom: 1px solid rgba(0,0,0,0.06);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         background: white;
       }
 
@@ -353,7 +388,7 @@
         font-size: 0.92rem;
         font-weight: 600;
         color: var(--mid);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
       }
 
       #card-grid {
@@ -377,26 +412,36 @@
         cursor: pointer;
         text-align: center;
         padding: 12px 8px;
-        transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.1s;
+        transition:
+          background-color 0.25s,
+          color 0.25s,
+          border-color 0.25s,
+          transform 0.1s;
         min-height: 80px;
         line-height: 1.25;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
         word-break: break-word;
       }
 
-      .card:active { transform: scale(0.96); }
+      .card:active {
+        transform: scale(0.96);
+      }
 
       .card.hidden {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--primary-dark) 100%
+        );
         border-color: var(--primary-dark);
         color: transparent;
-        box-shadow: 0 3px 8px rgba(74,144,226,0.3);
+        box-shadow: 0 3px 8px rgba(74, 144, 226, 0.3);
       }
 
       .card.selected {
         border-color: var(--warning);
         background: #fffbf0;
-        box-shadow: 0 0 0 3px rgba(243,156,18,0.3);
+        box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.3);
       }
 
       .card.matched {
@@ -404,7 +449,7 @@
         border-color: #27ae60;
         color: white;
         pointer-events: none;
-        box-shadow: 0 3px 8px rgba(46,204,113,0.35);
+        box-shadow: 0 3px 8px rgba(46, 204, 113, 0.35);
       }
 
       .card.wrong-flash {
@@ -414,24 +459,39 @@
       }
 
       @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
       }
 
       @keyframes pop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.12); }
-        100% { transform: scale(1); }
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.12);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
-      .pop-anim { animation: pop 0.25s ease; }
+      .pop-anim {
+        animation: pop 0.25s ease;
+      }
 
       /* Batch complete overlay */
       .batch-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(26,35,50,0.85);
+        background: rgba(26, 35, 50, 0.85);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -441,7 +501,9 @@
         padding: 20px;
       }
 
-      .batch-overlay.hidden { display: none; }
+      .batch-overlay.hidden {
+        display: none;
+      }
 
       .overlay-card {
         background: white;
@@ -450,7 +512,7 @@
         width: 100%;
         max-width: 340px;
         text-align: center;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       }
 
       .overlay-emoji {
@@ -483,17 +545,39 @@
         font-weight: 700;
         cursor: pointer;
         margin-bottom: 10px;
-        transition: transform 0.1s, opacity 0.1s;
+        transition:
+          transform 0.1s,
+          opacity 0.1s;
       }
 
-      .overlay-btn:active { transform: scale(0.97); opacity: 0.9; }
-      .overlay-btn:last-child { margin-bottom: 0; }
+      .overlay-btn:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+      }
+      .overlay-btn:last-child {
+        margin-bottom: 0;
+      }
 
-      .overlay-btn.primary   { background: var(--primary); color: white; }
-      .overlay-btn.success   { background: var(--success); color: white; }
-      .overlay-btn.danger    { background: var(--danger); color: white; }
-      .overlay-btn.secondary { background: var(--light); color: var(--mid); }
-      .overlay-btn.warning   { background: var(--warning); color: white; }
+      .overlay-btn.primary {
+        background: var(--primary);
+        color: white;
+      }
+      .overlay-btn.success {
+        background: var(--success);
+        color: white;
+      }
+      .overlay-btn.danger {
+        background: var(--danger);
+        color: white;
+      }
+      .overlay-btn.secondary {
+        background: var(--light);
+        color: var(--mid);
+      }
+      .overlay-btn.warning {
+        background: var(--warning);
+        color: white;
+      }
 
       /* ---- PATTERN GAME ---- */
       #pattern-screen .game-content {
@@ -514,10 +598,18 @@
         transition: color 0.2s;
       }
 
-      #pattern-status.watching { color: var(--primary); }
-      #pattern-status.your-turn { color: var(--success); }
-      #pattern-status.game-over { color: var(--danger); }
-      #pattern-status.correct   { color: var(--success); }
+      #pattern-status.watching {
+        color: var(--primary);
+      }
+      #pattern-status.your-turn {
+        color: var(--success);
+      }
+      #pattern-status.game-over {
+        color: var(--danger);
+      }
+      #pattern-status.correct {
+        color: var(--success);
+      }
 
       .streak-display {
         display: flex;
@@ -552,20 +644,25 @@
         border: none;
         opacity: 0.55;
         cursor: pointer;
-        transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+        transition:
+          opacity 0.15s,
+          transform 0.1s,
+          box-shadow 0.15s;
         min-height: 100px;
         font-size: 1.7rem;
-        color: rgba(255,255,255,0.8);
+        color: rgba(255, 255, 255, 0.8);
         font-weight: 700;
-        text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
 
-      .pattern-btn:active { transform: scale(0.95); }
+      .pattern-btn:active {
+        transform: scale(0.95);
+      }
 
       .pattern-btn.active-flash {
         opacity: 1;
         transform: scale(1.07);
-        box-shadow: 0 0 28px rgba(0,0,0,0.35);
+        box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
       }
 
       .pattern-btn.user-press {
@@ -573,10 +670,18 @@
         transform: scale(0.95);
       }
 
-      #btn-red    { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-      #btn-blue   { background: linear-gradient(135deg, #3498db, #2980b9); }
-      #btn-green  { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-      #btn-yellow { background: linear-gradient(135deg, #f1c40f, #d4ac0d); }
+      #btn-red {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+      }
+      #btn-blue {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+      }
+      #btn-green {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+      }
+      #btn-yellow {
+        background: linear-gradient(135deg, #f1c40f, #d4ac0d);
+      }
 
       .pattern-action-row {
         display: flex;
@@ -592,26 +697,52 @@
         font-size: 1.05rem;
         font-weight: 700;
         cursor: pointer;
-        transition: transform 0.1s, opacity 0.1s;
+        transition:
+          transform 0.1s,
+          opacity 0.1s;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 6px;
       }
 
-      .action-btn:active { transform: scale(0.96); opacity: 0.85; }
+      .action-btn:active {
+        transform: scale(0.96);
+        opacity: 0.85;
+      }
 
-      .action-btn.reset   { background: var(--mid); color: white; }
-      .action-btn.hint    { background: var(--warning); color: white; }
-      .action-btn.back    { background: var(--light); color: var(--mid); }
+      .action-btn.reset {
+        background: var(--mid);
+        color: white;
+      }
+      .action-btn.hint {
+        background: var(--warning);
+        color: white;
+      }
+      .action-btn.back {
+        background: var(--light);
+        color: var(--mid);
+      }
 
-      .action-btn:disabled { opacity: 0.35; pointer-events: none; }
+      .action-btn:disabled {
+        opacity: 0.35;
+        pointer-events: none;
+      }
 
       /* ---- SCORE PULSE ---- */
       @keyframes scorePop {
-        0%   { opacity: 1; transform: translateY(0) scale(1); }
-        60%  { opacity: 1; transform: translateY(-30px) scale(1.2); }
-        100% { opacity: 0; transform: translateY(-50px) scale(0.9); }
+        0% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        60% {
+          opacity: 1;
+          transform: translateY(-30px) scale(1.2);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-50px) scale(0.9);
+        }
       }
 
       .score-popup {
@@ -621,12 +752,16 @@
         pointer-events: none;
         animation: scorePop 0.8s ease forwards;
         z-index: 999;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       /* ---- LEVEL BADGE ---- */
       .level-badge {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        background: linear-gradient(
+          135deg,
+          var(--primary),
+          var(--primary-dark)
+        );
         color: white;
         border-radius: 20px;
         padding: 5px 14px;
@@ -640,7 +775,6 @@
   </head>
   <body>
     <div id="app-container">
-
       <header>
         <div class="title">🧠 Brain Boost</div>
         <div class="score-area">
@@ -653,12 +787,7 @@
 
       <!-- ============ HOME SCREEN ============ -->
       <div id="home-screen" class="screen active">
-        <div style="padding: 14px 12px; overflow-y: auto; flex: 1;">
-          <div class="home-welcome">
-            <h2>Choose a Game</h2>
-            <p>Train your brain, earn points!</p>
-          </div>
-
+        <div style="padding: 14px 12px; overflow-y: auto; flex: 1">
           <div class="session-stats">
             <div class="stat-item">
               <div class="stat-value" id="stat-total">0</div>
@@ -680,9 +809,24 @@
 
           <div class="section-label">Difficulty</div>
           <div class="difficulty-row">
-            <button class="diff-btn easy selected" onclick="selectDifficulty('easy', this)">🟢 Easy</button>
-            <button class="diff-btn medium" onclick="selectDifficulty('medium', this)">🟡 Medium</button>
-            <button class="diff-btn hard" onclick="selectDifficulty('hard', this)">🔴 Hard</button>
+            <button
+              class="diff-btn easy selected"
+              onclick="selectDifficulty('easy', this)"
+            >
+              🟢 Easy
+            </button>
+            <button
+              class="diff-btn medium"
+              onclick="selectDifficulty('medium', this)"
+            >
+              🟡 Medium
+            </button>
+            <button
+              class="diff-btn hard"
+              onclick="selectDifficulty('hard', this)"
+            >
+              🔴 Hard
+            </button>
           </div>
 
           <div class="section-label">Pick a Game</div>
@@ -711,7 +855,9 @@
           <button class="back-icon-btn" onclick="goHome()">‹</button>
           <div class="topbar-info">
             <div class="topbar-title">Word Match</div>
-            <div class="topbar-subtitle" id="vocab-topbar-sub">Batch 1 · Easy</div>
+            <div class="topbar-subtitle" id="vocab-topbar-sub">
+              Batch 1 · Easy
+            </div>
           </div>
           <div class="topbar-score">
             <div class="pts" id="vocab-score-display">0</div>
@@ -737,9 +883,19 @@
           <div class="overlay-card">
             <span class="overlay-emoji" id="overlay-emoji">🎉</span>
             <div class="overlay-title" id="overlay-title">Batch Complete!</div>
-            <div class="overlay-subtitle" id="overlay-subtitle">Great job matching all pairs.</div>
-            <button class="overlay-btn success" id="overlay-next-btn" onclick="startNextBatch()">Next Batch →</button>
-            <button class="overlay-btn secondary" onclick="goHome()">Back to Menu</button>
+            <div class="overlay-subtitle" id="overlay-subtitle">
+              Great job matching all pairs.
+            </div>
+            <button
+              class="overlay-btn success"
+              id="overlay-next-btn"
+              onclick="startNextBatch()"
+            >
+              Next Batch →
+            </button>
+            <button class="overlay-btn secondary" onclick="goHome()">
+              Back to Menu
+            </button>
           </div>
         </div>
       </div>
@@ -762,7 +918,10 @@
             <div class="progress-fill" id="pattern-progress-fill"></div>
           </div>
         </div>
-        <div class="game-content" style="padding: 10px 12px; gap: 10px; justify-content: space-between;">
+        <div
+          class="game-content"
+          style="padding: 10px 12px; gap: 10px; justify-content: space-between"
+        >
           <div id="pattern-status-area">
             <div id="pattern-status" class="watching">Get Ready...</div>
             <div class="streak-display">
@@ -772,17 +931,48 @@
           </div>
 
           <div id="pattern-grid">
-            <button class="pattern-btn" id="btn-red"    onclick="handlePatternInput(0)">●</button>
-            <button class="pattern-btn" id="btn-blue"   onclick="handlePatternInput(1)">●</button>
-            <button class="pattern-btn" id="btn-green"  onclick="handlePatternInput(2)">●</button>
-            <button class="pattern-btn" id="btn-yellow" onclick="handlePatternInput(3)">●</button>
+            <button
+              class="pattern-btn"
+              id="btn-red"
+              onclick="handlePatternInput(0)"
+            >
+              ●
+            </button>
+            <button
+              class="pattern-btn"
+              id="btn-blue"
+              onclick="handlePatternInput(1)"
+            >
+              ●
+            </button>
+            <button
+              class="pattern-btn"
+              id="btn-green"
+              onclick="handlePatternInput(2)"
+            >
+              ●
+            </button>
+            <button
+              class="pattern-btn"
+              id="btn-yellow"
+              onclick="handlePatternInput(3)"
+            >
+              ●
+            </button>
           </div>
 
           <div class="pattern-action-row">
-            <button class="action-btn hint" id="hint-btn" onclick="replayHint()" disabled>
+            <button
+              class="action-btn hint"
+              id="hint-btn"
+              onclick="replayHint()"
+              disabled
+            >
               👁 Replay <span id="hint-cost-label">(-50 pts)</span>
             </button>
-            <button class="action-btn reset" onclick="resetPattern()">↺ Reset</button>
+            <button class="action-btn reset" onclick="resetPattern()">
+              ↺ Reset
+            </button>
             <button class="action-btn back" onclick="goHome()">‹ Menu</button>
           </div>
         </div>
@@ -791,23 +981,43 @@
         <div class="batch-overlay hidden" id="pattern-overlay">
           <div class="overlay-card">
             <span class="overlay-emoji" id="pattern-overlay-emoji">💥</span>
-            <div class="overlay-title" id="pattern-overlay-title">Game Over!</div>
-            <div class="overlay-subtitle" id="pattern-overlay-subtitle">You reached Level 1.</div>
-            <button class="overlay-btn warning" id="pattern-replay-btn" onclick="replayFromOverlay()">👁 Replay Pattern (-50 pts)</button>
-            <button class="overlay-btn primary"  onclick="resetPattern(); hidePatternOverlay()">↺ Try Again</button>
-            <button class="overlay-btn secondary" onclick="goHome()">Back to Menu</button>
+            <div class="overlay-title" id="pattern-overlay-title">
+              Game Over!
+            </div>
+            <div class="overlay-subtitle" id="pattern-overlay-subtitle">
+              You reached Level 1.
+            </div>
+            <button
+              class="overlay-btn warning"
+              id="pattern-replay-btn"
+              onclick="replayFromOverlay()"
+            >
+              👁 Replay Pattern (-50 pts)
+            </button>
+            <button
+              class="overlay-btn primary"
+              onclick="
+                resetPattern();
+                hidePatternOverlay();
+              "
+            >
+              ↺ Try Again
+            </button>
+            <button class="overlay-btn secondary" onclick="goHome()">
+              Back to Menu
+            </button>
           </div>
         </div>
       </div>
-
-    </div><!-- /app-container -->
+    </div>
+    <!-- /app-container -->
 
     <script>
       /* =============================================
          GLOBAL STATE
          ============================================= */
       const state = {
-        difficulty: 'easy',
+        difficulty: "easy",
         totalScore: 0,
         batchesCompleted: 0,
         bestStreak: 0,
@@ -829,58 +1039,106 @@
          ============================================= */
       const VOCAB = {
         easy: [
-          { en: "Apple", fa: "سیب" }, { en: "Water", fa: "آب" },
-          { en: "Book", fa: "کتاب" }, { en: "House", fa: "خانه" },
-          { en: "Sun", fa: "خورشید" }, { en: "Moon", fa: "ماه" },
-          { en: "Tree", fa: "درخت" }, { en: "Friend", fa: "دوست" },
-          { en: "City", fa: "شهر" }, { en: "Road", fa: "جاده" },
-          { en: "School", fa: "مدرسه" }, { en: "Bread", fa: "نان" },
-          { en: "Mother", fa: "مادر" }, { en: "Father", fa: "پدر" },
-          { en: "Hand", fa: "دست" }, { en: "Eye", fa: "چشم" },
-          { en: "Window", fa: "پنجره" }, { en: "Night", fa: "شب" },
-          { en: "Day", fa: "روز" }, { en: "Big", fa: "بزرگ" },
-          { en: "Small", fa: "کوچک" }, { en: "Happy", fa: "خوشحال" },
-          { en: "Sad", fa: "غمگین" }, { en: "New", fa: "جدید" },
-          { en: "Old", fa: "قدیمی" }, { en: "To see", fa: "دیدن" },
-          { en: "To go", fa: "رفتن" }, { en: "To eat", fa: "خوردن" },
-          { en: "To sleep", fa: "خوابیدن" }, { en: "Mountain", fa: "کوه" },
-          { en: "Sea", fa: "دریا" }, { en: "Star", fa: "ستاره" },
-          { en: "Bird", fa: "پرنده" }, { en: "Flower", fa: "گل" },
-          { en: "Milk", fa: "شیر" }, { en: "Chair", fa: "صندلی" },
-          { en: "Table", fa: "میز" }, { en: "Door", fa: "در" },
-          { en: "Key", fa: "کلید" }, { en: "Fire", fa: "آتش" },
+          { en: "Apple", fa: "سیب" },
+          { en: "Water", fa: "آب" },
+          { en: "Book", fa: "کتاب" },
+          { en: "House", fa: "خانه" },
+          { en: "Sun", fa: "خورشید" },
+          { en: "Moon", fa: "ماه" },
+          { en: "Tree", fa: "درخت" },
+          { en: "Friend", fa: "دوست" },
+          { en: "City", fa: "شهر" },
+          { en: "Road", fa: "جاده" },
+          { en: "School", fa: "مدرسه" },
+          { en: "Bread", fa: "نان" },
+          { en: "Mother", fa: "مادر" },
+          { en: "Father", fa: "پدر" },
+          { en: "Hand", fa: "دست" },
+          { en: "Eye", fa: "چشم" },
+          { en: "Window", fa: "پنجره" },
+          { en: "Night", fa: "شب" },
+          { en: "Day", fa: "روز" },
+          { en: "Big", fa: "بزرگ" },
+          { en: "Small", fa: "کوچک" },
+          { en: "Happy", fa: "خوشحال" },
+          { en: "Sad", fa: "غمگین" },
+          { en: "New", fa: "جدید" },
+          { en: "Old", fa: "قدیمی" },
+          { en: "To see", fa: "دیدن" },
+          { en: "To go", fa: "رفتن" },
+          { en: "To eat", fa: "خوردن" },
+          { en: "To sleep", fa: "خوابیدن" },
+          { en: "Mountain", fa: "کوه" },
+          { en: "Sea", fa: "دریا" },
+          { en: "Star", fa: "ستاره" },
+          { en: "Bird", fa: "پرنده" },
+          { en: "Flower", fa: "گل" },
+          { en: "Milk", fa: "شیر" },
+          { en: "Chair", fa: "صندلی" },
+          { en: "Table", fa: "میز" },
+          { en: "Door", fa: "در" },
+          { en: "Key", fa: "کلید" },
+          { en: "Fire", fa: "آتش" },
         ],
         medium: [
-          { en: "Experience", fa: "تجربه" }, { en: "Knowledge", fa: "دانش" },
-          { en: "Success", fa: "موفقیت" }, { en: "Freedom", fa: "آزادی" },
-          { en: "Health", fa: "سلامتی" }, { en: "Dangerous", fa: "خطرناک" },
-          { en: "Safe", fa: "امن" }, { en: "Future", fa: "آینده" },
-          { en: "Past", fa: "گذشته" }, { en: "To believe", fa: "باور کردن" },
-          { en: "To understand", fa: "فهمیدن" }, { en: "To remember", fa: "به یاد آوردن" },
-          { en: "Necessary", fa: "لازم" }, { en: "Possible", fa: "ممکن" },
-          { en: "Impossible", fa: "غیرممکن" }, { en: "History", fa: "تاریخ" },
-          { en: "Culture", fa: "فرهنگ" }, { en: "Society", fa: "جامعه" },
-          { en: "Government", fa: "دولت" }, { en: "Beautiful", fa: "زیبا" },
-          { en: "Difficult", fa: "سخت" }, { en: "Easy", fa: "آسان" },
-          { en: "Famous", fa: "مشهور" }, { en: "Interesting", fa: "جالب" },
-          { en: "Weather", fa: "آب و هوا" }, { en: "Journey", fa: "سفر" },
-          { en: "Dream", fa: "رویا" }, { en: "Truth", fa: "حقیقت" },
-          { en: "Choice", fa: "انتخاب" }, { en: "Peace", fa: "صلح" },
+          { en: "Experience", fa: "تجربه" },
+          { en: "Knowledge", fa: "دانش" },
+          { en: "Success", fa: "موفقیت" },
+          { en: "Freedom", fa: "آزادی" },
+          { en: "Health", fa: "سلامتی" },
+          { en: "Dangerous", fa: "خطرناک" },
+          { en: "Safe", fa: "امن" },
+          { en: "Future", fa: "آینده" },
+          { en: "Past", fa: "گذشته" },
+          { en: "To believe", fa: "باور کردن" },
+          { en: "To understand", fa: "فهمیدن" },
+          { en: "To remember", fa: "به یاد آوردن" },
+          { en: "Necessary", fa: "لازم" },
+          { en: "Possible", fa: "ممکن" },
+          { en: "Impossible", fa: "غیرممکن" },
+          { en: "History", fa: "تاریخ" },
+          { en: "Culture", fa: "فرهنگ" },
+          { en: "Society", fa: "جامعه" },
+          { en: "Government", fa: "دولت" },
+          { en: "Beautiful", fa: "زیبا" },
+          { en: "Difficult", fa: "سخت" },
+          { en: "Easy", fa: "آسان" },
+          { en: "Famous", fa: "مشهور" },
+          { en: "Interesting", fa: "جالب" },
+          { en: "Weather", fa: "آب و هوا" },
+          { en: "Journey", fa: "سفر" },
+          { en: "Dream", fa: "رویا" },
+          { en: "Truth", fa: "حقیقت" },
+          { en: "Choice", fa: "انتخاب" },
+          { en: "Peace", fa: "صلح" },
         ],
         hard: [
-          { en: "Justice", fa: "عدالت" }, { en: "Conscience", fa: "وجدان" },
-          { en: "Perspective", fa: "دیدگاه" }, { en: "Philosophy", fa: "فلسفه" },
-          { en: "Analysis", fa: "تجزیه و تحلیل" }, { en: "Hypothesis", fa: "فرضیه" },
-          { en: "Sustainability", fa: "پایداری" }, { en: "Complexity", fa: "پیچیدگی" },
-          { en: "Innovation", fa: "نوآوری" }, { en: "Structure", fa: "ساختار" },
-          { en: "Development", fa: "توسعه" }, { en: "Investment", fa: "سرمایه گذاری" },
-          { en: "Strategy", fa: "استراتژی" }, { en: "Diversity", fa: "تنوع" },
-          { en: "Negotiation", fa: "مذاکره" }, { en: "Authority", fa: "اقتدار" },
-          { en: "Democracy", fa: "مردمسالاری" }, { en: "Psychology", fa: "روانشناسی" },
-          { en: "Intelligence", fa: "هوش" }, { en: "Artificial", fa: "مصنوعی" },
-          { en: "Universe", fa: "جهان هستی" }, { en: "Paradox", fa: "تناقض" },
-          { en: "Obligation", fa: "تعهد" }, { en: "Equality", fa: "برابری" },
-          { en: "Ethical", fa: "اخلاقی" }, { en: "Dimension", fa: "بعد" },
+          { en: "Justice", fa: "عدالت" },
+          { en: "Conscience", fa: "وجدان" },
+          { en: "Perspective", fa: "دیدگاه" },
+          { en: "Philosophy", fa: "فلسفه" },
+          { en: "Analysis", fa: "تجزیه و تحلیل" },
+          { en: "Hypothesis", fa: "فرضیه" },
+          { en: "Sustainability", fa: "پایداری" },
+          { en: "Complexity", fa: "پیچیدگی" },
+          { en: "Innovation", fa: "نوآوری" },
+          { en: "Structure", fa: "ساختار" },
+          { en: "Development", fa: "توسعه" },
+          { en: "Investment", fa: "سرمایه گذاری" },
+          { en: "Strategy", fa: "استراتژی" },
+          { en: "Diversity", fa: "تنوع" },
+          { en: "Negotiation", fa: "مذاکره" },
+          { en: "Authority", fa: "اقتدار" },
+          { en: "Democracy", fa: "مردمسالاری" },
+          { en: "Psychology", fa: "روانشناسی" },
+          { en: "Intelligence", fa: "هوش" },
+          { en: "Artificial", fa: "مصنوعی" },
+          { en: "Universe", fa: "جهان هستی" },
+          { en: "Paradox", fa: "تناقض" },
+          { en: "Obligation", fa: "تعهد" },
+          { en: "Equality", fa: "برابری" },
+          { en: "Ethical", fa: "اخلاقی" },
+          { en: "Dimension", fa: "بعد" },
         ],
       };
 
@@ -904,9 +1162,9 @@
       }
 
       // Shuffle all three lists immediately on page load so first game is always random
-      rebuildShuffledVocab('easy');
-      rebuildShuffledVocab('medium');
-      rebuildShuffledVocab('hard');
+      rebuildShuffledVocab("easy");
+      rebuildShuffledVocab("medium");
+      rebuildShuffledVocab("hard");
 
       const BATCH_SIZES = { easy: 4, medium: 5, hard: 6 };
       const POINTS = {
@@ -923,11 +1181,12 @@
          ============================================= */
       let audioCtx;
       function getAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (!audioCtx)
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         return audioCtx;
       }
 
-      function playTone(freq, duration = 0.15, type = 'sine', vol = 0.18) {
+      function playTone(freq, duration = 0.15, type = "sine", vol = 0.18) {
         try {
           const ctx = getAudio();
           const osc = ctx.createOscillator();
@@ -937,48 +1196,67 @@
           osc.frequency.value = freq;
           osc.type = type;
           gain.gain.setValueAtTime(vol, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+          gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            ctx.currentTime + duration,
+          );
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + duration);
-        } catch(e) {}
+        } catch (e) {}
       }
 
-      function playMatch()   { playTone(523, 0.12); setTimeout(() => playTone(659, 0.12), 100); }
-      function playMiss()    { playTone(220, 0.2, 'sawtooth', 0.12); }
-      function playWin()     { [523,659,784,1047].forEach((f,i) => setTimeout(() => playTone(f, 0.15), i*80)); }
+      function playMatch() {
+        playTone(523, 0.12);
+        setTimeout(() => playTone(659, 0.12), 100);
+      }
+      function playMiss() {
+        playTone(220, 0.2, "sawtooth", 0.12);
+      }
+      function playWin() {
+        [523, 659, 784, 1047].forEach((f, i) =>
+          setTimeout(() => playTone(f, 0.15), i * 80),
+        );
+      }
       function playPattern(idx) {
         const freqs = [330, 415, 523, 622];
-        playTone(freqs[idx], 0.35, 'sine', 0.22);
+        playTone(freqs[idx], 0.35, "sine", 0.22);
       }
 
       /* =============================================
          NAVIGATION
          ============================================= */
       function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
       }
 
       function goHome() {
         clearAllPatternTimeouts();
         isPlayerTurn = false;
         hidePatternOverlay();
-        showScreen('home-screen');
+        showScreen("home-screen");
         updateHomeStats();
       }
 
       function updateHomeStats() {
-        document.getElementById('stat-total').textContent = state.totalScore;
-        document.getElementById('stat-batches').textContent = state.batchesCompleted;
-        document.getElementById('stat-streak').textContent = state.bestStreak;
-        document.getElementById('stat-level').textContent = state.bestPatternLevel;
-        document.getElementById('total-score-display').textContent = state.totalScore;
+        document.getElementById("stat-total").textContent = state.totalScore;
+        document.getElementById("stat-batches").textContent =
+          state.batchesCompleted;
+        document.getElementById("stat-streak").textContent = state.bestStreak;
+        document.getElementById("stat-level").textContent =
+          state.bestPatternLevel;
+        document.getElementById("total-score-display").textContent =
+          state.totalScore;
       }
 
       function selectDifficulty(diff, btn) {
         state.difficulty = diff;
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+        document
+          .querySelectorAll(".diff-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        btn.classList.add("selected");
       }
 
       /* =============================================
@@ -986,10 +1264,10 @@
          ============================================= */
       function showScorePopup(points, el) {
         const rect = el.getBoundingClientRect();
-        const popup = document.createElement('div');
-        popup.className = 'score-popup';
+        const popup = document.createElement("div");
+        popup.className = "score-popup";
         popup.textContent = points > 0 ? `+${points}` : `${points}`;
-        popup.style.color = points > 0 ? '#2ecc71' : '#e74c3c';
+        popup.style.color = points > 0 ? "#2ecc71" : "#e74c3c";
         popup.style.left = `${rect.left + rect.width / 2 - 20}px`;
         popup.style.top = `${rect.top - 10}px`;
         document.body.appendChild(popup);
@@ -998,7 +1276,8 @@
 
       function addScore(pts) {
         state.totalScore += pts;
-        document.getElementById('total-score-display').textContent = state.totalScore;
+        document.getElementById("total-score-display").textContent =
+          state.totalScore;
       }
 
       /* =============================================
@@ -1017,7 +1296,7 @@
         state.vocabBatchIndex = 0;
         // Re-shuffle the word list fresh every time the game is started
         rebuildShuffledVocab(state.difficulty);
-        showScreen('vocab-screen');
+        showScreen("vocab-screen");
         loadVocabBatch();
       }
 
@@ -1034,7 +1313,10 @@
         }
 
         const actualStart = state.vocabBatchIndex * batchSize;
-        currentBatchWords = shuffledVocab[diff].slice(actualStart, actualStart + batchSize);
+        currentBatchWords = shuffledVocab[diff].slice(
+          actualStart,
+          actualStart + batchSize,
+        );
         totalPairsInBatch = currentBatchWords.length;
 
         vocabFirstCard = null;
@@ -1042,7 +1324,7 @@
         vocabMatchedPairs = 0;
 
         const capDiff = diff.charAt(0).toUpperCase() + diff.slice(1);
-        document.getElementById('vocab-topbar-sub').textContent =
+        document.getElementById("vocab-topbar-sub").textContent =
           `Batch ${state.vocabBatchIndex + 1} · ${capDiff}`;
 
         updateVocabUI();
@@ -1051,13 +1333,13 @@
       }
 
       function renderVocabCards() {
-        const grid = document.getElementById('card-grid');
-        grid.innerHTML = '';
+        const grid = document.getElementById("card-grid");
+        grid.innerHTML = "";
 
         let cards = [];
         currentBatchWords.forEach((pair, i) => {
-          cards.push({ text: pair.en, matchId: i, type: 'en' });
-          cards.push({ text: pair.fa, matchId: i, type: 'fa' });
+          cards.push({ text: pair.en, matchId: i, type: "en" });
+          cards.push({ text: pair.fa, matchId: i, type: "fa" });
         });
         cards = fisherYates(cards);
 
@@ -1067,26 +1349,34 @@
         // 2 columns, so rows = ceil(cardCount/2)
         const rows = Math.ceil(cardCount / 2);
         const availH = window.innerHeight - 230; // rough header/bar height
-        const cardH = Math.max(75, Math.floor((availH - (rows - 1) * 8 - 12) / rows));
-        const fontSize = cardH < 90 ? '1.1rem' : '1.3rem';
+        const cardH = Math.max(
+          75,
+          Math.floor((availH - (rows - 1) * 8 - 12) / rows),
+        );
+        const fontSize = cardH < 90 ? "1.1rem" : "1.3rem";
 
-        cards.forEach(cd => {
-          const el = document.createElement('div');
-          el.className = 'card hidden';
+        cards.forEach((cd) => {
+          const el = document.createElement("div");
+          el.className = "card hidden";
           el.textContent = cd.text;
           el.dataset.matchId = cd.matchId;
           el.style.minHeight = `${cardH}px`;
           el.style.fontSize = fontSize;
-          el.addEventListener('click', () => flipVocabCard(el));
+          el.addEventListener("click", () => flipVocabCard(el));
           grid.appendChild(el);
         });
       }
 
       function flipVocabCard(card) {
-        if (vocabLockBoard || card === vocabFirstCard || card.classList.contains('matched')) return;
+        if (
+          vocabLockBoard ||
+          card === vocabFirstCard ||
+          card.classList.contains("matched")
+        )
+          return;
 
-        card.classList.remove('hidden');
-        card.classList.add('selected');
+        card.classList.remove("hidden");
+        card.classList.add("selected");
 
         if (!vocabFirstCard) {
           vocabFirstCard = card;
@@ -1094,23 +1384,26 @@
         }
 
         const secondCard = card;
-        const isMatch = vocabFirstCard.dataset.matchId === secondCard.dataset.matchId;
+        const isMatch =
+          vocabFirstCard.dataset.matchId === secondCard.dataset.matchId;
 
         if (isMatch) {
           playMatch();
           state.vocabStreak++;
-          if (state.vocabStreak > state.bestStreak) state.bestStreak = state.vocabStreak;
+          if (state.vocabStreak > state.bestStreak)
+            state.bestStreak = state.vocabStreak;
 
           const diff = state.difficulty;
           let pts = POINTS.match[diff];
-          if (state.vocabStreak >= 3) pts += POINTS.streakBonus * (state.vocabStreak - 2);
+          if (state.vocabStreak >= 3)
+            pts += POINTS.streakBonus * (state.vocabStreak - 2);
           state.vocabScore += pts;
           addScore(pts);
 
-          vocabFirstCard.classList.remove('selected');
-          secondCard.classList.remove('selected');
-          vocabFirstCard.classList.add('matched', 'pop-anim');
-          secondCard.classList.add('matched', 'pop-anim');
+          vocabFirstCard.classList.remove("selected");
+          secondCard.classList.remove("selected");
+          vocabFirstCard.classList.add("matched", "pop-anim");
+          secondCard.classList.add("matched", "pop-anim");
           showScorePopup(pts, secondCard);
           vocabMatchedPairs++;
 
@@ -1128,18 +1421,19 @@
           const pen = POINTS.mistakePenalty[state.difficulty];
           state.vocabScore = Math.max(0, state.vocabScore - pen);
           state.totalScore = Math.max(0, state.totalScore - pen);
-          document.getElementById('total-score-display').textContent = state.totalScore;
+          document.getElementById("total-score-display").textContent =
+            state.totalScore;
           showScorePopup(-pen, secondCard);
 
           vocabLockBoard = true;
-          vocabFirstCard.classList.add('wrong-flash');
-          secondCard.classList.add('wrong-flash');
+          vocabFirstCard.classList.add("wrong-flash");
+          secondCard.classList.add("wrong-flash");
 
           setTimeout(() => {
-            vocabFirstCard.classList.remove('wrong-flash', 'selected');
-            secondCard.classList.remove('wrong-flash', 'selected');
-            vocabFirstCard.classList.add('hidden');
-            secondCard.classList.add('hidden');
+            vocabFirstCard.classList.remove("wrong-flash", "selected");
+            secondCard.classList.remove("wrong-flash", "selected");
+            vocabFirstCard.classList.add("hidden");
+            secondCard.classList.add("hidden");
             vocabFirstCard = null;
             vocabLockBoard = false;
             updateVocabUI();
@@ -1148,12 +1442,19 @@
       }
 
       function updateVocabUI() {
-        const pct = totalPairsInBatch > 0 ? (vocabMatchedPairs / totalPairsInBatch) * 100 : 0;
-        document.getElementById('vocab-progress-fill').style.width = `${pct}%`;
-        document.getElementById('vocab-pairs-pill').textContent = `${vocabMatchedPairs} / ${totalPairsInBatch} pairs`;
-        document.getElementById('vocab-misses-pill').textContent = `❌ ${state.vocabMisses} misses`;
-        document.getElementById('vocab-streak-pill').textContent = `🔥 ${state.vocabStreak} streak`;
-        document.getElementById('vocab-score-display').textContent = state.vocabScore;
+        const pct =
+          totalPairsInBatch > 0
+            ? (vocabMatchedPairs / totalPairsInBatch) * 100
+            : 0;
+        document.getElementById("vocab-progress-fill").style.width = `${pct}%`;
+        document.getElementById("vocab-pairs-pill").textContent =
+          `${vocabMatchedPairs} / ${totalPairsInBatch} pairs`;
+        document.getElementById("vocab-misses-pill").textContent =
+          `❌ ${state.vocabMisses} misses`;
+        document.getElementById("vocab-streak-pill").textContent =
+          `🔥 ${state.vocabStreak} streak`;
+        document.getElementById("vocab-score-display").textContent =
+          state.vocabScore;
       }
 
       function showBatchComplete() {
@@ -1168,16 +1469,19 @@
         const nextStart = (state.vocabBatchIndex + 1) * BATCH_SIZES[diff];
         const hasMore = nextStart < wordList.length;
 
-        document.getElementById('overlay-emoji').textContent = '🎉';
-        document.getElementById('overlay-title').textContent = 'Batch Complete!';
-        document.getElementById('overlay-subtitle').textContent =
+        document.getElementById("overlay-emoji").textContent = "🎉";
+        document.getElementById("overlay-title").textContent =
+          "Batch Complete!";
+        document.getElementById("overlay-subtitle").textContent =
           `+${bonus} bonus points! Total: ${state.vocabScore} pts\n` +
-          (hasMore ? `${wordList.length - nextStart} words remain in this difficulty.` : 'All words done! Starting over.');
+          (hasMore
+            ? `${wordList.length - nextStart} words remain in this difficulty.`
+            : "All words done! Starting over.");
 
-        const nextBtn = document.getElementById('overlay-next-btn');
-        nextBtn.textContent = hasMore ? 'Next Batch →' : '🔄 Restart Words';
+        const nextBtn = document.getElementById("overlay-next-btn");
+        nextBtn.textContent = hasMore ? "Next Batch →" : "🔄 Restart Words";
 
-        document.getElementById('vocab-overlay').classList.remove('hidden');
+        document.getElementById("vocab-overlay").classList.remove("hidden");
         updateVocabUI();
         updateHomeStats();
       }
@@ -1185,7 +1489,10 @@
       function startNextBatch() {
         state.vocabBatchIndex++;
         const diff = state.difficulty;
-        if (state.vocabBatchIndex * BATCH_SIZES[diff] >= shuffledVocab[diff].length) {
+        if (
+          state.vocabBatchIndex * BATCH_SIZES[diff] >=
+          shuffledVocab[diff].length
+        ) {
           // Will be reset and re-shuffled inside loadVocabBatch
           state.vocabBatchIndex = shuffledVocab[diff].length; // triggers loop-back
         }
@@ -1193,7 +1500,7 @@
       }
 
       function hideVocabOverlay() {
-        document.getElementById('vocab-overlay').classList.add('hidden');
+        document.getElementById("vocab-overlay").classList.add("hidden");
       }
 
       /* =============================================
@@ -1207,14 +1514,14 @@
       let patternGameOver = false;
 
       const patternButtons = [
-        document.getElementById('btn-red'),
-        document.getElementById('btn-blue'),
-        document.getElementById('btn-green'),
-        document.getElementById('btn-yellow'),
+        document.getElementById("btn-red"),
+        document.getElementById("btn-blue"),
+        document.getElementById("btn-green"),
+        document.getElementById("btn-yellow"),
       ];
 
       function clearAllPatternTimeouts() {
-        patternTimeouts.forEach(t => clearTimeout(t));
+        patternTimeouts.forEach((t) => clearTimeout(t));
         patternTimeouts = [];
       }
 
@@ -1225,11 +1532,11 @@
       }
 
       function startPatternRecall() {
-        showScreen('pattern-screen');
+        showScreen("pattern-screen");
         state.patternScore = 0;
         state.patternStreak = 0;
         state.hintUsedThisLevel = false;
-        document.getElementById('pattern-score-display').textContent = 0;
+        document.getElementById("pattern-score-display").textContent = 0;
         hidePatternOverlay();
         resetPatternGame();
       }
@@ -1241,9 +1548,9 @@
         patternGameOver = false;
         isPlayerTurn = false;
         state.hintUsedThisLevel = false;
-        setPatternStatus('Get Ready...', 'watching');
+        setPatternStatus("Get Ready...", "watching");
         updatePatternUI();
-        document.getElementById('hint-btn').disabled = true;
+        document.getElementById("hint-btn").disabled = true;
         addPatternTimeout(nextPatternLevel, 900);
       }
 
@@ -1261,17 +1568,19 @@
           state.bestPatternLevel = patternLevel;
         }
 
-        setPatternStatus(`Level ${patternLevel} — Watch...`, 'watching');
-        document.getElementById('pattern-topbar-sub').textContent = `Level ${patternLevel}`;
-        document.getElementById('level-badge').textContent = `Lv ${patternLevel}`;
-        document.getElementById('hint-btn').disabled = true;
+        setPatternStatus(`Level ${patternLevel} — Watch...`, "watching");
+        document.getElementById("pattern-topbar-sub").textContent =
+          `Level ${patternLevel}`;
+        document.getElementById("level-badge").textContent =
+          `Lv ${patternLevel}`;
+        document.getElementById("hint-btn").disabled = true;
         updatePatternProgress();
 
         sequence.push(Math.floor(Math.random() * 4));
 
         const speed = getPatternSpeed();
         let delay = 600;
-        sequence.forEach(btnIdx => {
+        sequence.forEach((btnIdx) => {
           addPatternTimeout(() => {
             flashPatternButton(btnIdx);
             playPattern(btnIdx);
@@ -1280,31 +1589,34 @@
         });
 
         addPatternTimeout(() => {
-          setPatternStatus('Your Turn! 👆', 'your-turn');
+          setPatternStatus("Your Turn! 👆", "your-turn");
           isPlayerTurn = true;
-          document.getElementById('hint-btn').disabled = false;
+          document.getElementById("hint-btn").disabled = false;
         }, delay);
       }
 
       function getPatternSpeed() {
         const diff = state.difficulty;
-        if (diff === 'easy')   return 900;
-        if (diff === 'medium') return 700;
+        if (diff === "easy") return 900;
+        if (diff === "medium") return 700;
         return 500; // hard
       }
 
       function flashPatternButton(index) {
         const btn = patternButtons[index];
-        btn.classList.add('active-flash');
-        setTimeout(() => btn.classList.remove('active-flash'), 380);
+        btn.classList.add("active-flash");
+        setTimeout(() => btn.classList.remove("active-flash"), 380);
       }
 
       function handlePatternInput(index) {
         if (!isPlayerTurn || patternGameOver) return;
 
-        patternButtons[index].classList.add('user-press');
+        patternButtons[index].classList.add("user-press");
         playPattern(index);
-        setTimeout(() => patternButtons[index].classList.remove('user-press'), 120);
+        setTimeout(
+          () => patternButtons[index].classList.remove("user-press"),
+          120,
+        );
 
         playerSequence.push(index);
         const pos = playerSequence.length - 1;
@@ -1323,12 +1635,14 @@
           state.patternScore += pts;
           addScore(pts);
           showScorePopup(pts, patternButtons[index]);
-          document.getElementById('pattern-score-display').textContent = state.patternScore;
+          document.getElementById("pattern-score-display").textContent =
+            state.patternScore;
           updatePatternProgress();
 
-          if (state.patternStreak > state.bestStreak) state.bestStreak = state.patternStreak;
+          if (state.patternStreak > state.bestStreak)
+            state.bestStreak = state.patternStreak;
           updateStreakDisplay();
-          setPatternStatus('✅ Correct!', 'correct');
+          setPatternStatus("✅ Correct!", "correct");
 
           addPatternTimeout(nextPatternLevel, 900);
         }
@@ -1341,12 +1655,12 @@
         playMiss();
         state.patternStreak = 0;
         updateStreakDisplay();
-        setPatternStatus(`❌ Wrong! Level ${patternLevel}`, 'game-over');
+        setPatternStatus(`❌ Wrong! Level ${patternLevel}`, "game-over");
 
         // Flash all buttons red briefly
-        patternButtons.forEach(b => {
-          b.style.opacity = '0.3';
-          setTimeout(() => b.style.opacity = '', 600);
+        patternButtons.forEach((b) => {
+          b.style.opacity = "0.3";
+          setTimeout(() => (b.style.opacity = ""), 600);
         });
 
         setTimeout(() => showPatternOverlay(), 700);
@@ -1354,21 +1668,25 @@
 
       function showPatternOverlay() {
         const canReplay = state.totalScore >= POINTS.hintCost;
-        document.getElementById('pattern-overlay-emoji').textContent = patternLevel <= 2 ? '😮' : patternLevel <= 5 ? '💪' : '🏆';
-        document.getElementById('pattern-overlay-title').textContent =
-          patternLevel <= 1 ? 'Nice Try!' : `Reached Level ${patternLevel}!`;
-        document.getElementById('pattern-overlay-subtitle').textContent =
+        document.getElementById("pattern-overlay-emoji").textContent =
+          patternLevel <= 2 ? "😮" : patternLevel <= 5 ? "💪" : "🏆";
+        document.getElementById("pattern-overlay-title").textContent =
+          patternLevel <= 1 ? "Nice Try!" : `Reached Level ${patternLevel}!`;
+        document.getElementById("pattern-overlay-subtitle").textContent =
           `You scored ${state.patternScore} pts this game.\n` +
-          (patternLevel <= 2 ? 'Keep practicing — you got this!' :
-           patternLevel <= 5 ? 'Solid memory! Can you go higher?' : 'Amazing memory! 🧠');
+          (patternLevel <= 2
+            ? "Keep practicing — you got this!"
+            : patternLevel <= 5
+              ? "Solid memory! Can you go higher?"
+              : "Amazing memory! 🧠");
 
-        const replayBtn = document.getElementById('pattern-replay-btn');
+        const replayBtn = document.getElementById("pattern-replay-btn");
         replayBtn.disabled = !canReplay;
         replayBtn.textContent = `👁 Replay Pattern (-${POINTS.hintCost} pts)`;
-        if (!canReplay) replayBtn.style.opacity = '0.4';
-        else replayBtn.style.opacity = '';
+        if (!canReplay) replayBtn.style.opacity = "0.4";
+        else replayBtn.style.opacity = "";
 
-        document.getElementById('pattern-overlay').classList.remove('hidden');
+        document.getElementById("pattern-overlay").classList.remove("hidden");
         updateHomeStats();
       }
 
@@ -1377,17 +1695,19 @@
         hidePatternOverlay();
         state.totalScore -= POINTS.hintCost;
         state.patternScore = Math.max(0, state.patternScore - POINTS.hintCost);
-        document.getElementById('total-score-display').textContent = state.totalScore;
-        document.getElementById('pattern-score-display').textContent = state.patternScore;
+        document.getElementById("total-score-display").textContent =
+          state.totalScore;
+        document.getElementById("pattern-score-display").textContent =
+          state.patternScore;
         patternGameOver = false;
         isPlayerTurn = false;
         playerSequence = [];
-        setPatternStatus(`Level ${patternLevel} — Watch again...`, 'watching');
-        document.getElementById('hint-btn').disabled = true;
+        setPatternStatus(`Level ${patternLevel} — Watch again...`, "watching");
+        document.getElementById("hint-btn").disabled = true;
 
         const speed = getPatternSpeed();
         let delay = 400;
-        sequence.forEach(btnIdx => {
+        sequence.forEach((btnIdx) => {
           addPatternTimeout(() => {
             flashPatternButton(btnIdx);
             playPattern(btnIdx);
@@ -1395,28 +1715,35 @@
           delay += speed;
         });
         addPatternTimeout(() => {
-          setPatternStatus('Your Turn! 👆', 'your-turn');
+          setPatternStatus("Your Turn! 👆", "your-turn");
           isPlayerTurn = true;
-          document.getElementById('hint-btn').disabled = false;
+          document.getElementById("hint-btn").disabled = false;
         }, delay);
       }
 
       function replayHint() {
-        if (!isPlayerTurn || state.totalScore < POINTS.hintCost || state.hintUsedThisLevel) return;
+        if (
+          !isPlayerTurn ||
+          state.totalScore < POINTS.hintCost ||
+          state.hintUsedThisLevel
+        )
+          return;
         state.hintUsedThisLevel = true;
         state.totalScore -= POINTS.hintCost;
         state.patternScore = Math.max(0, state.patternScore - POINTS.hintCost);
-        document.getElementById('total-score-display').textContent = state.totalScore;
-        document.getElementById('pattern-score-display').textContent = state.patternScore;
-        document.getElementById('hint-btn').disabled = true;
+        document.getElementById("total-score-display").textContent =
+          state.totalScore;
+        document.getElementById("pattern-score-display").textContent =
+          state.patternScore;
+        document.getElementById("hint-btn").disabled = true;
         isPlayerTurn = false;
         playerSequence = [];
 
-        setPatternStatus(`Replaying Level ${patternLevel}...`, 'watching');
+        setPatternStatus(`Replaying Level ${patternLevel}...`, "watching");
 
         const speed = getPatternSpeed();
         let delay = 200;
-        sequence.forEach(btnIdx => {
+        sequence.forEach((btnIdx) => {
           addPatternTimeout(() => {
             flashPatternButton(btnIdx);
             playPattern(btnIdx);
@@ -1424,17 +1751,17 @@
           delay += speed;
         });
         addPatternTimeout(() => {
-          setPatternStatus('Your Turn! 👆', 'your-turn');
+          setPatternStatus("Your Turn! 👆", "your-turn");
           isPlayerTurn = true;
         }, delay);
       }
 
       function hidePatternOverlay() {
-        document.getElementById('pattern-overlay').classList.add('hidden');
+        document.getElementById("pattern-overlay").classList.add("hidden");
       }
 
       function setPatternStatus(text, cls) {
-        const el = document.getElementById('pattern-status');
+        const el = document.getElementById("pattern-status");
         el.textContent = text;
         el.className = cls;
       }
@@ -1443,19 +1770,26 @@
         // Progress represents how many levels achieved vs a target (e.g., 10)
         const target = 10;
         const pct = Math.min((patternLevel / target) * 100, 100);
-        document.getElementById('pattern-progress-fill').style.width = `${pct}%`;
-        document.getElementById('pattern-topbar-sub').textContent = `Level ${patternLevel}`;
+        document.getElementById("pattern-progress-fill").style.width =
+          `${pct}%`;
+        document.getElementById("pattern-topbar-sub").textContent =
+          `Level ${patternLevel}`;
       }
 
       function updateStreakDisplay() {
-        document.getElementById('streak-badge').textContent = `🔥 ${state.patternStreak} streak`;
+        document.getElementById("streak-badge").textContent =
+          `🔥 ${state.patternStreak} streak`;
       }
 
       function updatePatternUI() {
-        document.getElementById('pattern-score-display').textContent = state.patternScore;
-        document.getElementById('pattern-topbar-sub').textContent = `Level ${patternLevel}`;
-        document.getElementById('level-badge').textContent = `Lv ${patternLevel}`;
-        document.getElementById('streak-badge').textContent = `🔥 ${state.patternStreak} streak`;
+        document.getElementById("pattern-score-display").textContent =
+          state.patternScore;
+        document.getElementById("pattern-topbar-sub").textContent =
+          `Level ${patternLevel}`;
+        document.getElementById("level-badge").textContent =
+          `Lv ${patternLevel}`;
+        document.getElementById("streak-badge").textContent =
+          `🔥 ${state.patternStreak} streak`;
         updatePatternProgress();
       }
 
