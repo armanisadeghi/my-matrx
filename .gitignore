@@ -46,3 +46,7 @@ yarn-error.log*
 # Temporary files
 *.tmp
 *.temp
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
