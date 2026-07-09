@@ -25,62 +25,6 @@ export default function HomePage({ recentPages }) {
     setIsLoading(false)
   }
 
-  const createTestPage = async () => {
-    setIsLoading(true)
-    setTestResult('Creating test page...')
-    
-    try {
-      const testHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Test Page</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-            .container { max-width: 600px; margin: 0 auto; text-align: center; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>🎉 Test Page Created Successfully!</h1>
-            <p>This page was created at ${new Date().toLocaleString()}</p>
-            <p>Database integration is working perfectly!</p>
-          </div>
-        </body>
-        </html>
-      `
-
-      const response = await fetch('/api/create-page', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: `Test Page - ${new Date().toLocaleString()}`,
-          description: 'Auto-generated test page',
-          htmlContent: testHTML,
-          userId: '00000000-0000-0000-0000-000000000000' // Test UUID
-        })
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setTestResult(`✅ Test Page Created! 
-Page ID: ${result.pageId}
-View at: ${result.url}
-Click here: http://localhost:3000${result.url}`)
-      } else {
-        setTestResult(`❌ Create Failed: ${result.error}
-Details: ${result.details || 'No additional details'}`)
-      }
-    } catch (err) {
-      setTestResult(`❌ Create Failed: ${err.message}`)
-    }
-    
-    setIsLoading(false)
-  }
-
   return (
     <>
       <Head>
@@ -123,21 +67,6 @@ Details: ${result.details || 'No additional details'}`)
             }}
           >
             {isLoading ? 'Testing...' : 'Test Database Connection'}
-          </button>
-          
-          <button 
-            onClick={createTestPage}
-            disabled={isLoading}
-            style={{ 
-              padding: '10px 20px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: isLoading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {isLoading ? 'Creating...' : 'Create Test Page'}
           </button>
         </div>
         
