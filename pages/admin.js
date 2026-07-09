@@ -7,6 +7,21 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [pages, setPages] = useState([])
   const [serverData, setServerData] = useState(null)
+  const [adminEmail, setAdminEmail] = useState('')
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) setAdminEmail(data.email || '')
+      })
+      .catch(() => {})
+  }, [])
+
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    window.location.href = '/'
+  }
 
   // Load pages on mount
   useEffect(() => {
@@ -139,9 +154,37 @@ export default function AdminPage() {
       </Head>
 
       <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-        <div style={{ borderBottom: '2px solid #dee2e6', paddingBottom: '20px', marginBottom: '30px' }}>
-          <h1 style={{ color: '#333', marginBottom: '10px' }}>🛠️ Admin Dashboard</h1>
-          <p style={{ color: '#666', margin: '0' }}>Manage pages, test connections, and debug the system</p>
+        <div
+          style={{
+            borderBottom: '2px solid #dee2e6',
+            paddingBottom: '20px',
+            marginBottom: '30px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+          }}
+        >
+          <div>
+            <h1 style={{ color: '#333', marginBottom: '10px' }}>🛠️ Admin Dashboard</h1>
+            <p style={{ color: '#666', margin: '0' }}>Manage pages, test connections, and debug the system</p>
+          </div>
+          <div style={{ textAlign: 'right', fontSize: '14px', color: '#666' }}>
+            {adminEmail && <div style={{ marginBottom: '8px' }}>Signed in as {adminEmail}</div>}
+            <button
+              onClick={logout}
+              style={{
+                padding: '6px 14px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '13px',
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}

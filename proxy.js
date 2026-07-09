@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
+import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/adminSession'
 
-// Paths that require an admin login (Basic Auth against ADMIN_USER / ADMIN_PASSWORD).
-// The bare POST /api/form-submissions endpoint is intentionally NOT included here —
-// that one has to stay public so anonymous site visitors can submit forms.
+// Admin login goes through aidream's OAuth broker (the same mechanism
+// apps/dashboard uses): a redirect to /auth/aimatrx, which does the Supabase
+// PKCE exchange + a public.admins lookup server-side, then bounces back here
+// with ?access_token=... (handled by pages/oauth/callback.js, which mints
+// our own short-lived signed session cookie via /api/auth/session).
 const ADMIN_PATHS = ['/admin']
 const ADMIN_API_EXACT = ['/api/create-page', '/api/list-pages']
 
@@ -27,14 +30,17 @@ function isBlockedDebug(pathname) {
   return pathname.startsWith('/api/debug/')
 }
 
-function unauthorized() {
-  return new NextResponse('Authentication required', {
-    status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="my-matrx admin"' },
-  })
+function isApiPath(pathname) {
+  return pathname.startsWith('/api/')
 }
 
-export function proxy(request) {
+function loginUrl(request) {
+  const aidreamUrl = process.env.AIDREAM_API_URL
+  const callback = `${request.nextUrl.origin}/oauth/callback`
+  return `${aidreamUrl}/auth/aimatrx?app_redirect=${encodeURIComponent(callback)}&admin_required=true`
+}
+
+export async function proxy(request) {
   const { pathname } = request.nextUrl
   const { method } = request
 
@@ -43,27 +49,26 @@ export function proxy(request) {
   }
 
   if (requiresAdminAuth(pathname)) {
-    const user = process.env.ADMIN_USER
-    const pass = process.env.ADMIN_PASSWORD
+    const sessionSecret = process.env.SESSION_SECRET
+    const aidreamUrl = process.env.AIDREAM_API_URL
 
-    // Fail closed: if credentials aren't configured in this environment, deny rather
-    // than silently letting the request through.
-    if (!user || !pass) {
+    // Fail closed: if login isn't configured in this environment, deny
+    // rather than silently letting the request through.
+    if (!sessionSecret || !aidreamUrl) {
       return new NextResponse('Admin access is not configured', { status: 503 })
     }
 
-    const authHeader = request.headers.get('authorization')
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-      return unauthorized()
-    }
+    const token = request.cookies.get(SESSION_COOKIE_NAME)?.value
+    const session = token ? await verifySessionToken(token, sessionSecret) : null
 
-    const decoded = atob(authHeader.slice(6))
-    const separatorIndex = decoded.indexOf(':')
-    const suppliedUser = decoded.slice(0, separatorIndex)
-    const suppliedPass = decoded.slice(separatorIndex + 1)
-
-    if (suppliedUser !== user || suppliedPass !== pass) {
-      return unauthorized()
+    if (!session) {
+      if (isApiPath(pathname)) {
+        return NextResponse.json(
+          { error: 'unauthorized', loginUrl: loginUrl(request) },
+          { status: 401 }
+        )
+      }
+      return NextResponse.redirect(loginUrl(request))
     }
   }
 
