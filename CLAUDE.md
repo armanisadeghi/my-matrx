@@ -2,6 +2,11 @@
 
 Simple Next.js app for serving dynamic HTML pages. Deployed on Vercel.
 
+> **Cross-repo system-of-record:** this app is one third of the CMS platform (with matrx-frontend
+> + aidream) — read `/Users/armanisadeghi/code/common-docs/cms-system/FEATURE.md` before touching
+> the `/c/`, `/p/`, or API surfaces in ANY repo. Cross-repo docs rules: invoke the
+> `cross-repo-docs` skill.
+
 ---
 
 ## Global Overrides
