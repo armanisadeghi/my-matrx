@@ -1,6 +1,18 @@
 -- ============================================
 -- MyMatrx Client Sites Database Schema
--- Purpose: Multi-tenant client website management with versioning
+-- Purpose: Multi-tenant client website management
+--
+-- ⚠️ HISTORICAL BOOTSTRAP SNAPSHOT — NOT the source of truth.
+-- The live CMS database (Supabase viyklljfdhtidwecakwx) is owned by aidream's
+-- `db/migrations/cms/*.sql`, tracked in `public._schema_migrations`.
+--
+-- Page versioning is NOT defined here. It is the canonical append-only
+-- `history.row_versions` log (migration 0002) + the `version_list` /
+-- `version_get` / `version_snapshot` / `version_restore` public RPCs
+-- (migration 0003). The old `client_page_versions` table,
+-- `create_page_version()` trigger and `rollback_to_version()` RPC were retired
+-- in migration 0004 (the table survives, read-only, as
+-- `graveyard.client_page_versions`).
 -- ============================================
 
 -- Enable UUID extension if not already enabled
@@ -140,37 +152,6 @@ CREATE TABLE client_components (
 );
 
 -- ============================================
--- 4. PAGE VERSION HISTORY TABLE
--- Track all published versions for rollback
--- ============================================
-CREATE TABLE client_page_versions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  page_id UUID NOT NULL REFERENCES client_pages(id) ON DELETE CASCADE,
-  
-  -- Version identification
-  version_number INTEGER NOT NULL,
-  version_label TEXT, -- 'v1.0', 'Launch Version', etc.
-  
-  -- Snapshot of content at publish time
-  html_content TEXT NOT NULL,
-  css_content TEXT,
-  js_content TEXT,
-  meta_title TEXT,
-  meta_description TEXT,
-  meta_keywords TEXT,
-  og_image TEXT,
-  canonical_url TEXT,
-  
-  -- Version metadata
-  published_by UUID,
-  published_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  change_summary TEXT, -- Description of what changed
-  
-  -- Timestamps
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- ============================================
 -- 5. CLIENT ASSETS TABLE
 -- Manage uploaded images, files, etc.
 -- ============================================
@@ -252,10 +233,6 @@ CREATE INDEX idx_client_components_client ON client_components(client_id);
 CREATE INDEX idx_client_components_type ON client_components(client_id, component_type);
 CREATE INDEX idx_client_components_active ON client_components(client_id, is_active) WHERE is_active = true;
 
--- Page Versions
-CREATE INDEX idx_page_versions_page ON client_page_versions(page_id, version_number DESC);
-CREATE INDEX idx_page_versions_date ON client_page_versions(page_id, published_at DESC);
-
 -- Client Assets
 CREATE INDEX idx_client_assets_client ON client_assets(client_id);
 CREATE INDEX idx_client_assets_type ON client_assets(client_id, file_type);
@@ -293,64 +270,6 @@ CREATE TRIGGER update_client_assets_updated_at BEFORE UPDATE ON client_assets
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================
--- TRIGGER FOR VERSION HISTORY
--- Auto-create version when page is published
--- ============================================
-
-CREATE OR REPLACE FUNCTION create_page_version()
-RETURNS TRIGGER AS $$
-DECLARE
-  next_version INTEGER;
-BEGIN
-  -- Only create version if is_published changed to true
-  IF NEW.is_published = true AND (OLD.is_published = false OR OLD.is_published IS NULL) THEN
-    -- Get next version number
-    SELECT COALESCE(MAX(version_number), 0) + 1 INTO next_version
-    FROM client_page_versions
-    WHERE page_id = NEW.id;
-    
-    -- Insert version record
-    INSERT INTO client_page_versions (
-      page_id,
-      version_number,
-      html_content,
-      css_content,
-      js_content,
-      meta_title,
-      meta_description,
-      meta_keywords,
-      og_image,
-      canonical_url,
-      published_by,
-      published_at
-    ) VALUES (
-      NEW.id,
-      next_version,
-      NEW.html_content,
-      NEW.css_content,
-      NEW.js_content,
-      NEW.meta_title,
-      NEW.meta_description,
-      NEW.meta_keywords,
-      NEW.og_image,
-      NEW.canonical_url,
-      NEW.last_published_by,
-      NOW()
-    );
-    
-    -- Update publish metadata
-    NEW.last_published_at = NOW();
-    NEW.has_draft = false;
-  END IF;
-  
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER page_version_on_publish BEFORE UPDATE ON client_pages
-  FOR EACH ROW EXECUTE FUNCTION create_page_version();
-
--- ============================================
 -- HELPER FUNCTIONS
 -- ============================================
 
@@ -379,6 +298,9 @@ BEGIN
     is_published = true,
     has_draft = false,
     last_published_by = publisher_id,
+    -- Set here since migration 0004; the retired create_page_version() BEFORE
+    -- trigger used to stamp it, and only on the first publish.
+    last_published_at = NOW(),
     publish_date = CASE WHEN publish_date IS NULL THEN NOW() ELSE publish_date END
   WHERE id = page_uuid;
   
@@ -407,39 +329,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to rollback to a specific version
-CREATE OR REPLACE FUNCTION rollback_to_version(page_uuid UUID, version_num INTEGER)
-RETURNS BOOLEAN AS $$
-DECLARE
-  version_data RECORD;
-BEGIN
-  -- Get the version data
-  SELECT * INTO version_data
-  FROM client_page_versions
-  WHERE page_id = page_uuid AND version_number = version_num;
-  
-  IF NOT FOUND THEN
-    RETURN false;
-  END IF;
-  
-  -- Update page with version data
-  UPDATE client_pages
-  SET 
-    html_content = version_data.html_content,
-    css_content = version_data.css_content,
-    js_content = version_data.js_content,
-    meta_title = version_data.meta_title,
-    meta_description = version_data.meta_description,
-    meta_keywords = version_data.meta_keywords,
-    og_image = version_data.og_image,
-    canonical_url = version_data.canonical_url,
-    is_published = true
-  WHERE id = page_uuid;
-  
-  RETURN FOUND;
-END;
-$$ LANGUAGE plpgsql;
-
 -- ============================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- Optional: Enable if using Supabase Auth
@@ -449,7 +338,6 @@ $$ LANGUAGE plpgsql;
 ALTER TABLE client_sites ENABLE ROW LEVEL SECURITY;
 ALTER TABLE client_pages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE client_components ENABLE ROW LEVEL SECURITY;
-ALTER TABLE client_page_versions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE client_assets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE client_activity_log ENABLE ROW LEVEL SECURITY;
 
