@@ -30,13 +30,15 @@
 
 5. **Verify Success**
    - You should see: "Schema created successfully!"
-   - Check the "Table Editor" - you should see 6 new tables:
+   - Check the "Table Editor" - you should see 5 new tables:
      - `client_sites`
      - `client_pages`
      - `client_components`
-     - `client_page_versions`
      - `client_assets`
      - `client_activity_log`
+
+   Page version history lives in `history.row_versions`, created by aidream's CMS
+   migration `0002` (not by this snapshot).
 
 ---
 
@@ -176,15 +178,14 @@ WHERE slug = 'services';
 
 ### Test Version History
 ```sql
--- Check if version was created
-SELECT 
-  version_number,
-  published_at
-FROM client_page_versions
-WHERE page_id = (SELECT id FROM client_pages WHERE slug = 'services')
-ORDER BY version_number DESC;
+-- Check that the publish was versioned (EVERY change is captured)
+SELECT version, operation, occurred_at
+FROM history.row_versions
+WHERE entity_type = 'client_page'
+  AND row_id = (SELECT id FROM client_pages WHERE slug = 'services')
+ORDER BY version DESC;
 ```
-**Expected**: At least 1 version entry
+**Expected**: One entry per change to the page, newest first
 
 ---
 
@@ -245,7 +246,8 @@ SELECT
   p.has_draft,
   COUNT(v.id) as version_count
 FROM client_pages p
-LEFT JOIN client_page_versions v ON v.page_id = p.id
+LEFT JOIN history.row_versions v
+       ON v.row_id = p.id AND v.entity_type = 'client_page' 
 WHERE p.client_id = (SELECT id FROM client_sites WHERE slug = 'iopbm')
 GROUP BY p.id, p.slug, p.title, p.is_published, p.has_draft
 ORDER BY p.sort_order;

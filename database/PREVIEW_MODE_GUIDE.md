@@ -306,17 +306,20 @@ Allow previewing specific versions:
 
 ```javascript
 // URL: /c/iopbm/home?version=5
+// NOTE: `history.row_versions` is not exposed to PostgREST, and the
+// `version_snapshot` RPC is service_role-only — this renderer uses the anon key,
+// so a version preview would need a server-side route, not a client query.
 const versionNumber = query.version;
 
 if (versionNumber) {
-  const { data: version } = await supabase
-    .from('client_page_versions')
-    .select('*')
-    .eq('page_id', pageId)
-    .eq('version_number', versionNumber)
-    .single();
-    
-  content = version.html_content;
+  const { data: snapshot } = await supabaseServiceRole
+    .rpc('version_snapshot', {
+      p_token: 'client_page',
+      p_id: pageId,
+      p_version: Number(versionNumber),
+    });
+
+  content = snapshot.html_content;
 }
 ```
 

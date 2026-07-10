@@ -52,13 +52,19 @@ Reusable components like headers and footers.
 - `cta`: Call-to-action sections
 - Custom types as needed
 
-### 4. `client_page_versions`
-Automatic history of all published versions.
+### 4. `history.row_versions`
+Automatic, append-only history of EVERY change to a page — create, edit, draft
+save, publish, rollback (aidream CMS migration `0002`).
 
 **Features:**
-- Auto-increments version number
-- Stores complete snapshot at publish time
-- Enables rollback to any previous version
+- Auto-increments the page's `version` on every UPDATE
+- Stores a complete jsonb snapshot (`row_data`) of the row at that version
+- Enables restore to any previous version, audit-preserving (the restore is
+  itself recorded as a new version)
+
+Superseded the old `client_page_versions` table, which only captured a page's
+first publish; it was retired in migration `0004` and archived to
+`graveyard.client_page_versions`.
 
 ### 5. `client_assets`
 File and image management.
@@ -159,14 +165,14 @@ When in preview mode, show a banner:
 ### Rollback to Previous Version
 
 ```sql
--- View all versions
-SELECT version_number, published_at, change_summary 
-FROM client_page_versions 
-WHERE page_id = 'xxx' 
-ORDER BY version_number DESC;
+-- View all versions (or call the version_list RPC — service_role only)
+SELECT version, operation, occurred_at
+FROM history.row_versions
+WHERE entity_type = 'client_page' AND row_id = 'xxx'
+ORDER BY version DESC;
 
--- Rollback to version 5
-SELECT rollback_to_version('page-uuid', 5);
+-- Restore version 5 (content columns only; adds a new version, erases nothing)
+SELECT platform.version_restore('client_page', 'page-uuid', 5);
 ```
 
 ## 🔐 Row Level Security (RLS)
@@ -286,16 +292,15 @@ ORDER BY sort_order;
 
 ### Get version history for a page
 ```sql
-SELECT 
-  v.version_number,
-  v.published_at,
-  v.change_summary,
-  v.version_label
-FROM client_page_versions v
-JOIN client_pages p ON v.page_id = p.id
+SELECT
+  v.version,
+  v.operation,
+  v.occurred_at
+FROM history.row_versions v
+JOIN client_pages p ON v.row_id = p.id AND v.entity_type = 'client_page'
 WHERE p.client_id = (SELECT id FROM client_sites WHERE slug = 'iopbm')
   AND p.slug = 'home'
-ORDER BY v.version_number DESC;
+ORDER BY v.version DESC;
 ```
 
 ### Get all active components for a client
@@ -318,9 +323,10 @@ WHERE client_id = (SELECT id FROM client_sites WHERE slug = 'iopbm')
 3. Confirm preview query param: `?preview=true`
 
 ### Version not being created
-1. Check trigger is enabled: `\d+ client_pages`
-2. Verify `is_published` changed from false to true
-3. Check `client_page_versions` table for errors
+Every change to `client_pages` is versioned — there is no publish-only condition.
+1. Check both triggers are enabled: `\d+ client_pages` → `_bump_version` (BEFORE
+   UPDATE) and `_history` (AFTER INSERT/UPDATE/DELETE)
+2. Check `history.row_versions` for the page's rows
 
 ### RLS blocking queries
 1. Use service role key in API routes
