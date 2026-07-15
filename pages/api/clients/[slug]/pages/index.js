@@ -1,4 +1,4 @@
-import { getClientPages } from '@/lib/supabase/clientHelpers'
+import { getClientPages, stripDraftFields } from '@/lib/supabase/clientHelpers'
 
 /**
  * GET /api/clients/[slug]/pages
@@ -19,9 +19,10 @@ export default async function handler(req, res) {
 
     const pages = await getClientPages(slug, includeUnpublished)
 
+    // SECURITY: never ship raw `*_draft` content on an anonymous endpoint.
     return res.status(200).json({
       success: true,
-      pages,
+      pages: pages.map(stripDraftFields),
       count: pages.length
     })
 

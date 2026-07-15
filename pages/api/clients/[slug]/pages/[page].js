@@ -1,4 +1,4 @@
-import { getClientPage, updatePageDraft } from '@/lib/supabase/clientHelpers'
+import { getClientPage, updatePageDraft, stripDraftFields } from '@/lib/supabase/clientHelpers'
 
 /**
  * GET /api/clients/[slug]/pages/[page]
@@ -24,9 +24,11 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Page not found' })
       }
 
+      // SECURITY: preview mode already merges drafts into the live fields
+      // server-side; raw `*_draft` keys must not ship on an anonymous endpoint.
       return res.status(200).json({
         success: true,
-        page: pageData
+        page: stripDraftFields(pageData)
       })
 
     } catch (error) {
