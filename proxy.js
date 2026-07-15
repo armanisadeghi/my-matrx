@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/adminSession'
+import { normalizeHost, isPlatformHost } from '@/lib/domains'
 
 // Admin login goes through aidream's OAuth broker (the same mechanism
 // apps/dashboard uses): a redirect to /auth/aimatrx, which does the Supabase
@@ -44,6 +45,28 @@ export async function proxy(request) {
   const { pathname } = request.nextUrl
   const { method } = request
 
+  // ── Domain-based client-site routing (W2-E) ─────────────────────────────
+  // docs/DOMAIN_ROUTING_DESIGN.md. This BLOCK runs before everything:
+  // /_sites is an internal-only rewrite target — direct requests 404 on every
+  // host (middleware rewrites below do NOT re-enter middleware, so the rewrite
+  // itself is unaffected).
+  if (pathname === '/_sites' || pathname.startsWith('/_sites/')) {
+    return new NextResponse('Not found', { status: 404 })
+  }
+
+  // A request whose Host is NOT the platform is a custom client domain:
+  // rewrite EVERY path into /_sites/{host}{path}, where the site is resolved
+  // by client_sites.domain (unknown domains 404 there). This is strictly
+  // STRONGER than the platform gates below — on a client domain no /api, /admin,
+  // /c or /p surface is reachable at all, only that site's own pages.
+  const host = normalizeHost(request.headers.get('host'))
+  if (!isPlatformHost(host)) {
+    const url = request.nextUrl.clone()
+    url.pathname = `/_sites/${host}${pathname === '/' ? '' : pathname}`
+    return NextResponse.rewrite(url)
+  }
+  // ── End domain routing; platform behavior below is unchanged ────────────
+
   if (isBlockedDebug(pathname) || isBlockedClientWrite(pathname, method)) {
     return new NextResponse('Not found', { status: 404 })
   }
@@ -75,13 +98,12 @@ export async function proxy(request) {
   return NextResponse.next()
 }
 
+// Matcher: host-based routing needs the middleware on EVERY path except Next
+// internals. Do NOT exclude dotted paths — /_sites/{host} targets contain dots,
+// and excluding them would let direct /_sites requests bypass the 404 guard.
+// Platform-host requests (including public/ static assets) just fall through to
+// NextResponse.next(); the original path-list gates are all pathname checks
+// inside proxy(), so platform behavior is identical.
 export const config = {
-  matcher: [
-    '/admin/:path*',
-    '/api/create-page',
-    '/api/list-pages',
-    '/api/form-submissions/:path*',
-    '/api/clients/:path*',
-    '/api/debug/:path*',
-  ],
+  matcher: ['/((?!_next/).*)'],
 }
