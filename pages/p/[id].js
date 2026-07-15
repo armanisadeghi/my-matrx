@@ -187,9 +187,17 @@ export async function getServerSideProps(props) {
 
     console.log('Page found server-side:', data.meta_title || 'Untitled')
 
+    // SECURITY: props are serialized into public __NEXT_DATA__ — whitelist
+    // exactly the fields the component reads (never ship user_id or any
+    // other internal html_pages column).
+    const pageData = {}
+    for (const field of ['id', 'html_content', 'meta_title', 'meta_description', 'meta_keywords', 'og_image', 'canonical_url', 'is_indexable']) {
+      pageData[field] = data[field] === undefined ? null : data[field]
+    }
+
     return {
       props: {
-        pageData: data
+        pageData
       }
     }
   } catch (error) {
