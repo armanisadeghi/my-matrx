@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { getClientSite, getClientPage, getClientPageByCategory, getClientPages, getClientComponents, getClientHomePage } from '@/lib/supabase/clientHelpers'
+import { getClientSite, getClientPage, getClientPageByCategory, getClientPages, getClientComponents, getClientHomePage, toRenderClientProps, stripDraftFields } from '@/lib/supabase/clientHelpers'
 
 export default function ClientPage({ client, page, relatedPages, components, isPreview, isList, notFound }) {
   if (notFound) {
@@ -310,12 +310,15 @@ export async function getServerSideProps(props) {
     console.log('Page type:', page.page_type, 'Category:', page.category)
     console.log('Has draft:', page._isPreview || false)
 
+    // SECURITY: props are serialized verbatim into public __NEXT_DATA__.
+    // Whitelist the client row (never ship `settings` / `owner_user_id`) and
+    // strip `*_draft` content from every page/component row.
     return {
       props: {
-        client,
-        page,
-        relatedPages,
-        components,
+        client: toRenderClientProps(client),
+        page: stripDraftFields(page),
+        relatedPages: relatedPages.map(stripDraftFields),
+        components: components.map(stripDraftFields),
         isPreview,
         isList
       }
