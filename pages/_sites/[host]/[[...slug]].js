@@ -12,9 +12,13 @@ export default ClientSiteRenderer
 export async function getServerSideProps(props) {
   try {
     const params = await props.params
-    const query = await props.query
     const { host: rawHost, slug = [] } = params
-    const isPreview = query.preview === 'true'
+    // Custom domains NEVER honor ?preview=true (design decision 6): preview is an
+    // internal/admin concern that stays on the platform /c/ host. Honoring a bare
+    // preview param on a client's PRODUCTION domain would expose unpublished +
+    // draft content to any anonymous visitor (adversarial finding W2-E #1). The
+    // /c/ mymatrx preview flow (admins + the agent verify loop) is unchanged.
+    const isPreview = false
 
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE) {
       console.error('Missing Supabase environment variables')

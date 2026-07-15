@@ -50,8 +50,13 @@ the renderer; extend the shared module.
 7. **Custom domains serve ONLY site pages.** On a custom host, EVERY path (including `/api/*`,
    `/admin`, `/c/*`, `/p/*`) is rewritten into `/_sites/{host}/...` and resolves as site
    content or 404s. Platform endpoints are unreachable on client domains — smaller surface,
-   no host-dependent API behavior. Static `public/` assets (dotted files, excluded from the
-   matcher) still serve — needed for `/favicon.ico` fallback.
+   no host-dependent API behavior. Exception: a small allowlist of root static files
+   (`ROOT_STATIC_PASSTHROUGH` in `proxy.js` — `/favicon.ico`, `/robots.txt`, `/sitemap.xml`)
+   passes through to `public/` before the rewrite, so the renderer's `/favicon.ico` fallback
+   works on a custom domain. The matcher itself only excludes `_next/` (it CANNOT exclude all
+   dotted paths — `/_sites/{host}` targets contain dots — so the allowlist lives in code).
+   `?preview=true` is IGNORED on custom domains (decision 6): honoring it on a client's
+   production domain would expose unpublished/draft content anonymously (adversarial finding #1).
 8. **Direct `/_sites/*` requests are 404'd in middleware** on any host — the path exists only
    as an internal rewrite target (prevents `mymatrx.com/_sites/{host}/...` duplicate-content
    URLs; middleware rewrites don't re-enter middleware).

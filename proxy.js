@@ -35,6 +35,10 @@ function isApiPath(pathname) {
   return pathname.startsWith('/api/')
 }
 
+// Root-level static files that must serve from public/ on a custom domain
+// (see the host-routing block below).
+const ROOT_STATIC_PASSTHROUGH = new Set(['/favicon.ico', '/robots.txt', '/sitemap.xml'])
+
 function loginUrl(request) {
   const aidreamUrl = process.env.AIDREAM_API_URL
   const callback = `${request.nextUrl.origin}/oauth/callback`
@@ -61,6 +65,13 @@ export async function proxy(request) {
   // /c or /p surface is reachable at all, only that site's own pages.
   const host = normalizeHost(request.headers.get('host'))
   if (!isPlatformHost(host)) {
+    // Root-level well-known static files must serve from public/ even on a
+    // custom domain (the renderer's favicon fallback is `/favicon.ico`).
+    // We can't exclude all dotted paths in the matcher — /_sites/{host} targets
+    // contain dots — so allowlist the specific root files here, before rewrite.
+    if (ROOT_STATIC_PASSTHROUGH.has(pathname)) {
+      return NextResponse.next()
+    }
     const url = request.nextUrl.clone()
     url.pathname = `/_sites/${host}${pathname === '/' ? '' : pathname}`
     return NextResponse.rewrite(url)
