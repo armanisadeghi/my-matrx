@@ -58,6 +58,7 @@ export async function getServerSideProps(props) {
       slugSegments: slug,
       isPreview,
       nav: buildNav(client, { onDomain: true }),
+      req: props.req, // carrier for the W2-C site-key injection (never enters props)
     })
   } catch (error) {
     console.error('Error in getServerSideProps (_sites):', error)
