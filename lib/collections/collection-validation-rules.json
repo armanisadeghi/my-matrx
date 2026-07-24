@@ -1,0 +1,1268 @@
+{
+  "$comment": "CW3 language-neutral drift fixture for validate_item (aidream/services/cms/collection_validation.py) and the my-matrx JS twin. Both implementations MUST run every case byte-identically. expect.rejected_fields / expect.warning_fields are SORTED, DEDUPED key lists. utf8_byte_length_cases / item_byte_size_cases pin the caller-enforced byte-cap counters (UTF-8 bytes; item bytes = compact JSON, no ascii escaping). max_length counts Unicode CODE POINTS (JS: [...s].length or codePointAt iteration, NEVER .length).",
+  "validate_cases": [
+    {
+      "name": "advisory_all_types_valid",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "bio",
+          "type": "richtext"
+        },
+        {
+          "key": "party",
+          "type": "number",
+          "min": 1,
+          "max": 20
+        },
+        {
+          "key": "subscribed",
+          "type": "boolean"
+        },
+        {
+          "key": "email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "key": "site",
+          "type": "url"
+        },
+        {
+          "key": "when",
+          "type": "datetime"
+        },
+        {
+          "key": "service",
+          "type": "select",
+          "options": [
+            "consult",
+            "follow-up"
+          ]
+        },
+        {
+          "key": "extra",
+          "type": "json"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "name": "Ada",
+        "bio": "<p>hello</p>",
+        "party": 4,
+        "subscribed": true,
+        "email": "ada@example.com",
+        "site": "https://example.com/x?y=1",
+        "when": "2026-07-23T10:30:00Z",
+        "service": "consult",
+        "extra": {
+          "any": [
+            "shape",
+            1,
+            true
+          ]
+        }
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "strict_all_types_valid",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "party",
+          "type": "number",
+          "min": 1,
+          "max": 20
+        },
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "name": "Ada",
+        "party": 20,
+        "when": "2026-01-31"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_missing_key_rejects_advisory",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email",
+          "required": true
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {},
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "email"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_missing_key_rejects_strict",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email",
+          "required": true
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {},
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "email"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_null_rejects",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "name": null
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "name"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_empty_string_rejects_advisory",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "name": ""
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "name"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "optional_empty_string_passes",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "notes": ""
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "optional_null_passes_strict",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "notes": null
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_json_empty_object_satisfies",
+      "field_schema": [
+        {
+          "key": "payload",
+          "type": "json",
+          "required": true
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "payload": {}
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "required_json_null_rejects",
+      "field_schema": [
+        {
+          "key": "payload",
+          "type": "json",
+          "required": true
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "payload": null
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "payload"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "unknown_key_passes_advisory",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "name": "x",
+        "sneaky": "value"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "unknown_key_rejects_strict",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "name": "x",
+        "sneaky": "value"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "sneaky"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "string_number_is_type_mismatch_advisory_warns",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "party": "5"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "party"
+        ]
+      }
+    },
+    {
+      "name": "string_number_is_type_mismatch_strict_rejects",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": "5"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "json_exponent_number_1e3_is_valid_number",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": 1000.0
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "string_exponent_1e3_is_mismatch",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": "1e3"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "nan_string_is_mismatch",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": "NaN"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "infinity_string_is_mismatch",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": "Infinity"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "boolean_for_number_is_mismatch",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": true
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "number_below_min_advisory_warns",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number",
+          "min": 1,
+          "max": 20
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "party": 0
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "party"
+        ]
+      }
+    },
+    {
+      "name": "number_above_max_strict_rejects",
+      "field_schema": [
+        {
+          "key": "party",
+          "type": "number",
+          "min": 1,
+          "max": 20
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "party": 21
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "party"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "boolean_strict_true_ok",
+      "field_schema": [
+        {
+          "key": "ok",
+          "type": "boolean"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "ok": false
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "boolean_string_true_is_mismatch",
+      "field_schema": [
+        {
+          "key": "ok",
+          "type": "boolean"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "ok": "true"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "ok"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "boolean_number_one_is_mismatch_advisory_warns",
+      "field_schema": [
+        {
+          "key": "ok",
+          "type": "boolean"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "ok": 1
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "ok"
+        ]
+      }
+    },
+    {
+      "name": "astral_plane_length_counts_code_points_pass",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text",
+          "max_length": 3
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "notes": "😀😀😀"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "astral_plane_over_max_length_strict_rejects",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text",
+          "max_length": 2
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "notes": "😀😀😀"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "notes"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "astral_plane_over_max_length_advisory_warns",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text",
+          "max_length": 2
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "notes": "😀😀😀"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "notes"
+        ]
+      }
+    },
+    {
+      "name": "combining_marks_count_as_separate_code_points",
+      "field_schema": [
+        {
+          "key": "notes",
+          "type": "text",
+          "max_length": 1
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "notes": "é"
+      },
+      "$comment": "e + U+0301 combining acute = 2 code points, over max_length 1",
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "notes"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_date_only_ok",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_minutes_precision_ok",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T10:30"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_zulu_ok",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T10:30:00Z"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_timezone_offset_ok",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T10:30:00+02:00"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_negative_offset_with_fraction_ok",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T10:30:00.123456-07:00"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_space_separator_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23 10:30:00"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_locale_form_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "07/23/2026"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_unpadded_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-1-5"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_month_13_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-13-01"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_feb_30_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-02-30"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_hour_24_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T24:00"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_bad_offset_minutes_is_mismatch",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "when": "2026-07-23T10:30:00+02:60"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "when"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "datetime_advisory_bad_form_warns",
+      "field_schema": [
+        {
+          "key": "when",
+          "type": "datetime"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "when": "next tuesday"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "when"
+        ]
+      }
+    },
+    {
+      "name": "email_invalid_advisory_warns",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "email": "not-an-email"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "email"
+        ]
+      }
+    },
+    {
+      "name": "email_invalid_strict_rejects",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "email": "a@b"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "email"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "email_with_spaces_is_mismatch",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "email": "a b@example.com"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "email"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "url_http_ok",
+      "field_schema": [
+        {
+          "key": "site",
+          "type": "url"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "site": "http://example.com"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "url_ftp_is_mismatch",
+      "field_schema": [
+        {
+          "key": "site",
+          "type": "url"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "site": "ftp://example.com"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "site"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "url_javascript_scheme_is_mismatch",
+      "field_schema": [
+        {
+          "key": "site",
+          "type": "url"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "site": "javascript:alert(1)"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "site"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "select_in_options_ok",
+      "field_schema": [
+        {
+          "key": "service",
+          "type": "select",
+          "options": [
+            "consult",
+            "follow-up"
+          ]
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "service": "follow-up"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "select_not_in_options_strict_rejects",
+      "field_schema": [
+        {
+          "key": "service",
+          "type": "select",
+          "options": [
+            "consult",
+            "follow-up"
+          ]
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "service": "walk-in"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "service"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "select_not_in_options_advisory_warns",
+      "field_schema": [
+        {
+          "key": "service",
+          "type": "select",
+          "options": [
+            "consult",
+            "follow-up"
+          ]
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "service": "walk-in"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": [
+          "service"
+        ]
+      }
+    },
+    {
+      "name": "select_without_options_accepts_any_string",
+      "field_schema": [
+        {
+          "key": "service",
+          "type": "select"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "service": "anything"
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "select_non_string_is_mismatch",
+      "field_schema": [
+        {
+          "key": "service",
+          "type": "select",
+          "options": [
+            "a"
+          ]
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "service": 3
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "service"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "text_non_string_is_mismatch",
+      "field_schema": [
+        {
+          "key": "name",
+          "type": "text"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "name": 42
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "name"
+        ],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "json_accepts_array_and_scalars",
+      "field_schema": [
+        {
+          "key": "a",
+          "type": "json"
+        },
+        {
+          "key": "b",
+          "type": "json"
+        },
+        {
+          "key": "c",
+          "type": "json"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "a": [
+          1,
+          2
+        ],
+        "b": "str",
+        "c": 3.5
+      },
+      "expect": {
+        "ok": true,
+        "rejected_fields": [],
+        "warning_fields": []
+      }
+    },
+    {
+      "name": "mixed_reject_and_warning_advisory",
+      "field_schema": [
+        {
+          "key": "email",
+          "type": "email",
+          "required": true
+        },
+        {
+          "key": "party",
+          "type": "number"
+        }
+      ],
+      "validation_mode": "advisory",
+      "data": {
+        "party": "5",
+        "junk": true
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "email"
+        ],
+        "warning_fields": [
+          "party"
+        ]
+      }
+    },
+    {
+      "name": "unknown_declared_type_is_mismatch_strict",
+      "field_schema": [
+        {
+          "key": "x",
+          "type": "geo"
+        }
+      ],
+      "validation_mode": "strict",
+      "data": {
+        "x": "anything"
+      },
+      "expect": {
+        "ok": false,
+        "rejected_fields": [
+          "x"
+        ],
+        "warning_fields": []
+      }
+    }
+  ],
+  "utf8_byte_length_cases": [
+    {
+      "name": "ascii",
+      "text": "hello",
+      "expect_bytes": 5
+    },
+    {
+      "name": "two_byte",
+      "text": "é",
+      "expect_bytes": 2
+    },
+    {
+      "name": "three_byte_cjk",
+      "text": "日本語",
+      "expect_bytes": 9
+    },
+    {
+      "name": "four_byte_astral",
+      "text": "😀😀😀",
+      "expect_bytes": 12
+    },
+    {
+      "name": "mixed",
+      "text": "a😀é",
+      "expect_bytes": 7
+    },
+    {
+      "name": "empty",
+      "text": "",
+      "expect_bytes": 0
+    }
+  ],
+  "item_byte_size_cases": [
+    {
+      "name": "compact_object",
+      "data": {
+        "a": 1,
+        "b": "x"
+      },
+      "expect_bytes": 15
+    },
+    {
+      "name": "unicode_not_ascii_escaped",
+      "data": {
+        "e": "😀"
+      },
+      "expect_bytes": 12
+    },
+    {
+      "name": "nested",
+      "data": {
+        "a": [
+          1,
+          true,
+          null
+        ],
+        "b": {
+          "c": "é"
+        }
+      },
+      "expect_bytes": 34
+    }
+  ]
+}
