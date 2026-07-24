@@ -160,23 +160,32 @@ async function handleSubmit(req, res) {
   //    success (spam rows are unreadable everywhere public, so the real row id
   //    leaks nothing).
   let isSpam = false
-  if (effective.honeypotField) {
+  let payload = data
+  if (effective.honeypotField && Object.prototype.hasOwnProperty.call(data, effective.honeypotField)) {
     const trapValue = data[effective.honeypotField]
     if (trapValue !== undefined && trapValue !== null && trapValue !== '') {
       isSpam = true
     }
+    // The honeypot is never a real field, so it must not reach the validator or
+    // the stored row. On a STRICT collection, leaving it in made the validator
+    // reject it as an unknown key — a 400 that NAMED the trap field, teaching
+    // the bot exactly what to omit next time and inverting the silent-trap
+    // contract (found live 2026-07-24). Stripping it keeps the trap silent in
+    // both modes and keeps `data` clean of decoy values.
+    payload = { ...data }
+    delete payload[effective.honeypotField]
   }
 
   // 7. Field validation (JS twin of the canonical validator).
   //    Advisory: warnings ride the success response. Strict: reject 400.
   //    required-missing rejects in BOTH modes (inside validateItem).
-  const validation = validateItem(collection.field_schema, data, collection.validation_mode)
+  const validation = validateItem(collection.field_schema, payload, collection.validation_mode)
   if (!validation.ok) {
     return res.status(400).json({ success: false, errors: validation.errors })
   }
 
   // 8. Cheap spam heuristics — flag, never reject (W2C-design §5.6).
-  if (!isSpam && countUrls(data) >= SPAM_URL_THRESHOLD) {
+  if (!isSpam && countUrls(payload) >= SPAM_URL_THRESHOLD) {
     isSpam = true
   }
 
@@ -197,7 +206,7 @@ async function handleSubmit(req, res) {
   const supabase = getSupabaseClient()
   const { data: outcome, error } = await supabase.rpc('submit_collection_item', {
     p_collection_id: collection.id,
-    p_data: data,
+    p_data: payload,
     p_is_spam: isSpam,
     p_source_url: source_url ? String(source_url).slice(0, MAX_SOURCE_URL_LENGTH) : null,
     p_ip: clientIp(req),

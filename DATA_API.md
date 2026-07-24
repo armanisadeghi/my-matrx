@@ -95,7 +95,11 @@ Layered gate on writes (each layer alone survivable; W2C-design §5):
    legitimate workload).
 4. **Honeypot** — `settings.honeypot_field` names a decoy key; a non-empty value flags
    `is_spam=true` and returns a **byte-shape-identical 201** (spam rows are unreadable on every
-   public surface).
+   public surface). The decoy key is **stripped from `data` before validation and before storage**:
+   it is not a declared field, so on a `strict` collection leaving it in produced a 400 that named
+   the trap field — an oracle teaching the bot exactly what to omit next time, and the opposite of a
+   silent trap. Stripping keeps the trap silent in both modes and keeps stored rows free of decoy
+   values. (A genuine undeclared key still rejects under `strict`.)
 5. **Field validation** — advisory/strict per collection (see the validator section).
 6. **Spam heuristics** — ≥ 4 http(s) URLs across string values ⇒ `is_spam=true`; flags, never
    rejects.
