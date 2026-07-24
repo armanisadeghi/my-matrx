@@ -1,5 +1,5 @@
 import { getClientSite } from '@/lib/supabase/clientHelpers'
-import { ClientSiteRenderer, buildNav, loadSitePageProps } from '@/lib/render/clientSiteRenderer'
+import { ClientSiteRenderer, buildNav, loadSitePageProps, siteNotFound } from '@/lib/render/clientSiteRenderer'
 
 // Path-based client-site route: /c/{site}/{slug} and /c/{site}/{category}/{slug}.
 // Thin wrapper over the ONE shared renderer (lib/render/clientSiteRenderer.js).
@@ -16,13 +16,13 @@ export async function getServerSideProps(props) {
 
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE) {
       console.error('Missing Supabase environment variables')
-      return { props: { notFound: true } }
+      return siteNotFound(props.res)
     }
 
     const client = await getClientSite(clientSlug)
     if (!client) {
       console.log('Client not found:', clientSlug)
-      return { props: { notFound: true } }
+      return siteNotFound(props.res)
     }
 
     return await loadSitePageProps({
@@ -31,9 +31,10 @@ export async function getServerSideProps(props) {
       isPreview,
       nav: buildNav(client, { onDomain: false }),
       req: props.req, // carrier for the W2-C site-key injection (never enters props)
+      res: props.res, // lets a missing page answer 404 instead of a soft-404 200
     })
   } catch (error) {
     console.error('Error in getServerSideProps:', error)
-    return { props: { notFound: true } }
+    return siteNotFound(props.res)
   }
 }

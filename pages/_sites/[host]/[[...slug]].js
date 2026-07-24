@@ -1,5 +1,5 @@
 import { getClientSiteByDomain } from '@/lib/supabase/clientHelpers'
-import { ClientSiteRenderer, buildNav, loadSitePageProps } from '@/lib/render/clientSiteRenderer'
+import { ClientSiteRenderer, buildNav, loadSitePageProps, siteNotFound } from '@/lib/render/clientSiteRenderer'
 import { normalizeHost, domainCounterpart } from '@/lib/domains'
 
 // Custom-domain client-site route (W2-E). NEVER reachable by URL: proxy.js
@@ -22,14 +22,14 @@ export async function getServerSideProps(props) {
 
     if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE) {
       console.error('Missing Supabase environment variables')
-      return { props: { notFound: true } }
+      return siteNotFound(props.res)
     }
 
     // proxy.js already normalized + validated the host, but this page must not
     // trust its caller: re-normalize (defense in depth — same funnel).
     const host = normalizeHost(rawHost)
     if (!host) {
-      return { props: { notFound: true } }
+      return siteNotFound(props.res)
     }
 
     let client = await getClientSiteByDomain(host)
@@ -50,7 +50,7 @@ export async function getServerSideProps(props) {
         }
       }
       console.log('No client site for domain:', host)
-      return { props: { notFound: true } }
+      return siteNotFound(props.res)
     }
 
     return await loadSitePageProps({
@@ -59,9 +59,10 @@ export async function getServerSideProps(props) {
       isPreview,
       nav: buildNav(client, { onDomain: true }),
       req: props.req, // carrier for the W2-C site-key injection (never enters props)
+      res: props.res, // lets a missing page answer 404 instead of a soft-404 200
     })
   } catch (error) {
     console.error('Error in getServerSideProps (_sites):', error)
-    return { props: { notFound: true } }
+    return siteNotFound(props.res)
   }
 }
