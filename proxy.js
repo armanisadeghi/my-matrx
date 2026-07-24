@@ -10,7 +10,23 @@ import { normalizeHost, isPlatformHost } from '@/lib/domains'
 const ADMIN_PATHS = ['/admin']
 const ADMIN_API_EXACT = ['/api/create-page', '/api/list-pages']
 
+// ── Public-by-design API surfaces (deliberately OUTSIDE the admin gate) ──────
+// | Path                                            | Why public                                              |
+// |-------------------------------------------------|---------------------------------------------------------|
+// | POST /api/form-submissions (exact)              | legacy visitor form endpoint (pre-W2C)                  |
+// | /api/sites/{site}/collections/{slug}/items[/id] | W2-C visitor runtime (DATA_API.md): writes are gated in |
+// |                                                 | the route itself (X-Matrx-Site-Key + layered abuse gate)|
+// |                                                 | and reads by per-collection public_read + field         |
+// |                                                 | allowlist — an admin cookie gate here would break every |
+// |                                                 | client-site form for anonymous visitors.                |
+// Everything else under /api/sites/ does not exist; there are no admin
+// collection routes in this repo (admin lives in matrx-frontend).
+const PUBLIC_COLLECTIONS_API_RE = /^\/api\/sites\/[^/]+\/collections\/[^/]+\/items(\/[^/]+)?$/
+
 function requiresAdminAuth(pathname) {
+  // Explicit guard: the W2-C public collection routes must NEVER be admin-
+  // gated, even if a future ADMIN_PATHS/ADMIN_API prefix would match them.
+  if (PUBLIC_COLLECTIONS_API_RE.test(pathname)) return false
   if (ADMIN_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) return true
   if (ADMIN_API_EXACT.includes(pathname)) return true
   // form_submissions reads (by id / latest / list / test) can contain user-submitted PII
@@ -61,8 +77,10 @@ export async function proxy(request) {
   // A request whose Host is NOT the platform is a custom client domain:
   // rewrite EVERY path into /_sites/{host}{path}, where the site is resolved
   // by client_sites.domain (unknown domains 404 there). This is strictly
-  // STRONGER than the platform gates below — on a client domain no /api, /admin,
-  // /c or /p surface is reachable at all, only that site's own pages.
+  // STRONGER than the platform gates below — on a client domain no /admin,
+  // /c or /p surface is reachable at all, only that site's own pages plus the
+  // two W2-C public data allowances carved out below (collection items API +
+  // /matrx-data.js), which that site's own forms need same-origin.
   const host = normalizeHost(request.headers.get('host'))
   if (!isPlatformHost(host)) {
     // Root-level well-known static files must serve from public/ even on a
@@ -70,6 +88,14 @@ export async function proxy(request) {
     // We can't exclude all dotted paths in the matcher — /_sites/{host} targets
     // contain dots — so allowlist the specific root files here, before rewrite.
     if (ROOT_STATIC_PASSTHROUGH.has(pathname)) {
+      return NextResponse.next()
+    }
+    // W2-C: a domain-mapped site's own page JS fetches its collection routes
+    // same-origin (matrx-data.js). These are the ONLY /api paths reachable on
+    // a custom domain — the routes themselves gate by site key / public_read,
+    // and the exposure is identical to the platform host (same public routes).
+    // /matrx-data.js is the static helper those pages <script src> include.
+    if (PUBLIC_COLLECTIONS_API_RE.test(pathname) || pathname === '/matrx-data.js') {
       return NextResponse.next()
     }
     const url = request.nextUrl.clone()
