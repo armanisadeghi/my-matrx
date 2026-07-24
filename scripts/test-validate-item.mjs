@@ -21,13 +21,49 @@
  * Exit 1 on any failure OR if the fixture file is missing — a missing fixture
  * means the twin is UNPINNED, which is the dangerous state, not a pass.
  */
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const fixturePath = join(root, 'lib/collections/collection-validation-rules.json')
 const validatorPath = join(root, 'lib/collections/validateItem.js')
+
+// ── Freshness guard: is our COPY still the canonical fixture? ────────────────
+// The suite below proves the JS twin matches the fixture — it says nothing
+// about whether the fixture is current. If aidream adds cases (it has, twice)
+// and this copy is not re-synced, every test still passes while the two
+// validators quietly disagree on the new cases. That is the exact failure this
+// whole fixture exists to prevent, so drift is a FAILURE, not a warning.
+//
+// Checked only when the sibling checkout is present (a developer machine); a
+// standalone clone skips it rather than failing on something it cannot see.
+const CANONICAL_FIXTURE =
+  '/Users/armanisadeghi/code/aidream/aidream/services/cms/collection-validation-rules.json'
+
+function sha1(path) {
+  return createHash('sha1').update(readFileSync(path)).digest('hex')
+}
+
+function checkFixtureFreshness() {
+  if (!existsSync(CANONICAL_FIXTURE)) {
+    console.log('· canonical fixture not on this machine — freshness check skipped')
+    return true
+  }
+  const ours = sha1(fixturePath)
+  const canonical = sha1(CANONICAL_FIXTURE)
+  if (ours === canonical) {
+    console.log(`✓ fixture matches canonical (${ours.slice(0, 12)})`)
+    return true
+  }
+  console.error('✗ FIXTURE DRIFT — this copy is not the canonical fixture.')
+  console.error(`    ours:      ${ours}`)
+  console.error(`    canonical: ${canonical}`)
+  console.error(`    fix: cp ${CANONICAL_FIXTURE} ${fixturePath}`)
+  console.error('    then re-run; new cases may reveal real validator divergences.')
+  return false
+}
 
 // validateItem.js is ESM syntax in a CJS-typed package (Next transpiles it);
 // it is pure + import-free, so load it via a data: URI for Node.
@@ -108,3 +144,4 @@ if (failures > 0) {
   console.error(`FAIL: ${failures} case(s) diverge from the canonical validator — fix validateItem.js (never the fixture).`)
   process.exit(1)
 }
+if (!checkFixtureFreshness()) process.exit(1)
