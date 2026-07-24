@@ -88,6 +88,43 @@ function sortedDedupedKeys(list) {
   return [...new Set((list || []).map((entry) => entry.key))].sort()
 }
 
+// The complete issue-code vocabulary (ruling (i)) — identical in all three
+// implementations, documented in DATA_API.md as a public wire contract. A code
+// outside this set is a divergence even if every field list still matches.
+const ISSUE_CODES = new Set([
+  'required_missing', 'unknown_key', 'type_mismatch',
+  'max_length', 'out_of_range', 'invalid_option',
+])
+
+/**
+ * Sorted [key, code] pairs — NOT deduped, so issue MULTIPLICITY is pinned too
+ * (ruling (j)). Element-wise comparison, matching Python's list ordering; the
+ * default Array#sort would compare the joined "key,code" string instead.
+ */
+function sortedIssuePairs(list) {
+  return (list || [])
+    .map((entry) => [entry.key, entry.code])
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0))
+}
+
+/** Compare against the fixture's expectation; a MISSING expectation fails —
+ *  silently skipping it is how the fixture stayed blind to codes for so long. */
+function checkIssues(problems, label, got, want) {
+  if (want === undefined) {
+    problems.push(`${label}: fixture case has no ${label} — re-copy the canonical fixture`)
+    return
+  }
+  const wantSorted = want
+    .map((p) => [p[0], p[1]])
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0))
+  if (JSON.stringify(got) !== JSON.stringify(wantSorted)) {
+    problems.push(`${label}: expected ${JSON.stringify(wantSorted)}, got ${JSON.stringify(got)}`)
+  }
+  for (const [, code] of got) {
+    if (!ISSUE_CODES.has(code)) problems.push(`${label}: undeclared issue code "${code}"`)
+  }
+}
+
 let total = 0
 let failures = 0
 function check(group, name, problems) {
@@ -120,6 +157,11 @@ for (const c of fixture.validate_cases || []) {
       problems.push(`warning_fields: expected [${want}], got [${got}]`)
     }
   }
+  // (key, code) pairs — the assertion that can actually SEE a code-vocabulary
+  // or multiplicity divergence. Field lists cannot, which is how Python's
+  // coarse `constraint_violation` and its short-circuit survived for months.
+  checkIssues(problems, 'rejected_issues', sortedIssuePairs(result.errors), c.expect.rejected_issues)
+  checkIssues(problems, 'warning_issues', sortedIssuePairs(result.warnings), c.expect.warning_issues)
   check('validate', c.name, problems)
 }
 

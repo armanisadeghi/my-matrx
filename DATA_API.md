@@ -141,10 +141,14 @@ layer), so nothing arriving through these routes is ever legitimately HTML.
 normal-page renders only** — never on previews, never on listing pages, never for sites without
 a data key.
 
-**The helper is auto-included.** The renderer emits `<script src="/matrx-data.js">` before your
-`js_content` whenever that JS mentions `MatrxData`, so you do not add the tag yourself. (It used
-to be a manual include; a page that forgot it died on a `ReferenceError` at the first line of the
-IIFE — no events, no form handler, no visible error. The platform includes it now.)
+**The helper is auto-included.** The renderer emits `<script src="/matrx-data.js">` **before every
+content body** whenever `MatrxData` is mentioned anywhere the page renders — `js_content`,
+`html_content` (including an inline `<script>` or an `onclick=`), or the site's header/footer
+component — so you never add the tag yourself, and it does not matter which of those you put your
+code in. (It used to be a manual include; a page that forgot it died on a `ReferenceError` at the
+first line — no events, no form handler, no visible error. Then the auto-include scanned only
+`js_content`, which reproduced that exact silent death for the shape agents actually author: an
+inline script inside `html_content`. Fixed 2026-07-25, adversarial finding N7.)
 
 **Error contract: every method REJECTS on failure** — deliberately unlike bare `fetch`, which
 resolves on a 4xx. The rejection carries `.status` and `.response` (the parsed body, with
@@ -176,10 +180,19 @@ Normative pins: `max_length` counts Unicode **code points**; byte caps are UTF-8
 `JSON.stringify(data)`; `datetime` is strict ISO-8601 only; numbers must be JSON numbers
 (`"5"` ≠ `5`, NaN/Infinity rejected).
 
-**2026-07-23 twin-divergence rulings (25 proven disagreements closed; fixture 56 → 140
-`validate_cases`).** Each rule is stated in full in the header of `validateItem.js` and,
-word for word, in the `collection_validation.py` docstring — read one of those before
-changing anything here. The traps that bit, so they are not re-introduced:
+**Issue objects are the WIRE CONTRACT** — the 400 body's `errors` and the 201 body's
+`warnings` are these objects verbatim, from all three implementations: `{key, code,
+message}` (the property is `key`, never `field`) with `code` one of exactly six values —
+`required_missing`, `unknown_key`, `type_mismatch`, `max_length`, `out_of_range`,
+`invalid_option`. **Every** constraint failure on a field is reported, not just the first
+(one value can be both over `max_length` and outside `options`); a TYPE mismatch
+short-circuits that field's constraint checks.
+
+**2026-07-23/25 twin-divergence rulings (27 proven disagreements closed across the three
+implementations; fixture 56 → 159 `validate_cases`).** Each rule is stated in full in the
+header of `validateItem.js` and, word for word, in the `collection_validation.py`
+docstring — read one of those before changing anything here. The traps that bit, so they
+are not re-introduced:
 
 - `""` is "missing" **only** for text/richtext/email/url/datetime/select. On `number` /
   `boolean` it is a type mismatch (a blank numeric input must never satisfy `required`);
@@ -196,3 +209,12 @@ changing anything here. The traps that bit, so they are not re-introduced:
   non-empty string is skipped entirely.
 - Numeric comparisons happen on the IEEE-754 double `JSON.parse` produced; a literal that
   parses to `Infinity` is rejected on both sides.
+- `required` constrains **only** when it is the literal boolean `true` — never
+  `if (field.required)`. `[]` and `{}` are truthy in JS and falsy in Python, so
+  language-native truthiness made a field's requiredness depend on which implementation
+  you asked (368 divergences per 5,000 random cases). `1`/`"true"`/`0`/`null` are
+  malformed and ignored too, like any other malformed constraint.
+- The fixture's `expect` asserts sorted `[key, code]` pairs (`rejected_issues` /
+  `warning_issues`), **not** bare field lists. Field lists cannot see a code-vocabulary or
+  multiplicity divergence, and that blindness let Python emit one coarse
+  `constraint_violation` — contradicting this document — for the fixture's whole life.
