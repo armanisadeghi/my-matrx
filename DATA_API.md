@@ -171,3 +171,24 @@ Canonical validation semantics live in aidream (Python). This repo's JS twin is
 Normative pins: `max_length` counts Unicode **code points**; byte caps are UTF-8 bytes of
 `JSON.stringify(data)`; `datetime` is strict ISO-8601 only; numbers must be JSON numbers
 (`"5"` ≠ `5`, NaN/Infinity rejected).
+
+**2026-07-23 twin-divergence rulings (25 proven disagreements closed; fixture 56 → 140
+`validate_cases`).** Each rule is stated in full in the header of `validateItem.js` and,
+word for word, in the `collection_validation.py` docstring — read one of those before
+changing anything here. The traps that bit, so they are not re-introduced:
+
+- `""` is "missing" **only** for text/richtext/email/url/datetime/select. On `number` /
+  `boolean` it is a type mismatch (a blank numeric input must never satisfy `required`);
+  on `json` it is a valid value. This is the highest-traffic real-world shape — browsers
+  submit `""` for untouched inputs.
+- `max_length` applies to **every** string value, whatever the field type.
+- `url` uses the canonical regex. **`new URL()` is banned here** — it accepted `HTTP://`,
+  `Https://`, a leading space, `http:/x` and embedded tabs that aidream rejects.
+- No `\s` in a shared regex (the two engines disagree about U+FEFF and U+001C–U+001F);
+  use `WS_CLASS`. No `Date.UTC` for calendar checks (it maps years 0–99 onto 1900–1999
+  and rejected the valid `"0050-03-01"`).
+- A malformed constraint is **ignored**, never reinterpreted (`max_length: -1`/`true`/
+  `"5"`/`2.5`, `min: true`, a non-array `options`); a field whose `key` is not a
+  non-empty string is skipped entirely.
+- Numeric comparisons happen on the IEEE-754 double `JSON.parse` produced; a literal that
+  parses to `Infinity` is rejected on both sides.
