@@ -9,6 +9,11 @@
  * on sites with no data key — every method throws a clear error then, so a
  * broken form fails loudly instead of silently posting nowhere.
  *
+ * ERROR CONTRACT: every method REJECTS on failure (unlike bare fetch, which
+ * resolves on a 4xx). Write `.then(onSuccess).catch(onFailure)` — the error
+ * carries `.status` and `.response`. A rejected write must never be shown to a
+ * visitor as a success.
+ *
  * SECURITY NOTE FOR PAGE AUTHORS: collection item data is DATA, never HTML.
  * Anything you render into the page from list()/get() MUST go through
  * MatrxData.escapeHtml (or textContent assignment). Interpolating raw item
@@ -35,11 +40,38 @@
     )
   }
 
+  /**
+   * Resolve on success, REJECT on failure — deliberately unlike bare fetch().
+   *
+   * fetch() resolving on a 4xx is a famous footgun, and here it is worse than
+   * usual: the natural pattern a page author writes is
+   *   MatrxData.submit(...).then(showThanks).catch(showError)
+   * With a resolve-on-failure contract, a rate-limited (429) or rejected (400)
+   * booking runs `showThanks` — the visitor is told "we'll be in touch" and the
+   * row does not exist. Observed live during W2-C convergence, on the first
+   * page ever written against this helper. A client silently losing bookings is
+   * the worst failure this system can have, so the API makes the safe pattern
+   * the default one: failures reject, `.catch` is the error path.
+   *
+   * The parsed body is still available as `err.response` (with `.error` /
+   * `.errors` / `._status`) for pages that want to show field-level messages,
+   * and every failure is also logged to the console so a page with no `.catch`
+   * is still diagnosable from the browser.
+   */
   function parseJson(response) {
-    return response.json().then(function (body) {
+    return response.json().catch(function () { return {} }).then(function (body) {
       body = body || {}
       body._status = response.status
-      return body
+      if (response.ok && body.success !== false) return body
+      var err = new Error(
+        'MatrxData: request failed (HTTP ' + response.status + ')' +
+        (body.error ? ' — ' + body.error : '')
+      )
+      err.response = body
+      err.status = response.status
+      // Loud by default: a swallowed failure here is a lost customer.
+      if (window.console && console.error) console.error(err.message, body)
+      throw err
     })
   }
 
@@ -84,9 +116,10 @@
      *   (allow_upsert collections only), or the string 'auto' to generate and
      *   persist one per (site, collection) — the autosave pattern.
      * @param {string} [opts.sourceUrl] - defaults to the current page URL.
-     * @returns {Promise<Object>} {success, id, warnings, _status} on success;
-     *   {success:false, error|errors, _status} on failure. Never throws on
-     *   HTTP errors — check .success.
+     * @returns {Promise<Object>} resolves {success, id, warnings, _status}.
+     *   REJECTS on any failure (429 rate limit, 400 validation, 404) with an
+     *   Error carrying `.status` and `.response` — so `.catch()` is the error
+     *   path and a rejected submission can never be reported as a success.
      */
     submit: function (collection, data, opts) {
       opts = opts || {}

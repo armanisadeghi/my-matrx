@@ -127,12 +127,30 @@ layer), so nothing arriving through these routes is ever legitimately HTML.
 
 ## matrx-data.js
 
-`<script src="/matrx-data.js"></script>` on any published page gives `window.MatrxData`:
-`submit(collection, data, {idempotencyKey, sourceUrl})`, `list(collection, {page, perPage})`,
-`get(collection, id)`, `escapeHtml(s)`. It reads `window.__MATRX_SITE__` (slug + data key),
-which the platform injects on **published normal-page renders only** — never on previews, never
-on listing pages, never for sites without a data key. Methods resolve with the parsed JSON body
-plus `_status`; they don't throw on HTTP errors — check `.success`.
+`window.MatrxData` gives `submit(collection, data, {idempotencyKey, sourceUrl})`,
+`list(collection, {page, perPage})`, `get(collection, id)`, `escapeHtml(s)`. It reads
+`window.__MATRX_SITE__` (slug + data key), which the platform injects on **published
+normal-page renders only** — never on previews, never on listing pages, never for sites without
+a data key.
+
+**The helper is auto-included.** The renderer emits `<script src="/matrx-data.js">` before your
+`js_content` whenever that JS mentions `MatrxData`, so you do not add the tag yourself. (It used
+to be a manual include; a page that forgot it died on a `ReferenceError` at the first line of the
+IIFE — no events, no form handler, no visible error. The platform includes it now.)
+
+**Error contract: every method REJECTS on failure** — deliberately unlike bare `fetch`, which
+resolves on a 4xx. The rejection carries `.status` and `.response` (the parsed body, with
+`.error` / `.errors` / `._status`), and is logged to the console. Write:
+
+```js
+MatrxData.submit('bookings', data)
+  .then(function () { status.textContent = 'Thanks — we will be in touch.' })
+  .catch(function (err) { status.textContent = 'Sorry, that did not go through.' })
+```
+
+This contract exists because the opposite one bit immediately: with resolve-on-failure, a
+rate-limited (429) booking ran the `.then` branch and told a visitor "we'll be in touch" while no
+row existed. **A write that did not land must never be reported to a visitor as a success.**
 
 ## Validator fixture-twin contract (CW3)
 
