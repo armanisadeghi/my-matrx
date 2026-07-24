@@ -65,7 +65,7 @@ with the same UUID key update ONE row instead of minting new ones (`matrx-data.j
 collections the key is silently ignored. **Residual risk (accepted, design §8-A4):** the key is
 `uuid`-typed so guessable/semantic keys are impossible, but an attacker who *steals* a live key
 (client-side compromise) can overwrite that one draft row — drafts are low-stakes; never derive
-keys from PII.
+keys from PII. A key whose row was soft-deleted (retention purge or admin delete) is NOT an upsert target — a resubmit starts a fresh, visible row rather than writing into a tombstone the owner can never see (CMS migration 0020).
 
 ### GET list / GET item — public reads
 
@@ -90,9 +90,13 @@ Layered gate on writes (each layer alone survivable; W2C-design §5):
    default 64 KiB UTF-8 (`settings.max_item_bytes`, ceiling 512 KiB); ≤ 200 keys after flatten.
 3. **Rate limits** — sliding 1-hour windows, default 30/IP/collection and 500/site, counted and
    enforced **atomically inside the DB function** `submit_collection_item()` (count-then-insert
-   from the route would race). Windows count *inserts*; idempotency-key *updates* of an existing
-   draft are deliberately uncounted (bounded to one row per key; autosave is the dominant
-   legitimate workload).
+   from the route would race). **Every write counts, including idempotency-key updates.** An
+   earlier version exempted upsert updates on the theory that they are "bounded to one row per
+   key" — true of *storage*, false of *work*: replaying one key with 512 KB bodies was an uncapped
+   write channel (plus tsvector/GIN churn on searchable collections) for anyone holding the site
+   key, which ships in page HTML by design. The windows count `visitor_write_at`, a column stamped
+   only by this function — never `created_at` (misses replays) and never `updated_at` (admin triage
+   would burn the visitors' budget). CMS migrations 0020 + 0021.
 4. **Honeypot** — `settings.honeypot_field` names a decoy key; a non-empty value flags
    `is_spam=true` and returns a **byte-shape-identical 201** (spam rows are unreadable on every
    public surface). The decoy key is **stripped from `data` before validation and before storage**:
