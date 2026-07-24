@@ -3,16 +3,20 @@
  * Fixture runner for the collection-item validator twin (CW3 drift guard).
  *
  * Runs EVERY case in lib/collections/collection-validation-rules.json (copied
- * verbatim from aidream/aidream/services/cms/ — the Python side owns the
- * canonical semantics) against lib/collections/validateItem.js.
+ * verbatim from aidream/aidream/services/cms/collection-validation-rules.json —
+ * the Python validate_item owns the canonical semantics; never edit the copy)
+ * against lib/collections/validateItem.js, plus the byte-cap counter cases the
+ * ROUTE enforces (pages/api/sites/.../items/index.js uses the same counters).
  *
  *   pnpm test:collections
  *
- * Case shape (the house url-rules.json pattern): top-level "*cases" arrays of
- * {name, input, expect}. input: {field_schema|schema, data, mode|validation_mode}.
- * expect: any of {ok|valid, errors, warnings} — errors/warnings compared as
- * order-insensitive (key, code) sets when entries are objects, or as code/key
- * string sets when entries are strings.
+ * Fixture contract (from the fixture's $comment):
+ *  - validate_cases: {name, field_schema, data, validation_mode,
+ *    expect: {ok, rejected_fields, warning_fields}} — rejected/warning are
+ *    SORTED, DEDUPED lists of field KEYS.
+ *  - utf8_byte_length_cases: {name, text, expect_bytes} — UTF-8 byte counter.
+ *  - item_byte_size_cases: {name, data, expect_bytes} — compact JSON bytes,
+ *    no ascii escaping (i.e. Buffer.byteLength(JSON.stringify(data))).
  *
  * Exit 1 on any failure OR if the fixture file is missing — a missing fixture
  * means the twin is UNPINNED, which is the dangerous state, not a pass.
@@ -35,7 +39,7 @@ const { validateItem } = await import(
 let fixture
 try {
   fixture = JSON.parse(readFileSync(fixturePath, 'utf8'))
-} catch (err) {
+} catch {
   console.error(`FAIL: fixture not readable at ${fixturePath}`)
   console.error(
     'The validator twin is UNPINNED without it. Copy it verbatim from ' +
@@ -44,70 +48,62 @@ try {
   process.exit(1)
 }
 
-// Collect every case from any top-level array whose key mentions "cases",
-// falling back to any top-level array of {input, expect} objects.
-const cases = []
-for (const [key, value] of Object.entries(fixture)) {
-  if (!Array.isArray(value)) continue
-  if (!/cases?$/i.test(key) && !value.every((c) => c && c.input && c.expect)) continue
-  for (const c of value) {
-    if (c && typeof c === 'object' && c.input && c.expect) cases.push({ group: key, ...c })
-  }
-}
-if (cases.length === 0) {
-  console.error('FAIL: fixture parsed but contained zero recognizable cases — inspect its shape.')
-  process.exit(1)
+function sortedDedupedKeys(list) {
+  return [...new Set((list || []).map((entry) => entry.key))].sort()
 }
 
-function problemSet(list) {
-  // Normalize an errors/warnings list to a sorted multiset of "key:code" tags.
-  return (list || [])
-    .map((entry) => {
-      if (typeof entry === 'string') return entry
-      const key = entry.key ?? entry.field ?? ''
-      const code = entry.code ?? entry.error ?? entry.type ?? ''
-      return `${key}:${code}`
-    })
-    .sort()
-}
-
+let total = 0
 let failures = 0
-for (const testCase of cases) {
-  const input = testCase.input
-  const schema = input.field_schema ?? input.schema ?? []
-  const mode = input.mode ?? input.validation_mode ?? 'advisory'
-  const result = validateItem(schema, input.data ?? {}, mode)
-
-  const problems = []
-  const expect = testCase.expect
-
-  const expectedOk = expect.ok ?? expect.valid
-  if (expectedOk !== undefined && result.ok !== expectedOk) {
-    problems.push(`ok: expected ${expectedOk}, got ${result.ok}`)
-  }
-  if (expect.errors !== undefined) {
-    const want = problemSet(expect.errors)
-    const got = problemSet(result.errors)
-    if (JSON.stringify(want) !== JSON.stringify(got)) {
-      problems.push(`errors: expected [${want}], got [${got}]`)
-    }
-  }
-  if (expect.warnings !== undefined) {
-    const want = problemSet(expect.warnings)
-    const got = problemSet(result.warnings)
-    if (JSON.stringify(want) !== JSON.stringify(got)) {
-      problems.push(`warnings: expected [${want}], got [${got}]`)
-    }
-  }
-
+function check(group, name, problems) {
+  total++
   if (problems.length > 0) {
     failures++
-    console.error(`✗ [${testCase.group}] ${testCase.name || '(unnamed)'}`)
+    console.error(`✗ [${group}] ${name}`)
     for (const p of problems) console.error(`    ${p}`)
   }
 }
 
-console.log(`${cases.length - failures}/${cases.length} fixture cases passed`)
+// ── 1. validate_cases ────────────────────────────────────────────────────────
+for (const c of fixture.validate_cases || []) {
+  const result = validateItem(c.field_schema, c.data, c.validation_mode)
+  const problems = []
+  if (c.expect.ok !== undefined && result.ok !== c.expect.ok) {
+    problems.push(`ok: expected ${c.expect.ok}, got ${result.ok}`)
+  }
+  if (c.expect.rejected_fields !== undefined) {
+    const got = sortedDedupedKeys(result.errors)
+    const want = [...c.expect.rejected_fields].sort()
+    if (JSON.stringify(got) !== JSON.stringify(want)) {
+      problems.push(`rejected_fields: expected [${want}], got [${got}]`)
+    }
+  }
+  if (c.expect.warning_fields !== undefined) {
+    const got = sortedDedupedKeys(result.warnings)
+    const want = [...c.expect.warning_fields].sort()
+    if (JSON.stringify(got) !== JSON.stringify(want)) {
+      problems.push(`warning_fields: expected [${want}], got [${got}]`)
+    }
+  }
+  check('validate', c.name, problems)
+}
+
+// ── 2. utf8_byte_length_cases (the route's string byte counter) ─────────────
+for (const c of fixture.utf8_byte_length_cases || []) {
+  const got = Buffer.byteLength(c.text, 'utf8')
+  check('utf8_bytes', c.name, got === c.expect_bytes ? [] : [`expected ${c.expect_bytes} bytes, got ${got}`])
+}
+
+// ── 3. item_byte_size_cases (the route's item size authority) ───────────────
+for (const c of fixture.item_byte_size_cases || []) {
+  const got = Buffer.byteLength(JSON.stringify(c.data), 'utf8')
+  check('item_bytes', c.name, got === c.expect_bytes ? [] : [`expected ${c.expect_bytes} bytes, got ${got}`])
+}
+
+if (total === 0) {
+  console.error('FAIL: fixture parsed but contained zero cases — inspect its shape.')
+  process.exit(1)
+}
+console.log(`${total - failures}/${total} fixture cases passed`)
 if (failures > 0) {
   console.error(`FAIL: ${failures} case(s) diverge from the canonical validator — fix validateItem.js (never the fixture).`)
   process.exit(1)
