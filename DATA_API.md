@@ -5,7 +5,7 @@ The visitor-facing data API for client-site collections (W2-C). Served by this r
 Definitions/admin live elsewhere (aidream services + matrx-frontend `/cms`); this file is the
 contract for **page JS talking to these routes** and for the agents that author such pages.
 
-System-of-record for the whole CMS platform: `/Users/armanisadeghi/code/common-docs/cms-system/FEATURE.md`.
+System-of-record for the whole CMS platform: `/Users/armanisadeghi/code/common-docs/systems/cms-system/FEATURE.md`.
 Design of record: `aidream/docs/cms_agent_authoring/W2C-design.md`.
 
 ---
