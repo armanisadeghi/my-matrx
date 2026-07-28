@@ -3,6 +3,7 @@
  * Tests for the two data-driven render layers:
  *   lib/render/themeCss.js  — theme_config → the leading `:root{}` cascade layer
  *   lib/render/siteNav.js   — navigation / show_in_nav → the `<!--matrx:nav-->` menu
+ *   lib/render/cascade.js   — layer order + the use_client_header/footer CSS gating
  *
  *   pnpm test:render
  *
@@ -19,6 +20,7 @@
  */
 import { themeConfigToCss, isSafeCssValue } from '../lib/render/themeCss.js'
 import { NAV_TOKEN, resolveNavItems, renderNavHtml, injectNav, hasNavToken } from '../lib/render/siteNav.js'
+import { buildCombinedCss } from '../lib/render/cascade.js'
 
 let total = 0
 let failures = 0
@@ -161,6 +163,60 @@ eq(
   'token: every occurrence is replaced (header AND footer can both carry one)',
   injectNav(`${NAV_TOKEN}|${NAV_TOKEN}`, [{ label: 'A', href: '/a' }]).split('<nav').length - 1,
   2
+)
+
+// ── cascade: layer order and the use_client_header/footer gating ────────────
+// C5 REGRESSION: the flags gate a component's CSS exactly as they gate its
+// markup. The renderer used to emit header/footer CSS unconditionally while
+// aidream's `resolve_cascade` gated it, so `cms_inspect css_cascade` reported a
+// cascade the live site did not serve. TWIN: aidream cascade.py — change both.
+const HDR = { css_content: '.h{color:red}' }
+const FTR = { css_content: '.f{color:blue}' }
+const cascadeArgs = (page) => ({
+  themeCss: ':root {\n  --a: 1;\n}',
+  globalCss: '.g{color:green}',
+  headerComponent: HDR,
+  footerComponent: FTR,
+  page,
+})
+const bothOn = { css_content: '.p{color:pink}', use_client_header: true, use_client_footer: true }
+
+eq(
+  'cascade: order is theme → global → header → footer → page',
+  buildCombinedCss(cascadeArgs(bothOn)),
+  ':root {\n  --a: 1;\n}\n\n.g{color:green}\n\n.h{color:red}\n\n.f{color:blue}\n\n.p{color:pink}'
+)
+eq(
+  'cascade: use_client_header=false drops the header CSS (and ONLY it)',
+  buildCombinedCss(cascadeArgs({ ...bothOn, use_client_header: false })),
+  ':root {\n  --a: 1;\n}\n\n.g{color:green}\n\n.f{color:blue}\n\n.p{color:pink}'
+)
+eq(
+  'cascade: use_client_footer=false drops the footer CSS (and ONLY it)',
+  buildCombinedCss(cascadeArgs({ ...bothOn, use_client_footer: false })),
+  ':root {\n  --a: 1;\n}\n\n.g{color:green}\n\n.h{color:red}\n\n.p{color:pink}'
+)
+eq(
+  'cascade: both flags false → neither component CSS ships (the dev-website verify-* fixtures)',
+  buildCombinedCss(cascadeArgs({ ...bothOn, use_client_header: false, use_client_footer: false })),
+  ':root {\n  --a: 1;\n}\n\n.g{color:green}\n\n.p{color:pink}'
+)
+eq(
+  'cascade: blank layers drop out entirely, no stray blank lines',
+  buildCombinedCss({ themeCss: '', globalCss: null, headerComponent: { css_content: null },
+    footerComponent: undefined, page: { css_content: '.p{}', use_client_header: true, use_client_footer: true } }),
+  '.p{}'
+)
+eq(
+  'cascade: every layer blank → empty string (no <style> tag is emitted)',
+  buildCombinedCss({ page: { css_content: null, use_client_header: true, use_client_footer: true } }),
+  ''
+)
+eq(
+  'cascade: a site with no header/footer rows is unaffected by the flags',
+  buildCombinedCss({ themeCss: ':root {\n  --a: 1;\n}', globalCss: '.g{}',
+    page: { css_content: '.p{}', use_client_header: false, use_client_footer: false } }),
+  ':root {\n  --a: 1;\n}\n\n.g{}\n\n.p{}'
 )
 
 console.warn = realWarn

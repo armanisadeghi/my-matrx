@@ -20,9 +20,24 @@ CSS is organized in a cascading hierarchy to maximize reusability and minimize d
 
 CSS loads in this order, so later styles can override earlier ones.
 
-Assembled in `lib/render/clientSiteRenderer.js`. **Mirrored server-side** in aidream
-(`aidream/services/cms_introspect/cascade.py`, which powers `cms_inspect css_cascade`) —
-change one and you must change the other or the tool lies about what the site serves.
+Assembled by `buildCombinedCss` in `lib/render/cascade.js` (the renderer just calls it).
+**Mirrored server-side** in aidream (`aidream/services/cms_introspect/cascade.py` `resolve_cascade`,
+which powers `cms_inspect css_cascade`) — change one and you must change the other or the tool lies
+about what the site serves.
+
+### A page that opts out of a component does not carry its CSS
+
+`client_pages.use_client_header` / `use_client_footer` gate the component's **stylesheet** exactly as
+they gate its markup. A headerless page shipping header CSS is dead bytes at best, and at worst live
+rules (resets, `body` declarations) styling a header that isn't on the page.
+
+`buildCombinedCss` owns this decision on this side, and `resolve_cascade` owns it on aidream's;
+neither caller pre-gates, so each side has exactly one home for the rule. Until 2026-07-27 the
+renderer gated only the markup and emitted the CSS unconditionally, so `cms_inspect css_cascade`
+(which always gated) reported a cascade the live site did not serve. Enabling the gate changed only
+the two `dev-website` `verify-*` fixtures — verified by diffing all 31 published pages before and
+after; all 19 iopbm pages came back byte-identical, because iopbm's header/footer rows have
+`css_content = NULL`. Covered by `pnpm test:render`.
 
 ---
 

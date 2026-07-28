@@ -62,12 +62,19 @@ drive it. `pnpm test:render` covers both.
 
 ### `theme_config` → CSS variables (`lib/render/themeCss.js`)
 
-The CSS cascade is `theme → global_css → header css → footer css → page css`. The `theme` layer is a
-`:root{}` block generated from `client_sites.theme_config` — naming contract, allowlist and examples
-in [docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
+The CSS cascade is `theme → global_css → header css → footer css → page css`, assembled by
+`buildCombinedCss` in `lib/render/cascade.js`. The `theme` layer is a `:root{}` block generated from
+`client_sites.theme_config` — naming contract, allowlist and examples in
+[docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
 
-- **Mirrored in aidream** (`aidream/services/cms_introspect/cascade.py`, powering
-  `cms_inspect css_cascade`). **Change both or they drift.**
+- **`use_client_header`/`use_client_footer` gate the component's CSS, not just its HTML.** A page
+  that opted out of the header does not carry header CSS. `lib/render/cascade.js` is the only place
+  that decides this; the renderer never pre-gates.
+
+- **Mirrored in aidream** (`aidream/services/cms_introspect/cascade.py` `resolve_cascade`, powering
+  `cms_inspect css_cascade`). **Change both or they drift.** They did drift once, on exactly the
+  gating above (fixed 2026-07-27) — the tool is contractually required to mirror the renderer, so a
+  change here that skips the twin makes the tool lie.
 - It comes FIRST on purpose: a site's own hand-written `:root` in `global_css` re-declares later and
   wins, so enabling the column changed nothing visually on any live site.
 
