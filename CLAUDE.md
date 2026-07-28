@@ -54,6 +54,45 @@ Clean URLs via `next.config.js` rewrites:
 
 ---
 
+## Client-site rendering — the data is authoritative
+
+One renderer serves every client site: `lib/render/clientSiteRenderer.js` (both `pages/c/…` and the
+custom-domain `pages/_sites/…` route are thin wrappers). Two columns that used to sit inert now
+drive it. `pnpm test:render` covers both.
+
+### `theme_config` → CSS variables (`lib/render/themeCss.js`)
+
+The CSS cascade is `theme → global_css → header css → footer css → page css`. The `theme` layer is a
+`:root{}` block generated from `client_sites.theme_config` — naming contract, allowlist and examples
+in [docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
+
+- **Mirrored in aidream** (`aidream/services/cms_introspect/cascade.py`, powering
+  `cms_inspect css_cascade`). **Change both or they drift.**
+- It comes FIRST on purpose: a site's own hand-written `:root` in `global_css` re-declares later and
+  wins, so enabling the column changed nothing visually on any live site.
+
+### `navigation` / `show_in_nav` → a menu (`lib/render/siteNav.js`)
+
+**Nav is NEVER auto-injected.** It replaces the literal token `<!--matrx:nav-->` in a header or
+footer component's `html_content`. No token → output is byte-identical to before the feature
+existed, which is what keeps hand-written menus (iopbm) working untouched. Do not "helpfully" widen
+this — a site that did not ask for a menu must not grow one.
+
+- Resolution: a non-empty `client_sites.navigation` array of `{label, href}` wins verbatim;
+  otherwise derived from pages where `is_published` AND `show_in_nav`, ordered by `sort_order` then
+  `title`, href = `nav.basePath` + `pagePath(page)` (correct on `/c/{slug}/…` AND a custom domain).
+- Markup is `<nav class="matrx-nav"><ul><li><a>…` with `aria-current="page"`, no inline styles —
+  sites style `.matrx-nav` themselves.
+- Every label and href is escaped server-side; non-navigating href schemes are neutralized.
+
+### Live-site safety
+
+`iopbm` and `prp-injection-md` are REAL client sites — treat them as read-only. `dev-website` is the
+sandbox (`agent_write_policy=full`) and carries the nav-token fixture. Prove any renderer change by
+diffing a rendered `/c/iopbm/…` page before and after.
+
+---
+
 ## Integration
 
 Pages from this site are embedded via iframe in the main AI Matrx admin app. See `MAIN_APP_INTEGRATION_INSTRUCTIONS.md` for the full integration guide.
@@ -66,5 +105,6 @@ Pages from this site are embedded via iframe in the main AI Matrx admin app. See
 |---------|---------|
 | `pnpm dev` | Start dev server |
 | `pnpm build` | Build for production |
+| `pnpm test:render` | Theme-CSS + nav-token render-layer tests |
 | `node -e "..."` | Generate UUID for new pages (`pnpm generate-uuid`) |
 | `pnpm env:pull` | Pull env from Doppler |

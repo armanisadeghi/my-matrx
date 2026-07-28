@@ -7,16 +7,66 @@ CSS is organized in a cascading hierarchy to maximize reusability and minimize d
 ## 📊 CSS Hierarchy (Order of Application)
 
 ```
-1. Global CSS (client_sites.global_css)
+1. Theme variables (client_sites.theme_config → a generated :root{} block)
    ↓
-2. Component CSS (client_components.css_content) 
+2. Global CSS (client_sites.global_css)
    ↓
-3. Page CSS (client_pages.css_content)
+3. Component CSS (client_components.css_content)
    ↓
-4. Inline Styles (highest priority)
+4. Page CSS (client_pages.css_content)
+   ↓
+5. Inline Styles (highest priority)
 ```
 
 CSS loads in this order, so later styles can override earlier ones.
+
+Assembled in `lib/render/clientSiteRenderer.js`. **Mirrored server-side** in aidream
+(`aidream/services/cms_introspect/cascade.py`, which powers `cms_inspect css_cascade`) —
+change one and you must change the other or the tool lies about what the site serves.
+
+---
+
+## 🎛 Theme variables — `client_sites.theme_config` (the data IS the theme)
+
+**Location:** `client_sites.theme_config` (JSONB) · **Code:** `lib/render/themeCss.js`
+
+The renderer generates a `:root{}` block from this column and puts it FIRST in the cascade. Set a
+color once in the database and every page gets the variable — no CSS to write, no duplication.
+
+**Naming contract** — `theme_config.{group}.{key}` → `--{group minus a trailing "s"}-{key with `_`→`-`}`:
+
+| `theme_config`                     | CSS custom property        |
+|------------------------------------|----------------------------|
+| `colors.primary_teal`              | `--color-primary-teal`     |
+| `fonts.primary`                    | `--font-primary`           |
+| `spacing.section`                  | `--spacing-section`        |
+| `radii.card`                       | `--radii-card`             |
+| a top-level scalar, e.g. `tracking`| `--tracking`               |
+
+```json
+{
+  "colors": { "primary_teal": "#3BA5A5", "text_dark": "#333333" },
+  "fonts":  { "primary": "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" }
+}
+```
+→
+```css
+:root {
+  --color-primary-teal: #3BA5A5;
+  --color-text-dark: #333333;
+  --font-primary: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
+}
+```
+
+**Rules:**
+- Only string/number values are emitted. Nested objects, `null` and empty strings are skipped.
+- Values must clear a conservative allowlist: hex colors, `rgb()`/`rgba()`/`hsl()`/`hsla()`,
+  `var()`/`calc()`/`min()`/`max()`/`clamp()`, numbers with units, keyword and font-family lists.
+  Anything else — `url()`, gradients, `@import`, a stray `;` or `}` — is **dropped** and logged
+  (`[theme_config] rejected unsafe value…`). Put those in `global_css`.
+- **A hand-written `:root` in `global_css` still wins**, because it is declared later. That is why
+  turning this column on changed nothing visually on any existing site — but it also means the
+  duplication is now removable: delete the hand-written variables and let the data drive them.
 
 ---
 
@@ -150,7 +200,7 @@ footer::before {
 ## 🎯 Best Practices
 
 ### 1. Use CSS Variables for Consistency
-Always reference global CSS variables instead of hardcoding colors:
+Declare them in `theme_config` (above) and always reference them instead of hardcoding colors:
 
 ✅ **Good:**
 ```css
@@ -301,6 +351,7 @@ Visit `/c/iopbm/services` - Header, footer, colors all work! ✅
 
 | CSS Type | Location | Purpose | Examples |
 |----------|----------|---------|----------|
+| **Theme** | `client_sites.theme_config` | Generated `:root{}` variables (first layer) | `--color-primary-teal`, `--font-primary` |
 | **Global** | `client_sites.global_css` | Theme-wide, header, footer | Colors, nav, footer, buttons |
 | **Component** | `client_components.css_content` | Component variations | Special header states |
 | **Page** | `client_pages.css_content` | Page-unique styles | Hero section, about section |
