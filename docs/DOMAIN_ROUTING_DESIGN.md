@@ -39,7 +39,9 @@ the renderer; extend the shared module.
    them the day a domain is attached. Instead the `/c/` render emits a **cross-domain
    canonical** (`https://{domain}/...`) so search engines consolidate onto the domain.
    Duplicate-content risk is handled by the canonical tag, the standard mechanism.
-5. **Canonical / og:url on a custom domain:** `https://{domain}/{category?}/{slug}` (page's
+5. **Canonical / og:url on a custom domain:** `https://{domain}{route}` — the page's
+   full path at any depth (`client_pages.route`, CMS migration 0028; was
+   `/{category?}/{slug}`, capped at two segments, until 2026-07-27). (page's
    explicit `canonical_url` column still wins when set). Home page: the domain root `/`
    302-redirects to `/{homeSlug}` (exact parity with `/c/{site}` behavior); canonical lives on
    the slug URL.
@@ -72,7 +74,7 @@ the renderer; extend the shared module.
 ## C4 URL contract (cross-repo, updated in the same change)
 
 - `aidream/aidream/services/cms/urls.py` — `page_urls(..., domain=None)`: when `domain` is
-  set, `path` is domain-rooted (`/{category?}/{slug}`), `live_url = https://{domain}{path}`,
+  set, `path` is domain-rooted (`{route}`, any depth), `live_url = https://{domain}{path}`,
   `root_url = https://{domain}` (home pages), and `preview_url` stays on mymatrx `/c/` form.
   `SiteSummary.live_url` becomes `https://{domain}` when set; site `preview_url` unchanged.
 - `aidream/aidream/services/cms/url-rules.json` — fixture gained `domain` cases; both suites

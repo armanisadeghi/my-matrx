@@ -85,6 +85,69 @@ color once in the database and every page gets the variable — no CSS to write,
 
 ---
 
+## 🦶 Footer — `client_sites.footer_config` (layout) + `contact_info` / `social_links` (content)
+
+**Location:** `client_sites.footer_config` (JSONB) · **Code:** `lib/render/siteFooter.js`
+
+Same contract as the nav menu: **opt-in via a token**. The generated footer replaces the literal
+`<!--matrx:footer-->` in a header or footer component's `html_content`. **No token → nothing is
+emitted and the page is byte-identical** to before this feature existed — which is why iopbm's
+hand-written `<footer>` is completely unaffected.
+
+`footer_config` is **layout only**. The content of the contact and social blocks comes from the
+columns that already own it — `contact_info` and `social_links` — so nothing is duplicated:
+
+```json
+{
+  "columns": [
+    { "heading": "Locations", "links": [{ "label": "Austin", "href": "/locations/austin" }] }
+  ],
+  "show_contact": true,  "contact_heading": "Contact",
+  "show_social":  true,  "social_heading":  "Follow Us",
+  "order": ["columns", "contact", "social"],
+  "copyright": "© 2025 Acme, Inc.",
+  "legal_links": [{ "label": "Privacy", "href": "/privacy" }]
+}
+```
+→
+```html
+<!-- emitted AT the token, i.e. inside the site's own <footer> element -->
+<div class="matrx-footer-cols">
+  <div class="matrx-footer-col"><h3>Locations</h3><ul><li><a href="/c/acme/locations/austin">Austin</a></li></ul></div>
+  <div class="matrx-footer-col"><h3>Contact</h3><ul><li>1 Main St</li><li><a href="tel:+15550102030">(555) 010-2030</a></li></ul></div>
+  <div class="matrx-footer-col"><h3>Follow Us</h3><ul><li><a href="https://x.test/acme">Twitter</a></li></ul></div>
+</div>
+<div class="matrx-footer-bottom"><p>© 2025 Acme, Inc.</p><ul class="matrx-footer-legal">…</ul></div>
+```
+
+**Rules:**
+- `{}` — the value on every site today — renders **nothing**. Populating the column is what turns it on.
+- **Hrefs starting with `/` are site-relative** and get the serving surface's base path, so one
+  config is correct on `/c/{slug}/…` *and* on a custom domain. Anchors, `mailto:`, `tel:` and
+  absolute URLs pass through verbatim. (Contrast `navigation`, whose explicit override is used
+  verbatim. iopbm's hand-written footer hard-codes `/c/iopbm/…` and would break the day it gets a
+  domain — authoring `/services` and letting the renderer prefix it is the fix.)
+- `show_contact` / `show_social` only *place* a block; if `contact_info` / `social_links` is empty
+  the block does not appear. `contact_info` understands `{phone, phone_raw, email, address:{street,
+  city, state, zip}}` — `phone_raw` supplies the `tel:` href, `phone` the display text.
+  `social_links` accepts a `{platform: url}` map or a `[{platform, url}]` list.
+- `copyright` omitted → `© {current year} {site name}`. Omit both name and value and no bottom bar
+  is emitted at all.
+- `order` sequences the column blocks. A block left out of `order` still renders (appended in the
+  default order) — a typo must never silently delete a footer column.
+- Every heading, label and href is **escaped server-side** and non-navigating href schemes are
+  neutralized to `#`. `footer_config` is agent-authored and API-writable.
+- **No inline styles, and no outer wrapper.** The blocks are emitted at the token, inside the site's
+  own `<footer>`. `.matrx-footer` is deliberately NOT used — that class belongs to the `<footer>`
+  element itself (aidream's starter kit emits `<footer class="matrx-footer">` and ships CSS for it),
+  so a second one would double its border/padding/background. Sites style `.matrx-footer-cols`,
+  `.matrx-footer-col`, `.matrx-footer-bottom` and `.matrx-footer-legal` — those names are the contract.
+
+Covered by `pnpm test:render`; the live fixture is `dev-website` (its footer component carries the
+token).
+
+---
+
 ## 🌍 Global CSS
 
 **Location:** `client_sites.global_css`
@@ -367,6 +430,7 @@ Visit `/c/iopbm/services` - Header, footer, colors all work! ✅
 | CSS Type | Location | Purpose | Examples |
 |----------|----------|---------|----------|
 | **Theme** | `client_sites.theme_config` | Generated `:root{}` variables (first layer) | `--color-primary-teal`, `--font-primary` |
+| **Footer** | `client_sites.footer_config` | Footer *markup* at `<!--matrx:footer-->` (style `.matrx-footer*` in global CSS) | Link columns, contact, social, copyright |
 | **Global** | `client_sites.global_css` | Theme-wide, header, footer | Colors, nav, footer, buttons |
 | **Component** | `client_components.css_content` | Component variations | Special header states |
 | **Page** | `client_pages.css_content` | Page-unique styles | Hero section, about section |

@@ -222,16 +222,38 @@ When a page has `page_type = 'listing'`, the system automatically:
 
 ## 🔀 Routing Priority
 
-Routes are matched in this order:
+> **UPDATED 2026-07-27 — there is no longer a depth limit.** A page's public
+> path is `client_pages.route`: a trigger derives it from the page's parent
+> chain (CMS migration 0028), it is UNIQUE per site, and the renderer matches it
+> whole. `/c/iopbm/locations/austin/pricing` is a normal URL now. The renderer
+> used to branch on path LENGTH and 404 anything past two segments; that ceiling
+> made 428 real planned URLs unbuildable. **Never reintroduce one.**
+> Code: `lib/render/pagePath.js` + `loadSitePageProps` in
+> `lib/render/clientSiteRenderer.js`. Server twin: aidream
+> `aidream/services/cms/urls.py`.
 
-1. `/c/[client]/[category]/[slug]` - Category-based routes (new)
-2. `/c/[client]/[page]` - Root-level pages (existing)
-3. `/c/[client]` - Redirects to home
+Resolution order:
+
+1. **`route` match** — the whole path, any depth. This answers every real page.
+2. `/c/[client]/[page]` — LEGACY ALIAS. Before routes existed, a page answered at
+   its bare slug regardless of category. Those URLs are live and indexed, so the
+   slug lookup survives as a fallback; it only runs on a route miss, and a slug
+   shared by several branches resolves to the SHALLOWEST route.
+3. `/c/[client]/[category]/[slug]` — LEGACY ALIAS, same reason.
+4. `/c/[client]` — redirects to the home page's slug URL.
 
 **Example routing:**
-- `/c/iopbm/home` → Matches route #2 (root-level)
-- `/c/iopbm/services` → Matches route #1 (services listing)
-- `/c/iopbm/services/gastro` → Matches route #1 (service item)
+- `/c/iopbm/services/gastroenterology` → route match
+- `/c/iopbm/locations/austin/pricing` → route match (3 segments, fine)
+- `/c/iopbm/general/about` → route miss, legacy category alias → the page whose
+  route is `/about` (`general` is "no category", so it is not in the route)
+
+### `category` is a label, not a path
+
+`category='general'` is the column DEFAULT — it means "the author named none" —
+and contributes NO path segment. A category equal to the page's slug is the
+category INDEX page: slug `services` + category `services` is `/services`, never
+`/services/services`. Nesting a page is `parent_id`, not `category`.
 
 ---
 
@@ -442,6 +464,7 @@ INSERT INTO client_pages (
 | `/c/[client]/[page]` | Root page | `/c/iopbm/contact` |
 | `/c/[client]/[category]` | Category listing | `/c/iopbm/services` |
 | `/c/[client]/[category]/[slug]` | Category item | `/c/iopbm/services/gastro` |
+| `/c/[client]/[...any depth]` | Any page, by its `route` | `/c/iopbm/locations/austin/pricing` |
 
 **Key Points:**
 - ✅ Use categories to organize related pages

@@ -57,8 +57,8 @@ Clean URLs via `next.config.js` rewrites:
 ## Client-site rendering — the data is authoritative
 
 One renderer serves every client site: `lib/render/clientSiteRenderer.js` (both `pages/c/…` and the
-custom-domain `pages/_sites/…` route are thin wrappers). Two columns that used to sit inert now
-drive it. `pnpm test:render` covers both.
+custom-domain `pages/_sites/…` route are thin wrappers). Three columns that used to sit inert now
+drive it. `pnpm test:render` covers all three.
 
 ### `theme_config` → CSS variables (`lib/render/themeCss.js`)
 
@@ -92,10 +92,27 @@ this — a site that did not ask for a menu must not grow one.
   sites style `.matrx-nav` themselves.
 - Every label and href is escaped server-side; non-navigating href schemes are neutralized.
 
+### `footer_config` (+ `contact_info` / `social_links`) → a footer (`lib/render/siteFooter.js`)
+
+Same opt-in contract as nav, at the token `<!--matrx:footer-->`. **No token → nothing is emitted**,
+which is what keeps iopbm's hand-written `<footer>` byte-identical.
+
+- **`footer_config` is LAYOUT ONLY.** It owns `columns`, `order`, the `show_contact` / `show_social`
+  flags, `copyright` and `legal_links`. The contact and social **content** comes from the
+  `contact_info` and `social_links` columns that already exist for it — never duplicate them into
+  `footer_config`.
+- Hrefs starting with `/` are site-relative and get `nav.basePath` (so one config is right on
+  `/c/{slug}/…` and a custom domain); anchors/`mailto:`/`tel:`/absolute URLs pass through verbatim.
+- Markup is `.matrx-footer-cols` / `.matrx-footer-col` + `.matrx-footer-bottom` /
+  `.matrx-footer-legal`, no inline styles, **no outer wrapper** — `.matrx-footer` is the site's own
+  `<footer>` element (aidream's starter kit owns that class). Everything is escaped server-side.
+- `{}` (every live site today) renders nothing. Full shape in
+  [docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
+
 ### Live-site safety
 
 `iopbm` and `prp-injection-md` are REAL client sites — treat them as read-only. `dev-website` is the
-sandbox (`agent_write_policy=full`) and carries the nav-token fixture. Prove any renderer change by
+sandbox (`agent_write_policy=full`) and carries the nav-token and footer-token fixtures. Prove any renderer change by
 diffing a rendered `/c/iopbm/…` page before and after.
 
 ---
