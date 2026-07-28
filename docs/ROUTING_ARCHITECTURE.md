@@ -238,9 +238,31 @@ Resolution order:
 2. `/c/[client]/[page]` — LEGACY ALIAS. Before routes existed, a page answered at
    its bare slug regardless of category. Those URLs are live and indexed, so the
    slug lookup survives as a fallback; it only runs on a route miss, and a slug
-   shared by several branches resolves to the SHALLOWEST route.
+   shared by several branches resolves to the SHALLOWEST **visible** route.
 3. `/c/[client]/[category]/[slug]` — LEGACY ALIAS, same reason.
-4. `/c/[client]` — redirects to the home page's slug URL.
+4. `/c/[client]` — 302s to the home page's **route** (`pagePath`), never its slug.
+
+> ### An alias is claimable — gate before you pick
+> CMS 0028 dropped `UNIQUE (client_id, slug)`, so ANY page can match another
+> page's legacy alias. Two rules keep that from taking a live page down, and
+> `lib/render/pageSelection.js` owns both (pinned by `pnpm test:render`):
+> - **The publish gate runs BEFORE the shallowest-route pick.** An alias has one
+>   answer, so gating afterwards turns "an unpublished page happens to share this
+>   slug" into a 404 for the live page it shadowed. `preview` keeps drafts in the
+>   running — that is what preview is for.
+> - **The site root redirects to `route`, not `slug`.** A home page is NOT
+>   root-level by definition: iopbm's is `category='root', slug='home'`, route
+>   `/root/home`, and `/home` reaches it only through the alias. `route` is
+>   UNIQUE per site, so a route target can only ever be the page it names.
+> - **`is_home_page` names a row** — `getClientHomePage` returns THAT row, and
+>   never re-resolves it through the slug alias.
+>
+> This was a live defect on a real client site: `category` DEFAULTS to
+> `'general'`, so a page named "Home" (route `/home`, depth 1 — shallower) stole
+> iopbm's alias; published it served itself as the homepage, and as an unsaved
+> DRAFT it 404'd the client's homepage AND site root. Our own plan→CMS bridge
+> writes that same default, so realizing any plan node named "Home" onto a site
+> reached it.
 
 **Example routing:**
 - `/c/iopbm/services/gastroenterology` → route match

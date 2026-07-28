@@ -6,6 +6,8 @@
  *   lib/render/siteFooter.js — footer_config (+ contact_info / social_links) →
  *                              the `<!--matrx:footer-->` footer
  *   lib/render/cascade.js   — layer order + the use_client_header/footer CSS gating
+ *   lib/render/pageSelection.js — which row a lookup answers with, and whether
+ *                              the viewer may see it (publish/preview gate)
  *
  *   pnpm test:render
  *
@@ -33,6 +35,7 @@ import {
 } from '../lib/render/siteFooter.js'
 import { buildCombinedCss } from '../lib/render/cascade.js'
 import { pagePath, isRealCategory } from '../lib/render/pagePath.js'
+import { gatePageForViewer, selectAliasPage } from '../lib/render/pageSelection.js'
 
 let total = 0
 let failures = 0
@@ -451,6 +454,48 @@ check('isRealCategory: case and whitespace do not smuggle it back in',
   isRealCategory('  GENERAL ') === false)
 check('isRealCategory: empty / null / undefined are not categories',
   isRealCategory('') === false && isRealCategory(null) === false && isRealCategory(undefined) === false)
+
+// ── selection: the alias shadowing case (gate BEFORE pick) ─────────────────
+// CMS 0028 dropped `UNIQUE (client_id, slug)`, so a legacy 1-/2-segment alias
+// can match several pages. Picking the shallowest FIRST and gating afterwards
+// let an unpublished page win the alias and then vanish — a 404 for the live
+// page it shadowed. iopbm's home page (`category='root', slug='home'`, route
+// `/root/home`) answers `/home` only through that alias, and `category`
+// DEFAULTS to 'general' (route `/home`, depth 1 — shallower), so a draft named
+// "Home" from our own plan→CMS bridge took down a real client's homepage and
+// site root. These pin gate-then-pick so it cannot come back.
+const REAL_HOME = { id: 'real', slug: 'home', category: 'root', route: '/root/home', is_published: true, is_home_page: true }
+const DECOY_PUBLISHED = { id: 'decoy', slug: 'home', category: 'general', route: '/home', is_published: true }
+const DECOY_DRAFT = { ...DECOY_PUBLISHED, is_published: false }
+
+eq('selection: an UNPUBLISHED shallower page never wins the alias (the 404 bug)',
+  selectAliasPage([DECOY_DRAFT, REAL_HOME], false, '/home')?.id, 'real')
+eq('selection: row order does not change that',
+  selectAliasPage([REAL_HOME, DECOY_DRAFT], false, '/home')?.id, 'real')
+eq('selection: a PUBLISHED shallower page still wins the alias (unchanged rule)',
+  selectAliasPage([DECOY_PUBLISHED, REAL_HOME], false, '/home')?.id, 'decoy')
+eq('selection: preview keeps drafts in the running — that is what preview is for',
+  selectAliasPage([DECOY_DRAFT, REAL_HOME], true, '/home')?.id, 'decoy')
+eq('selection: every match unpublished → nothing to serve',
+  selectAliasPage([DECOY_DRAFT, { ...REAL_HOME, is_published: false }], false, '/home'), null)
+eq('selection: a lone published match is served',
+  selectAliasPage([REAL_HOME], false, '/home')?.id, 'real')
+eq('selection: no rows → null', selectAliasPage([], false, '/home'), null)
+eq('selection: null rows → null', selectAliasPage(null, false, '/home'), null)
+
+// The site root redirects to the home page's ROUTE, never its slug — the slug
+// alias is exactly the thing another page can steal.
+eq('selection: the site-root redirect target is the route, not the slug',
+  pagePath(REAL_HOME), '/root/home')
+
+// gate: the publish check itself, and the draft merge preview depends on.
+eq('selection: an unpublished page is invisible to a visitor',
+  gatePageForViewer({ is_published: false }, false), null)
+eq('selection: a preview of a draft merges the *_draft twins',
+  gatePageForViewer({ is_published: false, has_draft: true, html_content: 'live', html_content_draft: 'draft' }, true).html_content,
+  'draft')
+eq('selection: a published page with no draft passes through untouched',
+  gatePageForViewer(REAL_HOME, false), REAL_HOME)
 
 console.warn = realWarn
 console.log(`${total - failures}/${total} render-layer cases passed`)
