@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["start", "--", "-p", "3100"],
       "port": 3100
+    },
+    {
+      "name": "my-matrx-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--", "-p", "3101"],
+      "port": 3101
     }
   ]
 }

@@ -36,6 +36,7 @@ import {
 import { buildCombinedCss } from '../lib/render/cascade.js'
 import { pagePath, isRealCategory } from '../lib/render/pagePath.js'
 import { gatePageForViewer, selectAliasPage } from '../lib/render/pageSelection.js'
+import { redirectDestination, redirectFromRoute } from '../lib/render/redirects.js'
 
 let total = 0
 let failures = 0
@@ -496,6 +497,27 @@ eq('selection: a preview of a draft merges the *_draft twins',
   'draft')
 eq('selection: a published page with no draft passes through untouched',
   gatePageForViewer(REAL_HOME, false), REAL_HOME)
+
+// ── redirects: THE 301 LAW destination math ─────────────────────────────────
+// The chain-collapse itself is DB-side (CMS 0032-0034, pinned by aidream's
+// live tests). What must be right HERE: the ledger key and the destination.
+eq('redirects: ledger key is the /-joined path', redirectFromRoute(['services', 'austin']), '/services/austin')
+eq('redirects: blank segments are dropped', redirectFromRoute(['services', '', 'austin']), '/services/austin')
+eq('redirects: the site root is never a ledger key', redirectFromRoute([]), null)
+eq('redirects: no segments at all → null', redirectFromRoute(null), null)
+eq('redirects: custom-domain destination is the bare route',
+  redirectDestination({ toRoute: '/services', fromRoute: '/old-services', basePath: '' }), '/services')
+eq('redirects: platform-host destination keeps the /c/ prefix',
+  redirectDestination({ toRoute: '/services', fromRoute: '/old-services', basePath: '/c/dev-website' }),
+  '/c/dev-website/services')
+eq('redirects: preview carries its query through',
+  redirectDestination({ toRoute: '/services', fromRoute: '/old', basePath: '', isPreview: true, previewPt: 'tok en' }),
+  '/services?preview=true&pt=tok%20en')
+eq('redirects: no ledger hit → null', redirectDestination({ toRoute: null, fromRoute: '/x', basePath: '' }), null)
+eq('redirects: a non-path target is never served',
+  redirectDestination({ toRoute: 'https://evil.example', fromRoute: '/x', basePath: '' }), null)
+eq('redirects: a self-target is never served',
+  redirectDestination({ toRoute: '/x', fromRoute: '/x', basePath: '' }), null)
 
 console.warn = realWarn
 console.log(`${total - failures}/${total} render-layer cases passed`)

@@ -109,6 +109,22 @@ which is what keeps iopbm's hand-written `<footer>` byte-identical.
 - `{}` (every live site today) renders nothing. Full shape in
   [docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
 
+### THE 301 LAW — the redirect ledger (`lib/render/redirects.js`)
+
+A route that resolves NO page (canonical + both legacy aliases missed) is checked against the
+per-site ledger `client_redirects` (CMS migrations 0032–0034) and served as a **real 301**
+(`siteMovedPermanently` hand-sets the status — Next's `permanent: true` would emit 308). Order is
+load-bearing: **page first, ledger second, 404 last** — a live page always beats a stale ledger row.
+
+- Rows are written by the DATABASE (a published page's route change fires a trigger; aidream's
+  dispositions and manual tool actions call the same `cms_record_redirect()` function) and are
+  **chain-collapsed on write** — serving is ONE lookup, never walk chains here.
+- Manual deletion (aidream `cms_site redirect_delete`) is the only removal. Never "clean up" rows
+  from this repo.
+- Destination math is pure (`redirectFromRoute` / `redirectDestination`, import-free, pinned by
+  `pnpm test:render`): basePath-aware for `/c/{slug}` vs custom domains, preview query carried
+  through, non-path and self targets refused.
+
 ### Live-site safety
 
 `iopbm` and `prp-injection-md` are REAL client sites — treat them as read-only. `dev-website` is the
@@ -129,6 +145,7 @@ Pages from this site are embedded via iframe in the main AI Matrx admin app. See
 |---------|---------|
 | `pnpm dev` | Start dev server |
 | `pnpm build` | Build for production |
-| `pnpm test:render` | Theme-CSS + nav-token render-layer tests |
+| `pnpm test:render` | Render-layer tests (theme CSS, nav/footer tokens, page selection, redirect math) |
+| `pnpm test:collections` | W2-C item validator vs the pinned cross-repo fixture |
 | `node -e "..."` | Generate UUID for new pages (`pnpm generate-uuid`) |
 | `pnpm env:pull` | Pull env from Doppler |
