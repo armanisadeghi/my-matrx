@@ -73,9 +73,50 @@ No site key. The collection must have `public_read=true`; each returned item is 
 `{id, created_at, data}` where `data` contains just the `public_read_fields` allowlist
 (empty allowlist ⇒ `data` is `{}`). Spam, soft-deleted, and archived rows never appear.
 
-List: `?page=1&per_page=20` (per_page capped at 100), ordered `created_at desc` (stable
-tiebreak on id). Response `{"success":true,"page":N,"per_page":N,"items":[...]}`.
+List: `?page=1&per_page=20` (per_page capped at 100). Response
+`{"success":true,"page":N,"per_page":N,"items":[...]}`.
 Item: `{"success":true,"item":{...}}`. Missing/not-public/invalid id ⇒ the uniform 404.
+
+**Order — `?order=field[:asc|desc]`.** Precedence: this parameter →
+`site_collections.settings.default_order` → `created_at:desc` (what every collection returned
+before ordering was configurable, so an unset collection is unchanged). The sort field must be
+`created_at`, `id`, or a member of `public_read_fields` — ordering by a field you cannot read is an
+oracle, so anything else is `400 {"success":false,"error":"invalid_order"}`, as is a malformed spec.
+Sorting is DB-side with a stable `id` tiebreak (pagination cannot duplicate or drop rows). jsonb
+values compare as **text**: correct for ISO-8601 datetimes written in UTC (`…Z`, what the platform
+emits), lexical for numbers.
+
+---
+
+## Rendering collection content (prefer this over fetching)
+
+If the rows are **page content** — events, testimonials, profiles, FAQ entries — do not fetch them.
+Bind them with a `<template>`, which the renderer expands **server-side**, so the rows are in the
+HTML search engines and our own crawler receive:
+
+```html
+<ul>
+  <template data-matrx-collection="events" data-order="starts_at:asc" data-limit="10">
+    <li><strong>{{title}}</strong> — {{starts_at}}</li>
+  </template>
+  <li data-matrx-empty="events">No events scheduled.</li>
+</ul>
+```
+
+- `data-matrx-collection` — the collection slug. It must have `public_read=true`; only
+  `public_read_fields` are readable, exactly as through the HTTP route.
+- `data-order` — optional, same grammar and same allowlist as `?order=`. Omit it to inherit the
+  collection's `settings.default_order`.
+- `data-limit` — optional, default 50, hard cap 200. Every row is inlined into the page.
+- `{{field}}` — an allowlisted field, or `{{id}}` / `{{created_at}}`. **The renderer escapes every
+  value**, so unlike hand-rolled DOM building this cannot produce a stored-XSS bug. A name that is
+  not readable (or no longer exists) renders empty.
+- `data-matrx-empty="<slug>"` — shown when there are no rows, and also when the collection is
+  archived or unreadable. Inside a `<ul>` use an `<li>`: `<template>` is legal there, a `<p>` is not.
+- A page with no `data-matrx-collection` renders byte-identically to before this existed.
+
+`MatrxData.list()` remains for genuinely interactive cases (search-as-you-type, load-more,
+infinite scroll) — client-side rendering is progressive enhancement, never the source of content.
 
 ---
 
@@ -127,16 +168,18 @@ fallback. An unparseable IP skips the per-IP window only; the per-site window al
 
 ## Escaping discipline (page authors — this means you)
 
-Collection item data is **data, never HTML**. The runtime never renders it; any page JS that
-does MUST escape every value: `MatrxData.escapeHtml(value)` (from `/matrx-data.js`) or
-`element.textContent = value`. Interpolating raw item values into `innerHTML` is a stored-XSS
-defect. `richtext` fields never occur on public-write collections (forbidden at the definition
+Collection item data is **data, never HTML**. A server-rendered `<template data-matrx-collection>`
+handles this for you — the renderer escapes every `{{field}}`, and you never interpolate, which is
+why binding is the recommended path. Any page JS that renders items itself MUST escape every value:
+`MatrxData.escapeHtml(value)` (from `/matrx-data.js`) or `element.textContent = value`.
+Interpolating raw item values into `innerHTML` is a stored-XSS defect. `richtext` fields never occur on public-write collections (forbidden at the definition
 layer), so nothing arriving through these routes is ever legitimately HTML.
 
 ## matrx-data.js
 
 `window.MatrxData` gives `submit(collection, data, {idempotencyKey, sourceUrl})`,
-`list(collection, {page, perPage})`, `get(collection, id)`, `escapeHtml(s)`. It reads
+`list(collection, {page, perPage, order})`, `get(collection, id)`, `escapeHtml(s)`.
+For page **content**, prefer the server-rendered binding above — `list()` is for interactive reads. It reads
 `window.__MATRX_SITE__` (slug + data key), which the platform injects on **published
 normal-page renders only** — never on previews, never on listing pages, never for sites without
 a data key.
