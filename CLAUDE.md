@@ -125,11 +125,92 @@ load-bearing: **page first, ledger second, 404 last** — a live page always bea
   `pnpm test:render`): basePath-aware for `/c/{slug}` vs custom domains, preview query carried
   through, non-path and self targets refused.
 
+### THE DISCOVERY SURFACE — `sitemap.xml` / `robots.txt` (`lib/render/sitemap.js`)
+
+Every client site serves its own pair, on both surfaces — `/c/{slug}/sitemap.xml` +
+`/c/{slug}/robots.txt` on the platform host, and `/sitemap.xml` + `/robots.txt` at the root of a
+custom domain (four thin routes over one implementation in `lib/render/discovery.js`). Pure math is
+in `lib/render/sitemap.js`, pinned by `pnpm test:render`.
+
+**THE ONE RULE: the sitemap lists exactly the URLs the renderer answers 200 with, in canonical
+form — nothing else.** Consequences, each a test:
+
+- **Published only**, and never a `plan_excluded_at` row. The draft gate is `getClientPages`'s own
+  default, not a filter bolted on afterwards.
+- **A redirected URL can never appear — for free, not by filtering.** THE 301 LAW resolves
+  page-first / ledger-second, so a route only reaches the ledger when NO page resolves it, while
+  every entry here comes from a published page's own route. **Do not subtract `client_redirects`
+  from this list** — that would drop a live page that had reoccupied an old URL. The legacy
+  `/{slug}` and `/{category}/{slug}` aliases and the site root (a 302 to the home page) are absent
+  for the same reason: a sitemap carries canonicals, not every address that resolves.
+- URLs are built on `nav.canonicalBase` — the same value the page's `<link rel=canonical>` uses, so
+  a domain-mapped site's sitemap lists its domain URLs on **every** surface. A page whose
+  `canonical_url` names something else is not listed at all.
+- `lastmod` is `last_published_at`, falling back to `updated_at` for rows published before CMS 0004
+  started writing it.
+- **robots.txt names the host it was asked on** (`x-forwarded-host`/`Host`, validated), so a client
+  domain advertises its own sitemap. It allows everything: preview and not-found hide themselves
+  with `noindex` and a real 404, which beats a `Disallow` a crawler may still index around.
+- `buildNav` therefore lives in its own pure module (`lib/render/surface.js`, re-exported by the
+  renderer) — a route that emits 200 bytes of XML must not pull React and the collection SSR layer
+  into its module graph.
+- `proxy.js`'s `ROOT_STATIC_PASSTHROUGH` deliberately no longer lists `/robots.txt` and
+  `/sitemap.xml`: they are per-site and generated, so they must go through the `/_sites/{host}`
+  rewrite. Putting them back would hand a client's domain the platform's files.
+
+Publish-time pinging (IndexNow / Search Console) is deliberately NOT here — it needs credentials
+and lives on the publish side (`G-PUBLISH-CRAWL` in the Growth Loop map).
+
+### COLLECTIONS RENDER SERVER-SIDE — `<template data-matrx-collection>` (`lib/render/collectionBindings.js`)
+
+`site_collection_items` rows reach a page in the **served HTML**, not after hydration. The syntax is
+one element, opt-in exactly like the nav and footer tokens:
+
+```html
+<ul>
+  <template data-matrx-collection="events" data-order="starts_at:asc" data-limit="10">
+    <li><strong>{{title}}</strong> — {{starts_at}}</li>
+  </template>
+  <li data-matrx-empty="events">No events scheduled.</li>
+</ul>
+```
+
+- **No `data-matrx-collection` in a body → that body is the SAME STRING, never parsed.** Every page
+  on every live site takes that path, which is what makes the feature unable to change them (proven
+  by a 19-page render diff of iopbm + prp-injection-md: byte-identical).
+- **The renderer escapes; the author never interpolates.** `{{field}}` resolves ONLY against the
+  `public_read_fields` projection (`lib/collections/collectionRead.js`) plus `{{id}}`/`{{created_at}}`
+  — a non-allowlisted field like `internal_notes` renders empty because it never reaches the
+  expander. Unknown names render empty rather than printing `{{…}}` at a visitor.
+- **Zero rows — including an archived collection, `public_read=false`, or a DB error — renders the
+  `data-matrx-empty` element and warns.** A client's page never 500s because one collection moved.
+- Bindings are scanned in the page body AND in the header/footer components (they carry
+  `html_content` too), expanded in `loadSitePageProps`, and the expanded HTML goes into props
+  deliberately: the rows are the same public projection the anonymous HTTP route already serves, and
+  markup that disagrees with props is markup React can wipe on a re-render.
+- `<template>` binding works because `node-html-parser` is lenient. **Do not swap in a
+  spec-compliant parser** (jsdom): it puts `<template>` children in a detached fragment and every
+  binding silently stops matching.
+- Row counts are bounded (`data-limit`, ≤200; default 50) — every row is inlined into the HTML.
+- Client JS is progressive enhancement now, never the source of content: `MatrxData.list()` stays
+  for interactive cases (search-as-you-type, load-more) and gained an `order` option.
+
+**Ordering is configurable, not hardcoded** (`lib/collections/ordering.js`): per-request
+(`?order=field[:asc|desc]`, `data-order`) → `site_collections.settings.default_order` →
+`created_at:desc`, which is byte-for-byte what every read did before. Sort fields are restricted to
+`public_read_fields` + `created_at`/`id` (ordering by an unreadable field is an oracle), sorting is
+DB-side with a stable `id` tiebreak, and a bad *setting* falls back loudly while a bad *request*
+400s. `lib/collections/publicItems.js` is the one read both the HTTP route and SSR use — do not fork
+it. jsonb values compare as TEXT (fine for `...Z` datetimes, wrong for numeric magnitude); the fix
+when it bites is a typed expression index, never a sort in JS.
+
 ### Live-site safety
 
 `iopbm` and `prp-injection-md` are REAL client sites — treat them as read-only. `dev-website` is the
-sandbox (`agent_write_policy=full`) and carries the nav-token and footer-token fixtures. Prove any renderer change by
-diffing a rendered `/c/iopbm/…` page before and after.
+sandbox (`agent_write_policy=full`) and carries the nav-token, footer-token and collection-binding
+fixtures (`/c/dev-website/events-and-booking` + the `events` collection, whose
+`settings.default_order` is `starts_at:asc`). Prove any renderer change by diffing a rendered
+`/c/iopbm/…` page before and after.
 
 ---
 
@@ -145,7 +226,7 @@ Pages from this site are embedded via iframe in the main AI Matrx admin app. See
 |---------|---------|
 | `pnpm dev` | Start dev server |
 | `pnpm build` | Build for production |
-| `pnpm test:render` | Render-layer tests (theme CSS, nav/footer tokens, page selection, redirect math) |
+| `pnpm test:render` | Render-layer tests (theme CSS, nav/footer tokens, page selection, redirect math, sitemap/robots) |
 | `pnpm test:collections` | W2-C item validator vs the pinned cross-repo fixture |
 | `node -e "..."` | Generate UUID for new pages (`pnpm generate-uuid`) |
 | `pnpm env:pull` | Pull env from Doppler |

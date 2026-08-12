@@ -1,5 +1,5 @@
 import { getClientSite } from '@/lib/supabase/clientHelpers'
-import { buildNav } from '@/lib/render/clientSiteRenderer'
+import { buildNav } from '@/lib/render/surface'
 import { discoveryNotFound, serveRobotsTxt } from '@/lib/render/discovery'
 
 // `/c/{site}/robots.txt` — the platform-host companion to `/c/{site}/sitemap.xml`.

@@ -1,5 +1,5 @@
 import { getClientSiteByDomain } from '@/lib/supabase/clientHelpers'
-import { buildNav } from '@/lib/render/clientSiteRenderer'
+import { buildNav } from '@/lib/render/surface'
 import { discoveryNotFound, serveRobotsTxt } from '@/lib/render/discovery'
 import { normalizeHost, domainCounterpart } from '@/lib/domains'
 

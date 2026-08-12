@@ -1,5 +1,5 @@
 import { getClientSite } from '@/lib/supabase/clientHelpers'
-import { buildNav } from '@/lib/render/clientSiteRenderer'
+import { buildNav } from '@/lib/render/surface'
 import { discoveryNotFound, serveSitemapXml } from '@/lib/render/discovery'
 
 // `/c/{site}/sitemap.xml` — the platform-host discovery surface for one client
