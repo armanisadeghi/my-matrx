@@ -53,7 +53,8 @@ the renderer; extend the shared module.
    `/admin`, `/c/*`, `/p/*`) is rewritten into `/_sites/{host}/...` and resolves as site
    content or 404s. Platform endpoints are unreachable on client domains — smaller surface,
    no host-dependent API behavior. Exception: a small allowlist of root static files
-   (`ROOT_STATIC_PASSTHROUGH` in `proxy.js` — `/favicon.ico`, `/robots.txt`, `/sitemap.xml`)
+   (`ROOT_STATIC_PASSTHROUGH` in `proxy.js` — `/favicon.ico` only; per-site
+   `/robots.txt` and `/sitemap.xml` continue through host routing)
    passes through to `public/` before the rewrite, so the renderer's `/favicon.ico` fallback
    works on a custom domain. The matcher itself only excludes `_next/` (it CANNOT exclude all
    dotted paths — `/_sites/{host}` targets contain dots — so the allowlist lives in code).

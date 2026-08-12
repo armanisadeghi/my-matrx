@@ -37,6 +37,21 @@ import { buildCombinedCss } from '../lib/render/cascade.js'
 import { pagePath, isRealCategory } from '../lib/render/pagePath.js'
 import { gatePageForViewer, selectAliasPage } from '../lib/render/pageSelection.js'
 import { redirectDestination, redirectFromRoute } from '../lib/render/redirects.js'
+import {
+  bindingKey,
+  expandCollectionBindings,
+  findCollectionBindings,
+  hasCollectionBinding,
+} from '../lib/render/collectionBindings.js'
+import { applyOrder, orderColumn, parseOrderSpec, resolveOrderSpec } from '../lib/collections/ordering.js'
+import {
+  originFromHeaders,
+  originOf,
+  renderRobotsTxt,
+  renderSitemapXml,
+  sitemapEntries,
+  toLastmod,
+} from '../lib/render/sitemap.js'
 
 let total = 0
 let failures = 0
@@ -518,6 +533,196 @@ eq('redirects: a non-path target is never served',
   redirectDestination({ toRoute: 'https://evil.example', fromRoute: '/x', basePath: '' }), null)
 eq('redirects: a self-target is never served',
   redirectDestination({ toRoute: '/x', fromRoute: '/x', basePath: '' }), null)
+
+// ── sitemap / robots: the discovery surface ────────────────────────────────
+// THE ONE RULE: the sitemap lists exactly the URLs the renderer answers 200
+// with, in canonical form. These cases pin the three ways that can go wrong —
+// a draft leaking in, a redirected URL appearing, and the wrong host.
+const SITE_PAGES = [
+  { slug: 'home', route: '/root/home', is_published: true, last_published_at: '2025-10-01T21:31:45.334086+00:00' },
+  { slug: 'about', route: '/about', is_published: true, last_published_at: null, updated_at: '2026-01-02T03:04:05.000Z' },
+  { slug: 'secret', route: '/secret', is_published: false, last_published_at: '2026-02-02T00:00:00.000Z' },
+  { slug: 'retired', route: '/retired', is_published: true, plan_excluded_at: '2026-03-03T00:00:00.000Z' },
+]
+
+const DOMAIN_ENTRIES = sitemapEntries({ pages: SITE_PAGES, canonicalBase: 'https://prpinjectionmd.com' })
+eq('sitemap: only published, non-retired pages are listed', DOMAIN_ENTRIES.length, 2)
+eq('sitemap: entries are canonical, domain-absolute, route-based, sorted',
+  DOMAIN_ENTRIES.map((e) => e.loc).join(' '),
+  'https://prpinjectionmd.com/about https://prpinjectionmd.com/root/home')
+eq('sitemap: lastmod is last_published_at when set',
+  DOMAIN_ENTRIES[1].lastmod, '2025-10-01T21:31:45.334Z')
+eq('sitemap: lastmod falls back to updated_at for pre-CMS-0004 rows',
+  DOMAIN_ENTRIES[0].lastmod, '2026-01-02T03:04:05.000Z')
+check('sitemap: a draft NEVER appears',
+  !DOMAIN_ENTRIES.some((e) => e.loc.endsWith('/secret')))
+check('sitemap: a plan-retired page NEVER appears',
+  !DOMAIN_ENTRIES.some((e) => e.loc.endsWith('/retired')))
+
+// THE 301 LAW, restated as a sitemap property: the only URLs the renderer
+// redirects are ones NO published page resolves (page-first / ledger-second),
+// and the site root, which 302s to the home page's route. Neither can be
+// derived from a published page's route, so neither can appear here.
+check('sitemap: the site root (a 302 to the home page) is never an entry',
+  !DOMAIN_ENTRIES.some((e) => e.loc === 'https://prpinjectionmd.com' || e.loc === 'https://prpinjectionmd.com/'))
+check('sitemap: a redirected old URL is never an entry',
+  !DOMAIN_ENTRIES.some((e) => e.loc.endsWith('/old-about')))
+
+eq('sitemap: the platform surface carries the /c/{slug} base',
+  sitemapEntries({ pages: [SITE_PAGES[1]], canonicalBase: 'https://mymatrx.com/c/iopbm' })[0].loc,
+  'https://mymatrx.com/c/iopbm/about')
+eq('sitemap: a trailing slash on the base never doubles',
+  sitemapEntries({ pages: [SITE_PAGES[1]], canonicalBase: 'https://x.com/' })[0].loc, 'https://x.com/about')
+eq('sitemap: a page declaring a DIFFERENT canonical is not listed',
+  sitemapEntries({
+    pages: [{ ...SITE_PAGES[1], canonical_url: 'https://elsewhere.example/about' }],
+    canonicalBase: 'https://x.com',
+  }).length, 0)
+eq('sitemap: a page declaring its OWN canonical (relative or absolute) is listed',
+  sitemapEntries({
+    pages: [
+      { ...SITE_PAGES[1], canonical_url: '/about' },
+      { ...SITE_PAGES[0], canonical_url: 'https://x.com/root/home' },
+    ],
+    canonicalBase: 'https://x.com',
+  }).length, 2)
+eq('sitemap: an empty canonical_url is not a declaration (live dev-website row)',
+  sitemapEntries({ pages: [{ ...SITE_PAGES[1], canonical_url: '' }], canonicalBase: 'https://x.com' }).length, 1)
+eq('sitemap: two rows resolving to one URL emit one entry',
+  sitemapEntries({ pages: [SITE_PAGES[1], { ...SITE_PAGES[1] }], canonicalBase: 'https://x.com' }).length, 1)
+
+const XML = renderSitemapXml(DOMAIN_ENTRIES)
+check('sitemap: XML declares the sitemaps.org 0.9 namespace',
+  XML.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'))
+check('sitemap: XML closes its urlset', XML.trimEnd().endsWith('</urlset>'))
+eq('sitemap: a site with nothing published is still a valid empty document',
+  renderSitemapXml([]),
+  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>\n')
+check('sitemap: an ampersand in a URL is escaped',
+  renderSitemapXml([{ loc: 'https://x.com/a?b=1&c=2', lastmod: null }]).includes('<loc>https://x.com/a?b=1&amp;c=2</loc>'))
+check('sitemap: no lastmod element when there is no date',
+  !renderSitemapXml([{ loc: 'https://x.com/a', lastmod: null }]).includes('lastmod'))
+eq('sitemap: an unparseable date is dropped rather than emitted', toLastmod('not-a-date'), null)
+
+// robots: the host must be the one the request arrived on.
+check('robots: the Sitemap line names the custom domain, not the platform host',
+  renderRobotsTxt({ sitemapUrl: 'https://prpinjectionmd.com/sitemap.xml', siteName: 'PRP Injection MD' })
+    .includes('\nSitemap: https://prpinjectionmd.com/sitemap.xml'))
+check('robots: the platform surface points at its own /c/{slug} sitemap',
+  renderRobotsTxt({ sitemapUrl: 'https://mymatrx.com/c/iopbm/sitemap.xml' })
+    .includes('\nSitemap: https://mymatrx.com/c/iopbm/sitemap.xml'))
+check('robots: crawling is allowed (noindex/404 do the hiding, not Disallow)',
+  renderRobotsTxt({ sitemapUrl: 'https://x.com/sitemap.xml' }).includes('\nAllow: /\n'))
+check('robots: a site name can never inject a directive',
+  !renderRobotsTxt({ sitemapUrl: 'https://x.com/sitemap.xml', siteName: 'Evil\nDisallow: /' })
+    .includes('\nDisallow: /'))
+
+eq('robots: the origin comes from the forwarded proto+host (Vercel)',
+  originFromHeaders({ 'x-forwarded-proto': 'https', 'x-forwarded-host': 'prpinjectionmd.com', host: 'my-matrx.vercel.app' }),
+  'https://prpinjectionmd.com')
+eq('robots: a bare host header works in dev', originFromHeaders({ host: 'localhost:3000' }), 'http://localhost:3000')
+eq('robots: an unparseable Host header is refused, never echoed',
+  originFromHeaders({ host: 'evil.com/\nX: y' }), null)
+eq('robots: no headers at all → null (caller falls back to the canonical origin)',
+  originFromHeaders(undefined), null)
+eq('origin: the canonical base of a platform-hosted site strips its path',
+  originOf('https://mymatrx.com/c/iopbm'), 'https://mymatrx.com')
+
+// ── collection bindings: rows in the SERVED HTML (W2-C SSR, G-COLLECTIONS) ──
+// The rule that protects every live page: a body with no binding attribute is
+// never parsed, never serialized, and comes back as the SAME STRING.
+const PLAIN_BODY = '<section class="page"><h1>Hi</h1><ul id="events"><li>Loading…</li></ul></section>'
+check('collections: a body with no binding is the same string reference',
+  expandCollectionBindings(PLAIN_BODY, new Map()) === PLAIN_BODY)
+eq('collections: no binding → nothing to fetch', findCollectionBindings(PLAIN_BODY).length, 0)
+eq('collections: hasCollectionBinding is false on a plain body', hasCollectionBinding(PLAIN_BODY), false)
+
+const EVENTS_BODY =
+  '<ul>\n' +
+  '  <template data-matrx-collection="events" data-order="starts_at:asc" data-limit="10">' +
+  '<li><strong>{{title}}</strong> — {{starts_at}}</li></template>\n' +
+  '  <li data-matrx-empty="events">No events scheduled.</li>\n' +
+  '</ul>'
+const EVENT_ROWS = [
+  { id: 'a1', created_at: '2026-07-24T05:31:57Z', data: { title: 'Open house', starts_at: '2026-09-03T18:00:00Z' } },
+  { id: 'b2', created_at: '2026-07-24T05:31:58Z', data: { title: 'Herbal workshop', starts_at: '2026-09-17T17:30:00Z' } },
+]
+const evBindings = findCollectionBindings(EVENTS_BODY)
+eq('collections: one template → one binding', evBindings.length, 1)
+eq('collections: the binding carries its collection', evBindings[0].collection, 'events')
+eq('collections: the binding carries its order', evBindings[0].order, 'starts_at:asc')
+eq('collections: the binding carries its limit', evBindings[0].limit, 10)
+
+const expanded = expandCollectionBindings(EVENTS_BODY, new Map([[bindingKey(evBindings[0]), EVENT_ROWS]]))
+check('collections: rows are IN the served markup', expanded.includes('<strong>Open house</strong>'))
+check('collections: every row is rendered', expanded.includes('<strong>Herbal workshop</strong>'))
+check('collections: the template element itself is gone', !expanded.includes('<template'))
+check('collections: the empty state is gone when there are rows', !expanded.includes('No events scheduled'))
+check('collections: no placeholder survives', !expanded.includes('{{'))
+
+// Zero rows — the page shows its empty state, never a raw template.
+const emptied = expandCollectionBindings(EVENTS_BODY, new Map([[bindingKey(evBindings[0]), []]]))
+check('collections: zero rows → the empty state stays', emptied.includes('No events scheduled'))
+check('collections: zero rows → the template is still removed', !emptied.includes('<template'))
+// An unresolvable collection (archived / not public_read / DB error) is the
+// zero-row path too: fail soft, never 500 a client's page.
+const unresolved = expandCollectionBindings(EVENTS_BODY, new Map())
+check('collections: an unresolvable binding renders the empty state', unresolved.includes('No events scheduled'))
+check('collections: an unresolvable binding shows no template', !unresolved.includes('<template'))
+
+// NOTHING HOSTILE ESCAPES: item data is visitor-supplied, and the page author
+// never interpolates it — the renderer escapes, once, here.
+const XSS = expandCollectionBindings(EVENTS_BODY, new Map([[bindingKey(evBindings[0]), [
+  { id: 'x', created_at: 'now', data: { title: '<script>alert(1)</script>', starts_at: '" onload="evil()' } },
+]]]))
+check('collections: a <script> in a value is escaped', !XSS.includes('<script>alert(1)'))
+check('collections: it is escaped, not dropped', XSS.includes('&lt;script&gt;alert(1)'))
+check('collections: an attribute-breaking value is escaped', XSS.includes('&quot; onload=&quot;'))
+
+// The allowlist is the read-side security model: a field the projection did not
+// carry renders EMPTY, so no template can print internal_notes.
+const NOTES_BODY = '<ul><template data-matrx-collection="events"><li>{{title}}:{{internal_notes}}</li></template></ul>'
+const notesBinding = findCollectionBindings(NOTES_BODY)[0]
+eq('collections: a non-allowlisted field renders empty',
+  expandCollectionBindings(NOTES_BODY, new Map([[bindingKey(notesBinding), [
+    { id: 'a', created_at: 'now', data: { title: 'Open house' } },
+  ]]])),
+  '<ul><li>Open house:</li></ul>')
+
+// ── ordering: configurable per collection, default preserved ────────────────
+eq('ordering: bare field defaults to ascending', JSON.stringify(parseOrderSpec('starts_at')), '{"field":"starts_at","ascending":true}')
+eq('ordering: explicit desc', JSON.stringify(parseOrderSpec('starts_at:desc')), '{"field":"starts_at","ascending":false}')
+eq('ordering: a bogus direction is not an order', parseOrderSpec('starts_at:sideways'), null)
+eq('ordering: an injection-shaped field is not an order', parseOrderSpec('data->>x;drop'), null)
+eq('ordering: empty is not an order', parseOrderSpec('  '), null)
+
+// The default must be byte-identical to the hardcoded behavior it replaced —
+// this is what keeps every existing collection rendering as it does today.
+eq('ordering: nothing declared → created_at desc',
+  JSON.stringify(resolveOrderSpec({}).order), '{"field":"created_at","ascending":false}')
+eq('ordering: the collection default is honored',
+  JSON.stringify(resolveOrderSpec({ settings: { default_order: 'starts_at:asc' }, allowedFields: ['starts_at'] }).order),
+  '{"field":"starts_at","ascending":true}')
+eq('ordering: a request beats the collection default',
+  JSON.stringify(resolveOrderSpec({ requested: 'created_at:asc', settings: { default_order: 'starts_at:asc' }, allowedFields: ['starts_at'] }).order),
+  '{"field":"created_at","ascending":true}')
+eq('ordering: a request for an unreadable field is refused',
+  resolveOrderSpec({ requested: 'internal_notes:asc', allowedFields: ['title'] }).error, 'invalid_order')
+eq('ordering: a malformed request is refused', resolveOrderSpec({ requested: 'x:sideways' }).error, 'invalid_order')
+// A typo in a SETTING must never 4xx a visitor's page — it falls back, loudly.
+eq('ordering: an unusable collection default falls back to created_at desc',
+  JSON.stringify(resolveOrderSpec({ settings: { default_order: 'internal_notes:asc' }, allowedFields: ['title'] }).order),
+  '{"field":"created_at","ascending":false}')
+eq('ordering: a real column stays a column', orderColumn('created_at'), 'created_at')
+eq('ordering: a data field becomes a jsonb path', orderColumn('starts_at'), 'data->>starts_at')
+
+// applyOrder must always append the unique id tiebreak (the unstable-pagination
+// class: without it rows duplicate across pages once the sort key ties).
+const calls = []
+const fakeQuery = { order(col, opts) { calls.push([col, opts.ascending, opts.nullsFirst]); return this } }
+applyOrder(fakeQuery, parseOrderSpec('starts_at:asc'))
+eq('ordering: sorts on the jsonb path first', JSON.stringify(calls[0]), '["data->>starts_at",true,false]')
+eq('ordering: then the stable id tiebreak', JSON.stringify(calls[1]), '["id",true,null]')
 
 console.warn = realWarn
 console.log(`${total - failures}/${total} render-layer cases passed`)

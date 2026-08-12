@@ -20,6 +20,8 @@
  */
 import { getSupabaseClient } from '@/lib/supabase/clientHelpers'
 import { validateItem } from '@/lib/collections/validateItem'
+import { resolveOrderSpec } from '@/lib/collections/ordering'
+import { fetchPublicItems } from '@/lib/collections/publicItems'
 import {
   uniform404,
   constantTimeEqual,
@@ -256,19 +258,27 @@ async function handleList(req, res) {
   const perPage = Math.min(Math.max(1, perPageRaw), MAX_PER_PAGE)
   const from = (page - 1) * perPage
 
+  // Order: `?order=field[:asc|desc]` → the collection's own
+  // `settings.default_order` → `created_at:desc` (what every collection did
+  // before ordering was configurable). Sort fields are restricted to
+  // `public_read_fields` + created_at/id — ordering by a field the caller
+  // cannot read is an oracle. The stable id tiebreak lives in applyOrder().
+  const { order, error: orderError } = resolveOrderSpec({
+    requested: typeof req.query.order === 'string' ? req.query.order : undefined,
+    settings: collection.settings,
+    allowedFields: collection.public_read_fields,
+  })
+  if (orderError) {
+    return res.status(400).json({ success: false, error: orderError })
+  }
+
   const supabase = getSupabaseClient()
-  const { data: rows, error } = await supabase
-    .from('site_collection_items')
-    .select('id, created_at, data')
-    .eq('collection_id', collection.id)
-    .eq('is_spam', false)
-    .eq('status', 'active')
-    .is('deleted_at', null)
-    // Secondary unique order column so pagination is stable when created_at ties
-    // (the unstable-pagination class: rows vanish/duplicate across pages otherwise).
-    .order('created_at', { ascending: false })
-    .order('id', { ascending: false })
-    .range(from, from + perPage - 1)
+  const { rows, error } = await fetchPublicItems(supabase, {
+    collectionId: collection.id,
+    order,
+    from,
+    to: from + perPage - 1,
+  })
   if (error) {
     console.error('[collections] list error:', error.message)
     return res.status(500).json({ success: false, error: 'internal_error' })

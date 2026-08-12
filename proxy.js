@@ -53,7 +53,14 @@ function isApiPath(pathname) {
 
 // Root-level static files that must serve from public/ on a custom domain
 // (see the host-routing block below).
-const ROOT_STATIC_PASSTHROUGH = new Set(['/favicon.ico', '/robots.txt', '/sitemap.xml'])
+//
+// `/robots.txt` and `/sitemap.xml` were in this set and are deliberately NOT
+// anymore: those two are PER-SITE and generated (pages/_sites/[host]/…), so
+// they must go through the rewrite like every other path. Serving them from
+// public/ would hand a client's domain the platform's files — and since no such
+// file exists in public/, it handed them a 404, which is what made every client
+// site undiscoverable (G-SITEMAP). Do not "restore" them here.
+const ROOT_STATIC_PASSTHROUGH = new Set(['/favicon.ico'])
 
 function loginUrl(request) {
   const aidreamUrl = process.env.AIDREAM_API_URL

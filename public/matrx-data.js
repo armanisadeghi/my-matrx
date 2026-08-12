@@ -144,13 +144,28 @@
 
     /**
      * List items of a public_read collection (only allowlisted fields come
-     * back). @returns {Promise<Object>} {success, items, page, per_page, _status}
+     * back).
+     *
+     * PREFER SSR FOR CONTENT. If the rows are page content (events,
+     * testimonials, profiles), bind them with a
+     * `<template data-matrx-collection="...">` instead — that markup is in the
+     * HTML a crawler receives, and this fetch is not (DATA_API.md → "Rendering
+     * collection content"). Use `list()` for genuinely interactive cases:
+     * search-as-you-type, pagination, load-more.
+     *
+     * @param {Object} [opts]
+     * @param {number} [opts.page] / @param {number} [opts.perPage]
+     * @param {string} [opts.order] `field[:asc|desc]`, restricted to the
+     *   collection's public_read_fields (+ created_at/id). Omit to get the
+     *   collection's own declared order.
+     * @returns {Promise<Object>} {success, items, page, per_page, _status}
      */
     list: function (collection, opts) {
       opts = opts || {}
       var params = []
       if (opts.page) params.push('page=' + encodeURIComponent(opts.page))
       if (opts.perPage) params.push('per_page=' + encodeURIComponent(opts.perPage))
+      if (opts.order) params.push('order=' + encodeURIComponent(opts.order))
       var qs = params.length ? '?' + params.join('&') : ''
       return fetch(itemsUrl(collection) + qs).then(parseJson)
     },
