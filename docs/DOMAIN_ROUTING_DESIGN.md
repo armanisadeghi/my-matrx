@@ -17,6 +17,21 @@ Both `/c/[client]/[[...slug]].js` and `/_sites/[host]/[[...slug]].js` are thin w
 ONE shared module: `lib/render/clientSiteRenderer.js` (component + data loader). Never fork
 the renderer; extend the shared module.
 
+### Desired domain versus active traffic domain
+
+`client_sites.domain` is the desired serving host and remains the lookup key for
+custom-host requests. Generated links, canonicals, Open Graph URLs, and sitemaps
+use it only when `client_sites.settings.domain_traffic` is absent (legacy rows)
+or carries `{ mode: "custom", verified_domain: <the current domain> }`. A newly
+added or changed domain starts in `mode: "platform"`, so `/c/{site}` remains the
+public traffic surface while DNS, Vercel attachment, and TLS are incomplete.
+
+The CMS verifies the whole route through
+`https://{domain}/__matrx-domain-verification`. The marker resolves the host back
+to the raw `client_sites.domain` row and returns the exact site slug and domain.
+Only that successful identity check activates custom-domain traffic. Direct
+custom-host serving remains available for the verification request itself.
+
 ## Decisions (each one deliberate)
 
 1. **Rewrite, not redirect; middleware, not per-page hacks.** `proxy.js` is extended, not

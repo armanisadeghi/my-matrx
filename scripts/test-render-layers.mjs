@@ -37,6 +37,7 @@ import { buildCombinedCss } from '../lib/render/cascade.js'
 import { pagePath, isRealCategory } from '../lib/render/pagePath.js'
 import { gatePageForViewer, selectAliasPage } from '../lib/render/pageSelection.js'
 import { redirectDestination, redirectFromRoute } from '../lib/render/redirects.js'
+import { activeSiteDomain, buildNav } from '../lib/render/surface.js'
 import {
   bindingKey,
   expandCollectionBindings,
@@ -533,6 +534,20 @@ eq('redirects: a non-path target is never served',
   redirectDestination({ toRoute: 'https://evil.example', fromRoute: '/x', basePath: '' }), null)
 eq('redirects: a self-target is never served',
   redirectDestination({ toRoute: '/x', fromRoute: '/x', basePath: '' }), null)
+
+// ── domain activation: desired host is not automatically the traffic host ──
+const domainSite = { slug: 'client', domain: 'client.example', settings: {} }
+eq('domain activation: legacy row retains its domain', activeSiteDomain(domainSite), 'client.example')
+eq('domain activation: platform mode suppresses desired domain',
+  activeSiteDomain({ ...domainSite, settings: { domain_traffic: { mode: 'platform' } } }), null)
+eq('domain activation: verified current domain is active',
+  activeSiteDomain({ ...domainSite, settings: { domain_traffic: { mode: 'custom', verified_domain: 'client.example' } } }),
+  'client.example')
+eq('domain activation: stale verification cannot activate a changed domain',
+  activeSiteDomain({ ...domainSite, settings: { domain_traffic: { mode: 'custom', verified_domain: 'old.example' } } }), null)
+eq('domain activation: platform canonical remains /c while pending',
+  buildNav({ ...domainSite, settings: { domain_traffic: { mode: 'platform' } } }).canonicalBase,
+  'https://mymatrx.com/c/client')
 
 // ── sitemap / robots: the discovery surface ────────────────────────────────
 // THE ONE RULE: the sitemap lists exactly the URLs the renderer answers 200
