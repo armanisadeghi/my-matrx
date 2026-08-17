@@ -48,6 +48,8 @@ import { applyOrder, orderColumn, parseOrderSpec, resolveOrderSpec } from '../li
 import {
   originFromHeaders,
   originOf,
+  indexNowKeyForWebSiteId,
+  isIndexNowKeyRequest,
   renderRobotsTxt,
   renderSitemapXml,
   sitemapEntries,
@@ -618,6 +620,13 @@ check('sitemap: an ampersand in a URL is escaped',
 check('sitemap: no lastmod element when there is no date',
   !renderSitemapXml([{ loc: 'https://x.com/a', lastmod: null }]).includes('lastmod'))
 eq('sitemap: an unparseable date is dropped rather than emitted', toLastmod('not-a-date'), null)
+eq('indexnow: paired web.site UUID becomes a legal stable public key',
+  indexNowKeyForWebSiteId('f47ac10b-58cc-4372-a567-0e02b2c3d479'),
+  'f47ac10b58cc4372a5670e02b2c3d479')
+check('indexnow: only the exact root key file is accepted',
+  isIndexNowKeyRequest(['f47ac10b58cc4372a5670e02b2c3d479.txt'], 'f47ac10b-58cc-4372-a567-0e02b2c3d479'))
+check('indexnow: a nested or mismatched key file is ordinary content',
+  !isIndexNowKeyRequest(['nested', 'f47ac10b58cc4372a5670e02b2c3d479.txt'], 'f47ac10b-58cc-4372-a567-0e02b2c3d479'))
 
 // robots: the host must be the one the request arrived on.
 check('robots: the Sitemap line names the custom domain, not the platform host',

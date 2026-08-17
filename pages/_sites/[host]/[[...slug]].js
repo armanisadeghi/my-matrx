@@ -1,6 +1,7 @@
 import { getClientSiteByDomain } from '@/lib/supabase/clientHelpers'
 import { ClientSiteRenderer, buildNav, loadSitePageProps, siteNotFound } from '@/lib/render/clientSiteRenderer'
 import { normalizeHost, domainCounterpart } from '@/lib/domains'
+import { serveIndexNowKeyIfRequested } from '@/lib/render/discovery'
 
 // Custom-domain client-site route (W2-E). NEVER reachable by URL: proxy.js
 // 404s direct /_sites/* requests and internally rewrites custom-host requests
@@ -52,6 +53,13 @@ export async function getServerSideProps(props) {
       console.log('No client site for domain:', host)
       return siteNotFound(props.res)
     }
+
+    const indexNowResponse = serveIndexNowKeyIfRequested({
+      client,
+      slugSegments: slug,
+      res: props.res,
+    })
+    if (indexNowResponse) return indexNowResponse
 
     return await loadSitePageProps({
       client,

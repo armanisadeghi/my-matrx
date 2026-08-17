@@ -1,6 +1,7 @@
 import { getClientSite } from '@/lib/supabase/clientHelpers'
 import { ClientSiteRenderer, buildNav, loadSitePageProps, siteNotFound } from '@/lib/render/clientSiteRenderer'
 import { previewAccessAllowed, previewGateDenied } from '@/lib/previewGate'
+import { serveIndexNowKeyIfRequested } from '@/lib/render/discovery'
 
 // Path-based client-site route: /c/{site}/{slug} and /c/{site}/{category}/{slug}.
 // Thin wrapper over the ONE shared renderer (lib/render/clientSiteRenderer.js).
@@ -25,6 +26,13 @@ export async function getServerSideProps(props) {
       console.log('Client not found:', clientSlug)
       return siteNotFound(props.res)
     }
+
+    const indexNowResponse = serveIndexNowKeyIfRequested({
+      client,
+      slugSegments: slug,
+      res: props.res,
+    })
+    if (indexNowResponse) return indexNowResponse
 
     // Preview gate: sites with a `settings.preview_token` require the `pt`
     // link param or a platform admin session; tokenless sites stay open.
