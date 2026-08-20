@@ -10,6 +10,7 @@
     "generate-uuid": "node -e \"console.log('New page ID:', require('crypto').randomUUID())\"",
     "generate-indexes": "node scripts/generate-project-indexes.js",
     "test:collections": "node scripts/test-validate-item.mjs",
+    "test:api-auth": "node scripts/test-api-auth.mjs",
     "test:render": "node scripts/test-render-layers.mjs",
     "env:pull": "doppler secrets download --project my-matrx --config dev --no-file --format env > .env.local",
     "env:push": "doppler secrets upload --project my-matrx --config dev .env.local"

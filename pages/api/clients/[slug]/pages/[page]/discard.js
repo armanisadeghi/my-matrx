@@ -1,4 +1,10 @@
 import { getClientPage, discardPageDraft } from '@/lib/supabase/clientHelpers'
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
+
+// NOTE: proxy.js also 404s this route outright (isBlockedClientWrite) because
+// matrx-frontend's /api/cms/pages owns this operation. The handler gate below is
+// not redundant with that — it is what holds if the matcher is ever edited or
+// this route is reached by a path the matcher does not see.
 
 /**
  * POST /api/clients/[slug]/pages/[page]/discard
@@ -8,6 +14,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
+  if (!rateLimit(req, res, { name: 'client-page-discard', limit: 30, windowMs: 60_000 })) return
+  if (!(await requireIdentity(req, res))) return
 
   try {
     const { slug, page } = req.query

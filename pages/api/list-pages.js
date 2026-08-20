@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -13,6 +14,9 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
+  if (!rateLimit(req, res, { name: 'list-pages', limit: 60, windowMs: 60_000 })) return
+  if (!(await requireIdentity(req, res))) return
 
   try {
     console.log('=== LIST PAGES API DEBUG ===')

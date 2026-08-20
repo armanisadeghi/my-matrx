@@ -1,4 +1,30 @@
 import { getClientPage, updatePageDraft, stripDraftFields } from '@/lib/supabase/clientHelpers'
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
+
+// The columns a draft update may touch. updatePageDraft() spreads whatever it
+// is given straight into an RLS-bypassing UPDATE, so an unbounded req.body let
+// a caller rewrite `is_published`, `client_id`, `route` — anything on the row.
+// Only draft content is writable here; publishing is publish_page_draft's job.
+const UPDATABLE_DRAFT_FIELDS = new Set([
+  'html_content_draft',
+  'css_content_draft',
+  'js_content_draft',
+  'meta_title_draft',
+  'meta_description_draft',
+])
+
+function pickDraftUpdates(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return {}
+  const picked = {}
+  for (const [key, value] of Object.entries(body)) {
+    if (UPDATABLE_DRAFT_FIELDS.has(key)) picked[key] = value
+  }
+  return picked
+}
+
+// NOTE: proxy.js also 404s PUT on this route (isBlockedClientWrite) because
+// matrx-frontend's /api/cms/pages owns page updates. The GET half stays public
+// (it is the anonymous page-read surface); only the write half is gated here.
 
 /**
  * GET /api/clients/[slug]/pages/[page]
@@ -42,8 +68,17 @@ export default async function handler(req, res) {
 
   // PUT: Update page draft
   if (req.method === 'PUT') {
+    if (!rateLimit(req, res, { name: 'client-page-update', limit: 60, windowMs: 60_000 })) return
+    if (!(await requireIdentity(req, res))) return
+
     try {
-      const updates = req.body
+      const updates = pickDraftUpdates(req.body)
+      if (Object.keys(updates).length === 0) {
+        return res.status(400).json({
+          error: 'No updatable fields',
+          allowed: [...UPDATABLE_DRAFT_FIELDS],
+        })
+      }
 
       // Get the page first to get its ID
       const pageData = await getClientPage(slug, page)

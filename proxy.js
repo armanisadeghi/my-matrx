@@ -8,7 +8,12 @@ import { normalizeHost, isPlatformHost } from '@/lib/domains'
 // with ?access_token=... (handled by pages/oauth/callback.js, which mints
 // our own short-lived signed session cookie via /api/auth/session).
 const ADMIN_PATHS = ['/admin']
-const ADMIN_API_EXACT = ['/api/create-page', '/api/list-pages']
+// Every service-role route in this app. /api/test-db was NOT here — it is a DB
+// diagnostic that reports which SUPABASE_* variables are configured and whether
+// the database answers, and it was reachable by anyone. Each of these also
+// enforces its own handler-level gate (lib/apiAuth.js); this list is the outer
+// gate, not the only one.
+const ADMIN_API_EXACT = ['/api/create-page', '/api/list-pages', '/api/test-db']
 
 // ── Public-by-design API surfaces (deliberately OUTSIDE the admin gate) ──────
 // | Path                                            | Why public                                              |

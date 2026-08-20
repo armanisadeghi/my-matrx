@@ -1,6 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
 
 export default async function handler(req, res) {
+  // Admin-only: this reports SUPABASE_* configuration presence and database
+  // reachability. Kept rather than deleted — /admin's diagnostics panel uses it.
+  if (!rateLimit(req, res, { name: 'test-db', limit: 20, windowMs: 60_000 })) return
+  if (!(await requireIdentity(req, res))) return
+
   try {
     // Log environment variables (without exposing keys)
     console.log('Environment check:')

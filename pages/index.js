@@ -1,30 +1,6 @@
-import { useState } from 'react'
 import Head from 'next/head'
 
 export default function HomePage({ recentPages }) {
-  const [testResult, setTestResult] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-
-  const testDatabaseConnection = async () => {
-    setIsLoading(true)
-    setTestResult('Testing database connection...')
-    
-    try {
-      const response = await fetch('/api/test-db')
-      const result = await response.json()
-
-      if (result.success) {
-        setTestResult(`✅ Database Connected! Method: ${result.method}\n${result.message}`)
-      } else {
-        setTestResult(`❌ Database Error: ${JSON.stringify(result, null, 2)}`)
-      }
-    } catch (err) {
-      setTestResult(`❌ Connection Failed: ${err.message}`)
-    }
-    
-    setIsLoading(false)
-  }
-
   return (
     <>
       <Head>
@@ -45,44 +21,6 @@ export default function HomePage({ recentPages }) {
       <h1>🚀 My Matrx - Dynamic HTML Pages</h1>
       <p>This is a Next.js app that serves HTML pages dynamically from Supabase.</p>
       
-      <div style={{ 
-        background: '#f5f5f5', 
-        padding: '20px', 
-        borderRadius: '8px', 
-        margin: '20px 0' 
-      }}>
-        <h2>🧪 Database Testing</h2>
-        <div style={{ marginBottom: '15px' }}>
-          <button 
-            onClick={testDatabaseConnection}
-            disabled={isLoading}
-            style={{ 
-              padding: '10px 20px', 
-              marginRight: '10px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: isLoading ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {isLoading ? 'Testing...' : 'Test Database Connection'}
-          </button>
-        </div>
-        
-        {testResult && (
-          <div style={{ 
-            padding: '10px', 
-            background: testResult.includes('✅') ? '#d4edda' : '#f8d7da',
-            border: `1px solid ${testResult.includes('✅') ? '#c3e6cb' : '#f5c6cb'}`,
-            borderRadius: '4px',
-            fontFamily: 'monospace'
-          }}>
-            {testResult}
-          </div>
-        )}
-      </div>
-
       <div>
         <h2>📄 Recent Pages</h2>
         {recentPages && recentPages.length > 0 ? (

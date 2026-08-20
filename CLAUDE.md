@@ -219,6 +219,41 @@ fixtures (`/c/dev-website/events-and-booking` + the `events` collection, whose
 
 ---
 
+## API auth — the handler is the lock, `proxy.js` is the outer gate
+
+Every route in `pages/api/**` that touches Supabase runs as the **service role**, which bypasses RLS
+entirely. `proxy.js`'s matcher is NOT sufficient on its own — a route added outside `ADMIN_API_EXACT`,
+or one edit to that list, silently re-opens anonymous RLS-free writes with no test failing. That is
+exactly how `pages/api/test-db.js` shipped publicly reachable.
+
+**So: any new route that reads or writes with the service role gates itself, in the handler.**
+
+```js
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
+
+if (!rateLimit(req, res, { name: 'my-route', limit: 20, windowMs: 60_000 })) return
+const identity = await requireIdentity(req, res)
+if (!identity) return
+```
+
+- Two identities, never anonymous: the `mm_admin_session` HMAC cookie, or `x-matrx-admin-secret`
+  matching `MYMATRX_ADMIN_API_SECRET` for server-to-server callers. **Fails closed** — an unset
+  secret disables that path, it never opens it.
+- **THE USER-ID LAW: `user_id` comes from `identity.userId`, never from `req.body`.** A body
+  `userId`/`user_id` is ignored on every route. Service callers attribute to
+  `MYMATRX_SERVICE_USER_ID`, never to anything they sent.
+- **Never spread `req.body` into an update.** `updatePageDraft()` writes whatever it is handed
+  straight into an RLS-bypassing `UPDATE`; the page `PUT` allowlists the five `*_draft` columns.
+- Rate limiting is fixed-window and in-memory per instance **on purpose** — admin routes on a
+  pre-launch platform need to survive a burst, not run a distributed quota system. The anonymous
+  visitor routes under `/api/sites/**` keep their DB-backed limiter, which has to be exact.
+- Public-by-design routes stay public: `POST /api/form-submissions` and the W2-C collection routes
+  gate themselves by site key / `public_read`, and must never grow an admin gate.
+- `pnpm test:api-auth` pins all of it. Full history: `common-docs/systems/cms-system/FEATURE.md`
+  § Security.
+
+---
+
 ## Integration
 
 Pages from this site are embedded via iframe in the main AI Matrx admin app. See `MAIN_APP_INTEGRATION_INSTRUCTIONS.md` for the full integration guide.
@@ -233,5 +268,6 @@ Pages from this site are embedded via iframe in the main AI Matrx admin app. See
 | `pnpm build` | Build for production |
 | `pnpm test:render` | Render-layer tests (theme CSS, nav/footer tokens, page selection, redirect math, sitemap/robots) |
 | `pnpm test:collections` | W2-C item validator vs the pinned cross-repo fixture |
+| `pnpm test:api-auth` | Handler-level auth + rate limiting on the service-role routes |
 | `node -e "..."` | Generate UUID for new pages (`pnpm generate-uuid`) |
 | `pnpm env:pull` | Pull env from Doppler |

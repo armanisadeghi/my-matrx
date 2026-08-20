@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { requireIdentity, rateLimit } from '@/lib/apiAuth'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -10,12 +11,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  // This handler holds the service-role key, which bypasses RLS. proxy.js also
+  // gates /api/create-page — that is the outer gate, this is the lock.
+  if (!rateLimit(req, res, { name: 'create-page', limit: 20, windowMs: 60_000 })) return
+  const identity = await requireIdentity(req, res)
+  if (!identity) return
+
   try {
     const { 
       htmlContent, 
       html_content, // Support both formats
-      userId, 
-      user_id, // Support both formats
       meta_title,
       meta_description,
       meta_keywords,
@@ -26,7 +31,10 @@ export default async function handler(req, res) {
 
     // Use the provided value or fallback
     const finalHtmlContent = htmlContent || html_content
-    const finalUserId = userId || user_id
+    // THE USER-ID LAW: attribution comes from the verified identity. A body
+    // `userId`/`user_id` is ignored — it used to be written verbatim, which let
+    // any caller stamp a row with someone else's id.
+    const finalUserId = identity.userId
 
     console.log('Creating page with data:', { 
       meta_title, 
