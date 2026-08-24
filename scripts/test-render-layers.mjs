@@ -23,7 +23,15 @@
  * Exit 1 on any failure.
  */
 import { themeConfigToCss, isSafeCssValue } from '../lib/render/themeCss.js'
-import { NAV_TOKEN, resolveNavItems, renderNavHtml, injectNav, hasNavToken } from '../lib/render/siteNav.js'
+import {
+  NAV_TOKEN,
+  hasNavToken,
+  injectNav,
+  rebaseSiteHrefs,
+  renderNavHtml,
+  resolveNavItems,
+  resolveSiteHref,
+} from '../lib/render/siteNav.js'
 import {
   FOOTER_TOKEN,
   contactInfoToLines,
@@ -167,6 +175,22 @@ eq(
   JSON.stringify(resolveNavItems({ navigation: [{ label: 'About', href: '#about' }], pages, basePath: '/c/dev', pagePath })),
   JSON.stringify([{ label: 'About', href: '#about' }])
 )
+eq(
+  'override: root-relative links are site-relative on the platform surface',
+  resolveNavItems({ navigation: [{ label: 'About', href: '/about' }], pages, basePath: '/c/dev', pagePath })[0].href,
+  '/c/dev/about'
+)
+eq('href: an already-prefixed platform path is not doubled', resolveSiteHref('/c/dev/about', '/c/dev'), '/c/dev/about')
+eq('href: a protocol-relative URL is not treated as a site path', resolveSiteHref('//cdn.example.com/x', '/c/dev'), '//cdn.example.com/x')
+eq(
+  'body: root-relative href attributes are rebased without touching external, anchor, or script text',
+  rebaseSiteHrefs(
+    '<a href="/about">A</a><a href="https://example.com">E</a><a href="#x">X</a><script>const x = \'href="/fake"\'</script>',
+    '/c/dev'
+  ),
+  '<a href="/c/dev/about">A</a><a href="https://example.com">E</a><a href="#x">X</a><script>const x = \'href="/fake"\'</script>'
+)
+eq('body: custom-domain surface remains byte-identical', rebaseSiteHrefs('<a href="/about">A</a>', ''), '<a href="/about">A</a>')
 
 // ── siteNav: markup, escaping, current page ────────────────────────────────
 eq(
