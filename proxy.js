@@ -110,6 +110,17 @@ export async function proxy(request) {
     if (PUBLIC_COLLECTIONS_API_RE.test(pathname) || pathname === '/matrx-data.js') {
       return NextResponse.next()
     }
+    // The domain-verification MARKER (docs/DOMAIN_ROUTING_DESIGN.md): the CMS
+    // fetches https://{domain}/__matrx-domain-verification to prove the whole
+    // route — DNS, TLS, serving — lands on us before it activates custom-domain
+    // traffic. Answered by an API route so the identity check is JSON, not a
+    // rendered page.
+    if (pathname === '/__matrx-domain-verification') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/api/domain-verification'
+      url.searchParams.set('host', host)
+      return NextResponse.rewrite(url)
+    }
     const url = request.nextUrl.clone()
     url.pathname = `/_sites/${host}${pathname === '/' ? '' : pathname}`
     return NextResponse.rewrite(url)

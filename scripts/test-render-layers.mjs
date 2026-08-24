@@ -539,7 +539,10 @@ eq('redirects: a self-target is never served',
 
 // ── domain activation: desired host is not automatically the traffic host ──
 const domainSite = { slug: 'client', domain: 'client.example', settings: {} }
-eq('domain activation: legacy row retains its domain', activeSiteDomain(domainSite), 'client.example')
+// FAIL CLOSED: no domain_traffic state = unverified — never grandfathered.
+// (The rollout passthrough this used to pin preserved only unverified claims;
+// removed 2026-08-24 once the /__matrx-domain-verification marker shipped.)
+eq('domain activation: a row with no traffic state is NOT active', activeSiteDomain(domainSite), null)
 eq('domain activation: platform mode suppresses desired domain',
   activeSiteDomain({ ...domainSite, settings: { domain_traffic: { mode: 'platform' } } }), null)
 eq('domain activation: verified current domain is active',
