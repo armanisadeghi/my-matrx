@@ -86,6 +86,20 @@ Sorting is DB-side with a stable `id` tiebreak (pagination cannot duplicate or d
 values compare as **text**: correct for ISO-8601 datetimes written in UTC (`…Z`, what the platform
 emits), lexical for numbers.
 
+**Filter — `?filter=field:op:value[,…]`.** Five operators — `eq gt gte lt lte` — plus one literal
+value, `now`, resolved server-side to the current instant in UTC. Clauses are comma-separated and
+**AND**-ed; there is no OR, no negation and no nesting, on purpose. Same allowlist as `?order=`
+(filtering by a field you cannot read narrows the list and leaks its values), same text-comparison
+caveat, and anything malformed or disallowed is `400 {"success":false,"error":"invalid_filter"}` —
+with **no** filter applied rather than a partial one.
+
+| Want | Send |
+|---|---|
+| Upcoming events, soonest first | `?order=starts_at:asc&filter=starts_at:gte:now` |
+| Published testimonials | `?filter=published:eq:true` |
+| One department's profiles | `?filter=department:eq:cardiology` |
+| Events in a window | `?filter=starts_at:gte:now,starts_at:lte:2026-12-31` |
+
 ---
 
 ## Rendering collection content (prefer this over fetching)
@@ -96,7 +110,10 @@ HTML search engines and our own crawler receive:
 
 ```html
 <ul>
-  <template data-matrx-collection="events" data-order="starts_at:asc" data-limit="10">
+  <template data-matrx-collection="events"
+            data-order="starts_at:asc"
+            data-filter="starts_at:gte:now"
+            data-limit="10">
     <li><strong>{{title}}</strong> — {{starts_at}}</li>
   </template>
   <li data-matrx-empty="events">No events scheduled.</li>
@@ -107,6 +124,10 @@ HTML search engines and our own crawler receive:
   `public_read_fields` are readable, exactly as through the HTTP route.
 - `data-order` — optional, same grammar and same allowlist as `?order=`. Omit it to inherit the
   collection's `settings.default_order`.
+- `data-filter` — optional, same grammar and same allowlist as `?filter=`. `starts_at:gte:now` is
+  how a past event leaves the page on its own, with nobody editing the site. Unlike the HTTP route,
+  a malformed or disallowed `data-filter` **warns and is dropped** (the list renders unfiltered);
+  an author's typo must never break a visitor's page.
 - `data-limit` — optional, default 50, hard cap 200. Every row is inlined into the page.
 - `{{field}}` — an allowlisted field, or `{{id}}` / `{{created_at}}`. **The renderer escapes every
   value**, so unlike hand-rolled DOM building this cannot produce a stored-XSS bug. A name that is
@@ -178,8 +199,27 @@ layer), so nothing arriving through these routes is ever legitimately HTML.
 ## matrx-data.js
 
 `window.MatrxData` gives `submit(collection, data, {idempotencyKey, sourceUrl})`,
-`list(collection, {page, perPage, order})`, `get(collection, id)`, `escapeHtml(s)`.
-For page **content**, prefer the server-rendered binding above — `list()` is for interactive reads. It reads
+`list(collection, {page, perPage, order, filter})`, `render(collection, {into, template, order,
+filter, empty, perPage})`, `get(collection, id)`, `escapeHtml(s)`.
+For page **content**, prefer the server-rendered binding above — `list()` is for interactive reads.
+
+`render()` uses the SAME `{{field}}` template syntax as the server binding, and escapes every value
+the same way, so the client path and the SSR path are one mental model instead of two. `template`
+may be markup or a selector for a `<template>` element — including the very element the SSR binder
+expands, so a list can be authored once and rendered either way:
+
+```js
+MatrxData.render('events', {
+  into: '#events',
+  template: '<li><strong>{{title}}</strong> — {{starts_at}}</li>',
+  order: 'starts_at:asc',
+  filter: 'starts_at:gte:now',
+  empty: '<li>No events scheduled.</li>',
+})
+```
+
+Reach for `render()` instead of `list()` + your own `innerHTML` string: hand-built markup is one
+forgotten `escapeHtml` away from stored XSS, and `render()` removes the chance to forget. It reads
 `window.__MATRX_SITE__` (slug + data key), which the platform injects on **published
 normal-page renders only** — never on previews, never on listing pages, never for sites without
 a data key.

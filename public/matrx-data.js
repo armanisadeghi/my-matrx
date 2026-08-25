@@ -22,6 +22,47 @@
 (function () {
   'use strict'
 
+  /**
+   * `template` may be raw HTML, a `<template>`/element, or a selector for one.
+   * A selector that matches an element uses its innerHTML; anything else is
+   * treated as the markup itself, so the common case (a literal string) needs
+   * no ceremony.
+   */
+  function resolveTemplate(template) {
+    if (!template) return null
+    if (typeof template !== 'string') {
+      return typeof template.innerHTML === 'string' ? template.innerHTML : null
+    }
+    // Only try a selector lookup for something that cannot be markup — a
+    // querySelector on `<li>{{title}}</li>` throws.
+    if (template.indexOf('<') === -1) {
+      var found = null
+      try {
+        found = document.querySelector(template)
+      } catch (e) {
+        found = null
+      }
+      if (found) return found.innerHTML
+    }
+    return template
+  }
+
+  /**
+   * Expand `{{field}}` against one public item row. The server twin is
+   * `lib/render/collectionBindings.js` renderTemplate() — same placeholder
+   * grammar, same escaping, same "unknown name renders empty" rule. Keep them
+   * in step: a page that renders one way server-side and another way after
+   * hydration is worse than either alone.
+   */
+  function renderTemplate(templateHtml, item, escape) {
+    var data = item && typeof item.data === 'object' && item.data !== null ? item.data : {}
+    return templateHtml.replace(/\{\{\s*([A-Za-z0-9_-]{1,64})\s*\}\}/g, function (_m, key) {
+      if (key === 'id') return escape(item && item.id)
+      if (key === 'created_at') return escape(item && item.created_at)
+      return Object.prototype.hasOwnProperty.call(data, key) ? escape(data[key]) : ''
+    })
+  }
+
   function site() {
     var s = window.__MATRX_SITE__
     if (!s || !s.slug || !s.dataKey) {
@@ -158,6 +199,9 @@
      * @param {string} [opts.order] `field[:asc|desc]`, restricted to the
      *   collection's public_read_fields (+ created_at/id). Omit to get the
      *   collection's own declared order.
+     * @param {string} [opts.filter] `field:op:value[,…]`, ops `eq gt gte lt lte`,
+     *   plus the literal `now` — e.g. `starts_at:gte:now` for upcoming events.
+     *   Same allowlist as `order`.
      * @returns {Promise<Object>} {success, items, page, per_page, _status}
      */
     list: function (collection, opts) {
@@ -166,8 +210,78 @@
       if (opts.page) params.push('page=' + encodeURIComponent(opts.page))
       if (opts.perPage) params.push('per_page=' + encodeURIComponent(opts.perPage))
       if (opts.order) params.push('order=' + encodeURIComponent(opts.order))
+      if (opts.filter) params.push('filter=' + encodeURIComponent(opts.filter))
       var qs = params.length ? '?' + params.join('&') : ''
       return fetch(itemsUrl(collection) + qs).then(parseJson)
+    },
+
+    /**
+     * Render a collection into the page using the SAME `{{field}}` template
+     * syntax the SSR binding uses — so the client path and the server path are
+     * one mental model instead of two (W2C-render-binding §C).
+     *
+     *   MatrxData.render('events', {
+     *     into: '#events',
+     *     template: '<li><strong>{{title}}</strong> — {{starts_at}}</li>',
+     *     order: 'starts_at:asc',
+     *     filter: 'starts_at:gte:now',
+     *     empty: '<li>No events scheduled.</li>',
+     *   })
+     *
+     * `template` may also be a SELECTOR for a `<template>` element, in which
+     * case its innerHTML is used — the same element the SSR binder expands,
+     * so a page can be written once and rendered either way.
+     *
+     * THE RENDERER ESCAPES, THE AUTHOR NEVER INTERPOLATES. Every `{{field}}`
+     * goes through escapeHtml here, exactly as the server expander does. That
+     * is the entire reason this method exists: `list()` hands back raw data and
+     * every page author who builds their own innerHTML string is one forgotten
+     * escapeHtml away from stored XSS.
+     *
+     * `{{id}}` and `{{created_at}}` address the row; every other name addresses
+     * `data`. An unknown name renders EMPTY rather than printing `{{starts_at}}`
+     * at a visitor.
+     *
+     * @param {string} collection
+     * @param {Object} opts
+     * @param {string|Element} opts.into container (selector or element) — its
+     *   contents are REPLACED
+     * @param {string|Element} opts.template row template, or a selector/element
+     *   whose innerHTML is the row template
+     * @param {string} [opts.empty] HTML rendered when there are zero rows
+     * @param {string} [opts.order] / @param {string} [opts.filter] /
+     *   @param {number} [opts.perPage] passed straight to list()
+     * @returns {Promise<Object>} the list() response, so callers can still read
+     *   `items` — and it REJECTS on failure like every other method here.
+     */
+    render: function (collection, opts) {
+      opts = opts || {}
+      var into = typeof opts.into === 'string' ? document.querySelector(opts.into) : opts.into
+      if (!into) {
+        return Promise.reject(new Error('MatrxData.render: `into` matched no element'))
+      }
+      var template = resolveTemplate(opts.template)
+      if (template === null) {
+        return Promise.reject(new Error('MatrxData.render: `template` is required'))
+      }
+      var self = this
+      return this.list(collection, {
+        order: opts.order,
+        filter: opts.filter,
+        perPage: opts.perPage,
+      }).then(function (response) {
+        var items = (response && response.items) || []
+        if (items.length === 0) {
+          into.innerHTML = opts.empty || ''
+          return response
+        }
+        into.innerHTML = items
+          .map(function (item) {
+            return renderTemplate(template, item, self.escapeHtml)
+          })
+          .join('')
+        return response
+      })
     },
 
     /**

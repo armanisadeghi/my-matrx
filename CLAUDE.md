@@ -173,7 +173,8 @@ one element, opt-in exactly like the nav and footer tokens:
 
 ```html
 <ul>
-  <template data-matrx-collection="events" data-order="starts_at:asc" data-limit="10">
+  <template data-matrx-collection="events" data-order="starts_at:asc"
+            data-filter="starts_at:gte:now" data-limit="10">
     <li><strong>{{title}}</strong> — {{starts_at}}</li>
   </template>
   <li data-matrx-empty="events">No events scheduled.</li>
@@ -198,7 +199,10 @@ one element, opt-in exactly like the nav and footer tokens:
   binding silently stops matching.
 - Row counts are bounded (`data-limit`, ≤200; default 50) — every row is inlined into the HTML.
 - Client JS is progressive enhancement now, never the source of content: `MatrxData.list()` stays
-  for interactive cases (search-as-you-type, load-more) and gained an `order` option.
+  for interactive cases (search-as-you-type, load-more) and takes `order`/`filter`.
+  **`MatrxData.render()` (2026-08-25) reuses the SAME `{{field}}` template and the same escaping**,
+  so the client path and the SSR path are one mental model — prefer it over `list()` plus a
+  hand-built `innerHTML` string, which is one forgotten `escapeHtml` away from stored XSS.
 
 **Ordering is configurable, not hardcoded** (`lib/collections/ordering.js`): per-request
 (`?order=field[:asc|desc]`, `data-order`) → `site_collections.settings.default_order` →
@@ -208,6 +212,20 @@ DB-side with a stable `id` tiebreak, and a bad *setting* falls back loudly while
 400s. `lib/collections/publicItems.js` is the one read both the HTTP route and SSR use — do not fork
 it. jsonb values compare as TEXT (fine for `...Z` datetimes, wrong for numeric magnitude); the fix
 when it bites is a typed expression index, never a sort in JS.
+
+**All three repos now agree on what "first" means** (2026-08-25). `ordering.js` is the reference
+implementation; `aidream/services/cms/collection_ordering.py` (canonical) and
+`matrx-frontend/features/cms/collections/ordering.ts` are ports, pinned by the language-neutral
+fixture `collection-ordering-rules.json` — `pnpm test:ordering` here, `pytest` there,
+`pnpm check:collection-ordering` in matrx-frontend. Until this landed, an events collection
+declaring `starts_at:asc` rendered chronologically to a visitor and newest-first to the agent and
+the admin grid.
+
+**Filtering is configurable too** (`lib/collections/filtering.js`, 2026-08-25): `data-filter` /
+`?filter=field:op:value[,…]`, ops `eq gt gte lt lte` plus the literal `now`, AND-ed, restricted to
+the same readable fields, applied DB-side BEFORE the limit. `starts_at:gte:now` is how a past event
+leaves a page with nobody editing the site. A bad `?filter=` 400s; a bad `data-filter` warns and is
+dropped, so an author's typo never breaks a visitor's page.
 
 ### Live-site safety
 

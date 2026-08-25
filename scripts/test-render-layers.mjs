@@ -54,6 +54,12 @@ import {
 } from '../lib/render/collectionBindings.js'
 import { applyOrder, orderColumn, parseOrderSpec, resolveOrderSpec } from '../lib/collections/ordering.js'
 import {
+  applyFilters,
+  filterColumn,
+  parseFilterClause,
+  resolveFilters,
+} from '../lib/collections/filtering.js'
+import {
   originFromHeaders,
   originOf,
   indexNowKeyForWebSiteId,
@@ -774,6 +780,72 @@ const fakeQuery = { order(col, opts) { calls.push([col, opts.ascending, opts.nul
 applyOrder(fakeQuery, parseOrderSpec('starts_at:asc'))
 eq('ordering: sorts on the jsonb path first', JSON.stringify(calls[0]), '["data->>starts_at",true,false]')
 eq('ordering: then the stable id tiebreak', JSON.stringify(calls[1]), '["id",true,null]')
+
+// ── filtering: a past event drops off, without anyone editing the page ──────
+// The other half of the flagship events bug. Ordering fixed "which one is
+// first"; this fixes "why is last month's open house still on the page".
+const FIXED_NOW = new Date('2026-08-24T12:00:00Z')
+
+eq('filtering: nothing requested → no filters, no error',
+  JSON.stringify(resolveFilters({})), '{"filters":[],"error":null}')
+eq('filtering: the flagship clause resolves `now` server-side',
+  JSON.stringify(resolveFilters({ requested: 'starts_at:gte:now', allowedFields: ['starts_at'], now: FIXED_NOW }).filters),
+  '[{"field":"starts_at","op":"gte","value":"2026-08-24T12:00:00.000Z"}]')
+eq('filtering: a datetime value keeps its own colons',
+  JSON.stringify(parseFilterClause('starts_at:gte:2026-09-17T17:30:00Z')),
+  '{"field":"starts_at","op":"gte","value":"2026-09-17T17:30:00Z"}')
+eq('filtering: clauses are comma-separated and AND-ed',
+  resolveFilters({ requested: 'starts_at:gte:now,rank:lte:3', allowedFields: ['starts_at', 'rank'], now: FIXED_NOW }).filters.length, 2)
+eq('filtering: every clause in one read shares one instant',
+  (() => {
+    const f = resolveFilters({ requested: 'a:gte:now,b:lte:now', allowedFields: ['a', 'b'], now: FIXED_NOW }).filters
+    return f[0].value === f[1].value
+  })(), true)
+// Filtering by a field the caller cannot READ narrows the list and leaks its
+// values — the same oracle the order allowlist exists to close.
+eq('filtering: an unreadable field is refused',
+  resolveFilters({ requested: 'internal_notes:gte:x', allowedFields: ['title'] }).error, 'invalid_filter')
+eq('filtering: a privileged surface may filter on any field',
+  resolveFilters({ requested: 'internal_notes:eq:x', allowAllFields: true }).error, null)
+eq('filtering: an unknown operator is refused',
+  resolveFilters({ requested: 'starts_at:between:x', allowedFields: ['starts_at'] }).error, 'invalid_filter')
+eq('filtering: a clause with no operator is refused',
+  resolveFilters({ requested: 'starts_at', allowedFields: ['starts_at'] }).error, 'invalid_filter')
+eq('filtering: an empty value is refused',
+  resolveFilters({ requested: 'starts_at:gte:', allowedFields: ['starts_at'] }).error, 'invalid_filter')
+// A refused spec yields ZERO filters, never a half-applied set.
+eq('filtering: a refused spec applies nothing at all',
+  resolveFilters({ requested: 'starts_at:gte:now,internal_notes:eq:x', allowedFields: ['starts_at'] }).filters.length, 0)
+eq('filtering: real columns need no allowlist',
+  resolveFilters({ requested: 'created_at:gte:2026-01-01' }).error, null)
+eq('filtering: a data field becomes a jsonb path', filterColumn('starts_at'), 'data->>starts_at')
+eq('filtering: a real column stays a column', filterColumn('created_at'), 'created_at')
+
+// applyFilters must go DB-side, one .filter() per clause, in order.
+const filterCalls = []
+const fakeFilterQuery = { filter(col, op, value) { filterCalls.push([col, op, value]); return this } }
+applyFilters(fakeFilterQuery, resolveFilters({ requested: 'starts_at:gte:now', allowedFields: ['starts_at'], now: FIXED_NOW }).filters)
+eq('filtering: applied DB-side on the jsonb path',
+  JSON.stringify(filterCalls[0]), '["data->>starts_at","gte","2026-08-24T12:00:00.000Z"]')
+
+// ── bindings: data-filter reaches the scanner and the key ───────────────────
+// The scan pass and the expand pass MUST derive the same key or the expander
+// looks up rows nobody fetched and every list silently renders empty.
+const filteredBindingHtml =
+  '<ul><template data-matrx-collection="events" data-order="starts_at:asc" ' +
+  'data-filter="starts_at:gte:now" data-limit="5"><li>{{title}}</li></template></ul>'
+const scanned = findCollectionBindings(filteredBindingHtml)
+eq('bindings: data-filter is scanned', scanned[0].filter, 'starts_at:gte:now')
+eq('bindings: the key carries the filter',
+  bindingKey(scanned[0]), 'events|starts_at:asc|starts_at:gte:now|5')
+// Two bindings differing ONLY by filter are two different fetches.
+eq('bindings: filter participates in identity',
+  bindingKey({ collection: 'events', order: null, filter: 'a:eq:1', limit: null }) ===
+  bindingKey({ collection: 'events', order: null, filter: 'a:eq:2', limit: null }), false)
+// And the expander must agree with the scanner on that key, or nothing renders.
+eq('bindings: the expander looks up the scanner\'s key',
+  expandCollectionBindings(filteredBindingHtml, { [bindingKey(scanned[0])]: [{ id: '1', data: { title: 'Open house' } }] })
+    .includes('Open house'), true)
 
 console.warn = realWarn
 console.log(`${total - failures}/${total} render-layer cases passed`)

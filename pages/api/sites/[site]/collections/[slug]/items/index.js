@@ -22,6 +22,7 @@ import { getSupabaseClient } from '@/lib/supabase/clientHelpers'
 import { validateItem } from '@/lib/collections/validateItem'
 import { resolveOrderSpec } from '@/lib/collections/ordering'
 import { fetchPublicItems } from '@/lib/collections/publicItems'
+import { resolveFilters } from '@/lib/collections/filtering'
 import {
   uniform404,
   constantTimeEqual,
@@ -272,10 +273,24 @@ async function handleList(req, res) {
     return res.status(400).json({ success: false, error: orderError })
   }
 
+  // Filter: `?filter=field:op:value[,…]`, ops `eq gt gte lt lte`, plus the one
+  // literal `now`. Same allowlist as the order, for the same reason — narrowing
+  // a list by a field the caller cannot read leaks that field's values. A bad
+  // CALLER spec is a 400 here; the SSR binder warns and drops it instead,
+  // because an author's typo must not break a visitor's page.
+  const { filters, error: filterError } = resolveFilters({
+    requested: typeof req.query.filter === 'string' ? req.query.filter : undefined,
+    allowedFields: collection.public_read_fields,
+  })
+  if (filterError) {
+    return res.status(400).json({ success: false, error: filterError })
+  }
+
   const supabase = getSupabaseClient()
   const { rows, error } = await fetchPublicItems(supabase, {
     collectionId: collection.id,
     order,
+    filters,
     from,
     to: from + perPage - 1,
   })
