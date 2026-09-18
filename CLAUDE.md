@@ -8,7 +8,7 @@ Arman plus dozens of concurrent agents (across two machines) edit these repos si
 Simple Next.js app for serving dynamic HTML pages. Deployed on Vercel.
 
 > **Cross-repo system-of-record:** this app is one third of the CMS platform (with matrx-frontend
-> + aidream) — read `/Users/armanisadeghi/code/common-docs/systems/cms-system/FEATURE.md` before touching
+> + aidream) — read `/Users/armanisadeghi/code/common-docs/systems/website-platform/cms/STATE.md` before touching
 > the `/c/`, `/p/`, or API surfaces in ANY repo. Cross-repo docs rules: invoke the
 > `cross-repo-docs` skill.
 
@@ -267,7 +267,7 @@ if (!identity) return
   visitor routes under `/api/sites/**` keep their DB-backed limiter, which has to be exact.
 - Public-by-design routes stay public: `POST /api/form-submissions` and the W2-C collection routes
   gate themselves by site key / `public_read`, and must never grow an admin gate.
-- `pnpm test:api-auth` pins all of it. Full history: `common-docs/systems/cms-system/FEATURE.md`
+- `pnpm test:api-auth` pins all of it. Full history: `common-docs/systems/website-platform/cms/STATE.md`
   § Security.
 
 ---
