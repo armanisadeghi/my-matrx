@@ -114,6 +114,21 @@ which is what keeps iopbm's hand-written `<footer>` byte-identical.
 - `{}` (every live site today) renders nothing. Full shape in
   [docs/CSS_ARCHITECTURE.md](docs/CSS_ARCHITECTURE.md).
 
+### THE ARCHIVE GATE — archived rows never render (`lib/render/pageSelection.js` `isLive`)
+
+CMS migration 0041 turns every CMS delete into an archive (`deleted_at`) on client_sites, pages,
+components, redirects, assets and html_pages. This app reads with the **service role, so row
+security never hides an archived row**. Every lookup drops them itself through `isLive` /
+`liveRows`, including in preview. Rules, each pinned by `pnpm test:render`:
+
+- **Filter in JS, never `.is('deleted_at', null)` in the query.** The gate must be correct before
+  and after the column exists: PostgREST answers a filter on an unknown column with a 400, which
+  would 404 every site. A row with no `deleted_at` key is live.
+- **No `.maybeSingle()` on route, redirect or home-flag lookups.** Those identities are unique
+  among LIVE rows only, so an archived row and its live successor can share one. Fetch the rows,
+  keep the live one.
+- An archived site keeps its slug and domain reserved and serves nothing.
+
 ### THE 301 LAW — the redirect ledger (`lib/render/redirects.js`)
 
 A route that resolves NO page (canonical + both legacy aliases missed) is checked against the

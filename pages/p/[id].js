@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import Head from 'next/head'
+import { isLive } from '@/lib/render/pageSelection'
 
 export default function DynamicPage({ pageData, notFound }) {
   if (notFound) {
@@ -178,7 +179,9 @@ export async function getServerSideProps(props) {
       .eq('id', params.id)
       .single()
 
-    if (error || !data) {
+    // An archived html_page (CMS 0041 deleted_at) is gone until restored. The
+    // service role skips row security, so the gate lives here (see isLive).
+    if (error || !data || !isLive(data)) {
       console.log('Page not found:', params.id, error?.message)
       return {
         notFound: true

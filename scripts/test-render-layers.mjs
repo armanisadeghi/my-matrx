@@ -43,7 +43,7 @@ import {
 } from '../lib/render/siteFooter.js'
 import { buildCombinedCss } from '../lib/render/cascade.js'
 import { pagePath, isRealCategory } from '../lib/render/pagePath.js'
-import { gatePageForViewer, selectAliasPage } from '../lib/render/pageSelection.js'
+import { gatePageForViewer, isLive, liveRows, selectAliasPage } from '../lib/render/pageSelection.js'
 import { redirectDestination, redirectFromRoute } from '../lib/render/redirects.js'
 import { activeSiteDomain, buildNav } from '../lib/render/surface.js'
 import {
@@ -846,6 +846,26 @@ eq('bindings: filter participates in identity',
 eq('bindings: the expander looks up the scanner\'s key',
   expandCollectionBindings(filteredBindingHtml, { [bindingKey(scanned[0])]: [{ id: '1', data: { title: 'Open house' } }] })
     .includes('Open house'), true)
+
+
+// ── THE ARCHIVE GATE (CMS 0041) — archived rows never render ────────────────
+// Correct before the column exists: a row with no `deleted_at` key is live.
+eq('archive: a row without deleted_at (pre-0041) is live', isLive({ id: 'a' }), true)
+eq('archive: deleted_at null is live', isLive({ id: 'a', deleted_at: null }), true)
+eq('archive: a stamped row is archived', isLive({ id: 'a', deleted_at: '2026-09-27T10:00:00Z' }), false)
+eq('archive: null is not a row', isLive(null), false)
+eq('archive: liveRows(null) is []', liveRows(null).length, 0)
+eq('archive: an archived published page is gated away, even in preview',
+  gatePageForViewer({ id: 'p', is_published: true, deleted_at: '2026-09-27T10:00:00Z' }, true), null)
+{
+  // A page archived at /services, and the live page that took the route since.
+  const archived = { id: 'old', route: '/services', slug: 'services', is_published: true, deleted_at: '2026-09-27T10:00:00Z' }
+  const live = { id: 'new', route: '/services/x/services', slug: 'services', is_published: true, deleted_at: null }
+  eq('archive: an archived page never wins an alias (shallower, but archived)',
+    selectAliasPage([archived, live], false, '/services', () => {}).id, 'new')
+  eq('archive: nor in preview', selectAliasPage([archived, live], true, '/services', () => {}).id, 'new')
+  eq('archive: only-archived alias resolves nothing', selectAliasPage([archived], false, '/services', () => {}), null)
+}
 
 console.warn = realWarn
 console.log(`${total - failures}/${total} render-layer cases passed`)

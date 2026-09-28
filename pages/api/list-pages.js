@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { requireIdentity, rateLimit } from '@/lib/apiAuth'
+import { liveRows } from '@/lib/render/pageSelection'
+
+// Exactly the columns this endpoint has always returned — `select('*')` below is
+// only there so the archive gate can see `deleted_at` (CMS 0041).
+const LISTED_FIELDS = ['id', 'meta_title', 'meta_description', 'is_indexable', 'created_at', 'user_id']
 
 export default async function handler(req, res) {
   // CORS headers
@@ -44,7 +49,9 @@ export default async function handler(req, res) {
 
     const { data, error, count } = await supabase
       .from('html_pages')
-      .select('id, meta_title, meta_description, is_indexable, created_at, user_id', { count: 'exact' })
+      // `*` so the archive gate can read `deleted_at` once CMS 0041 adds it
+      // without naming it before then (see isLive); archived pages are not listed.
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .limit(10)
 
@@ -60,7 +67,11 @@ export default async function handler(req, res) {
     console.log(`Found ${count} total pages, returning ${data.length}`)
 
     // Generate URLs for each page
-    const pagesWithUrls = data.map(page => ({
+    const pagesWithUrls = liveRows(data).map(row => {
+      const page = {}
+      for (const field of LISTED_FIELDS) page[field] = row[field] === undefined ? null : row[field]
+      return page
+    }).map(page => ({
       ...page,
       url: `${req.headers.host ? `https://${req.headers.host}` : 'http://localhost:3000'}/p/${page.id}`,
       localUrl: `http://localhost:3000/p/${page.id}`
