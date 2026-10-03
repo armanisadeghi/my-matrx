@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Head from 'next/head'
 import { isLive } from '@/lib/render/pageSelection'
+import { splitStoredHtml } from '@/lib/render/storedHtmlParts'
 
 export default function DynamicPage({ pageData, notFound }) {
   if (notFound) {
@@ -81,17 +82,13 @@ export default function DynamicPage({ pageData, notFound }) {
   let inlineStyles = ''
   
   if (hasCompleteHead) {
-    // Extract styles from head section
-    const styleMatches = pageData.html_content.match(/<style[^>]*>([\s\S]*?)<\/style>/gi)
-    if (styleMatches) {
-      inlineStyles = styleMatches.join('\n')
-    }
-    
-    // Extract just the body content, stripping html/head tags
-    const bodyMatch = pageData.html_content.match(/<body[^>]*>([\s\S]*?)<\/body>/i)
-    if (bodyMatch) {
-      bodyContent = bodyMatch[1]
-    }
+    // The head's <style>s go to <Head>; its scripts and stylesheets go FIRST in
+    // the body so they load before the body's inline scripts, as they did in
+    // the author's <head> (lib/render/storedHtmlParts.js — they used to be
+    // dropped, and a page loading a library from a CDN rendered blank).
+    const parts = splitStoredHtml(pageData.html_content)
+    inlineStyles = parts.inlineStyles
+    bodyContent = parts.headAssets ? `${parts.headAssets}\n${parts.body}` : parts.body
   }
 
   // Use Next.js Head component for SEO control
