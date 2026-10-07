@@ -110,7 +110,7 @@ export default function DynamicPage({ pageData, notFound }) {
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`https://mymatrx.com/p/${pageData.id}`} />
+        <meta property="og:url" content={`https://www.mymatrx.com/p/${pageData.id}`} />
         
         {pageData.og_image && (
           <meta property="og:image" content={pageData.og_image} />

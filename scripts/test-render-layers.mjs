@@ -582,7 +582,7 @@ eq('domain activation: stale verification cannot activate a changed domain',
   activeSiteDomain({ ...domainSite, settings: { domain_traffic: { mode: 'custom', verified_domain: 'old.example' } } }), null)
 eq('domain activation: platform canonical remains /c while pending',
   buildNav({ ...domainSite, settings: { domain_traffic: { mode: 'platform' } } }).canonicalBase,
-  'https://mymatrx.com/c/client')
+  'https://www.mymatrx.com/c/client')
 
 // ── sitemap / robots: the discovery surface ────────────────────────────────
 // THE ONE RULE: the sitemap lists exactly the URLs the renderer answers 200
@@ -619,8 +619,8 @@ check('sitemap: a redirected old URL is never an entry',
   !DOMAIN_ENTRIES.some((e) => e.loc.endsWith('/old-about')))
 
 eq('sitemap: the platform surface carries the /c/{slug} base',
-  sitemapEntries({ pages: [SITE_PAGES[1]], canonicalBase: 'https://mymatrx.com/c/iopbm' })[0].loc,
-  'https://mymatrx.com/c/iopbm/about')
+  sitemapEntries({ pages: [SITE_PAGES[1]], canonicalBase: 'https://www.mymatrx.com/c/iopbm' })[0].loc,
+  'https://www.mymatrx.com/c/iopbm/about')
 eq('sitemap: a trailing slash on the base never doubles',
   sitemapEntries({ pages: [SITE_PAGES[1]], canonicalBase: 'https://x.com/' })[0].loc, 'https://x.com/about')
 eq('sitemap: a page declaring a DIFFERENT canonical is not listed',
@@ -666,8 +666,8 @@ check('robots: the Sitemap line names the custom domain, not the platform host',
   renderRobotsTxt({ sitemapUrl: 'https://prpinjectionmd.com/sitemap.xml', siteName: 'PRP Injection MD' })
     .includes('\nSitemap: https://prpinjectionmd.com/sitemap.xml'))
 check('robots: the platform surface points at its own /c/{slug} sitemap',
-  renderRobotsTxt({ sitemapUrl: 'https://mymatrx.com/c/iopbm/sitemap.xml' })
-    .includes('\nSitemap: https://mymatrx.com/c/iopbm/sitemap.xml'))
+  renderRobotsTxt({ sitemapUrl: 'https://www.mymatrx.com/c/iopbm/sitemap.xml' })
+    .includes('\nSitemap: https://www.mymatrx.com/c/iopbm/sitemap.xml'))
 check('robots: crawling is allowed (noindex/404 do the hiding, not Disallow)',
   renderRobotsTxt({ sitemapUrl: 'https://x.com/sitemap.xml' }).includes('\nAllow: /\n'))
 check('robots: a site name can never inject a directive',
@@ -683,7 +683,7 @@ eq('robots: an unparseable Host header is refused, never echoed',
 eq('robots: no headers at all → null (caller falls back to the canonical origin)',
   originFromHeaders(undefined), null)
 eq('origin: the canonical base of a platform-hosted site strips its path',
-  originOf('https://mymatrx.com/c/iopbm'), 'https://mymatrx.com')
+  originOf('https://www.mymatrx.com/c/iopbm'), 'https://www.mymatrx.com')
 
 // ── collection bindings: rows in the SERVED HTML (W2-C SSR, G-COLLECTIONS) ──
 // The rule that protects every live page: a body with no binding attribute is
