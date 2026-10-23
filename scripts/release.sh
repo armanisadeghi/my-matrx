@@ -253,7 +253,7 @@ pick_version() {   # sets CURRENT, NEW, TAG, MSG from BASE_TREE
 }
 put_blob() {   # idx path kind label → bumped blob into the index, keeping its file mode
     local idx="$1" f="$2" kind="$3" mode blob
-    mode="$(git ls-tree "$BASE_TREE" -- "$f" | awk '{print $1}')"
+    mode="$(git ls-tree --full-tree "$BASE_TREE" -- "$f" | awk '{print $1}')"   # --full-tree: f is root-relative (nested cwd)
     if [[ "$mode" == 120000 ]]; then
         finding "WARNING" "Version" "$f is a symlink — its version was not bumped"; return 0
     fi
