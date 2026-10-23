@@ -1,0 +1,11 @@
+#!/bin/sh
+# my-matrx pre-commit, nested in aidream (apps/my-matrx, 2026-10-23): aidream's pre-commit runs this hook
+# (scripts/githooks/dispatch-app-hooks.sh, MATRX_HOOK_DISPATCHED=1) when a commit stages a path under
+# apps/my-matrx/. No screenshots, media, archives, logs, binaries or files over 1 MB (Arman 2026-10-23);
+# the guard is common-docs' no_junk.py with --root. A real asset goes in apps/my-matrx/.junk-allowlist.txt
+# with a `# reason`. Standalone (no common-docs/ in the checkout) it does nothing.
+[ "${MATRX_RELEASE_PATH:-0}" = "1" ] && exit 0
+here=$(cd "$(dirname "$0")/../.." && pwd) || exit 0
+top=$(git -C "$here" rev-parse --show-toplevel) || exit 0
+[ -f "$top/common-docs/meta/scripts/no_junk.py" ] || exit 0
+exec python3 "$top/common-docs/meta/scripts/no_junk.py" --staged --root "$here"

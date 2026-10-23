@@ -45,12 +45,35 @@ def listed_items(log_path):
     return items
 
 
-def main():
-    top = git("rev-parse", "--show-toplevel").strip()
+def _toplevel(cwd):
+    res = subprocess.run(["git", "rev-parse", "--path-format=absolute", "--show-toplevel"],
+                         cwd=cwd, capture_output=True, text=True)
+    return os.path.realpath(res.stdout.strip()) if res.returncode == 0 and res.stdout.strip() else ""
+
+
+def tool_root(cwd):
+    """The tree this copy of the tool serves, never blindly the git toplevel.
+
+    Nested in a monorepo (aidream/common-docs, aidream/infra/matrx-sandbox, aidream/infra/matrx-ship, aidream/apps/my-matrx) the toplevel is the
+    monorepo, and grepping from it reports every other tree's copy of these two tools as open
+    items. The folder holding scripts/ is the root when cwd's repository contains it; otherwise
+    cwd's own toplevel (a throwaway repo in a self-test). Twin of matrx-frontend's
+    scripts/lib/app_root.py app_root_for(). `git grep` from that root is limited to it and
+    prints root-relative paths, matching SELF, LOG_REL and HOLD_ROOT.
+    """
+    top = _toplevel(cwd)
     if not top:
+        return ""
+    here = os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+    return here if _toplevel(here) == top else top
+
+
+def main():
+    root = tool_root(os.getcwd())
+    if not root:
         print("not inside a git repository")
         sys.exit(2)
-    os.chdir(top)
+    os.chdir(root)
 
     found = {}  # path -> set of kinds
     for kind, mark in (("held", HELD_MARK), ("docs", DOCS_MARK)):

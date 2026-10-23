@@ -75,6 +75,24 @@ stop() {   # the only way out before the push: nothing was released
     exit 1
 }
 
+# NESTED in the aidream monorepo (apps/my-matrx, 2026-10-23). my-matrx releases on aidream's main: the
+# version file is apps/my-matrx/package.json, tags are my-matrx/v* (its v1.0.* came along renamed), and a
+# round where apps/my-matrx/ did not change since the last my-matrx/v* tag releases nothing. The release
+# commit carries the ONE release identity (apps/matrx-frontend/scripts/release.sh RELEASE_IDENTITY_*:
+# Vercel builds a private repository's commit only for a team-member author), and after the push the
+# My-matrx Vercel project builds THAT commit through the API (vercel-trigger-release.sh, subject
+# my-matrx-release:) — git-push deployments are off (apps/my-matrx/vercel.json). The shared checkout's
+# HEAD belongs to aidream's sync, so this never fast-forwards it. Standalone: everything below unchanged.
+NESTED_PREFIX="$(git -C "$ROOT" rev-parse --show-prefix 2>/dev/null || true)"
+NESTED_TOP=""
+if [[ -n "$NESTED_PREFIX" ]]; then
+    NESTED_TOP="$(git -C "$ROOT" rev-parse --show-toplevel)"
+    VERSION_FILE="${NESTED_PREFIX}${VERSION_FILE}"
+    TAG_PREFIX="my-matrx/v"
+    eval "$(grep -E '^RELEASE_IDENTITY_(NAME|EMAIL)="[^"$`]*"$' "$NESTED_TOP/apps/matrx-frontend/scripts/release.sh" 2>/dev/null)"
+    [[ -n "${RELEASE_IDENTITY_EMAIL:-}" ]] || finding "WARNING" "Git" "No RELEASE_IDENTITY_* in apps/matrx-frontend/scripts/release.sh — the release commit carries this checkout's git identity, which Vercel may block"
+fi
+
 # ── flags: a bad one is a WARNING, never a stop ──────────────────────────────
 BUMP="patch"; NOTE=""; DRY=false
 while [[ $# -gt 0 ]]; do
@@ -277,12 +295,25 @@ build_commit() {   # sets RELEASE_SHA from BASE_TREE, NEW, MSG
     fi
     tree="$(GIT_INDEX_FILE="$idx" git write-tree)" || return 1
     rm -f "$idx"
-    RELEASE_SHA="$(git commit-tree "$tree" "${PARENTS[@]}" -m "$MSG" 2>>"$LOG")"
+    local ident=()
+    [[ -n "${RELEASE_IDENTITY_EMAIL:-}" ]] && ident=(env GIT_AUTHOR_NAME="$RELEASE_IDENTITY_NAME" GIT_AUTHOR_EMAIL="$RELEASE_IDENTITY_EMAIL"
+        GIT_COMMITTER_NAME="$RELEASE_IDENTITY_NAME" GIT_COMMITTER_EMAIL="$RELEASE_IDENTITY_EMAIL")
+    RELEASE_SHA="$(${ident[@]+"${ident[@]}"} git commit-tree "$tree" "${PARENTS[@]}" -m "$MSG" 2>>"$LOG")"
 }
 
 base_tree
 REMOTE_TAGS=""
 refresh_remote_tags
+if [[ -n "$NESTED_PREFIX" ]]; then   # nested: nothing changed under apps/my-matrx since the last tag -> no release
+    LAST_TAG="$(grep -o "refs/tags/${TAG_PREFIX}[0-9][0-9.]*\$" <<< "$REMOTE_TAGS" | sed 's#^refs/tags/##' \
+        | python3 -c 'import sys; t=[l.strip() for l in sys.stdin if l.strip()]; t.sort(key=lambda s: [int(x) for x in s.rsplit("v", 1)[1].split(".") if x.isdigit()]); print(t[-1] if t else "")')"
+    if [[ -n "$LAST_TAG" ]] && q git fetch --no-tags "$REMOTE" "+refs/tags/$LAST_TAG:refs/tags/$LAST_TAG" \
+        && [[ "$(git rev-parse -q --verify "$LAST_TAG^{commit}:${NESTED_PREFIX%/}")" == "$(git rev-parse -q --verify "$BASE_TREE:${NESTED_PREFIX%/}")" ]]; then
+        echo "release.sh: ${NESTED_PREFIX%/} is unchanged since $LAST_TAG — nothing to release."
+        print_findings
+        exit 0
+    fi
+fi
 if $DRY; then
     pick_version
     echo "release.sh: DRY RUN — $REMOTE/$BRANCH is at $CURRENT; would release $TAG. Nothing changed."
@@ -311,11 +342,19 @@ $PUSHED || stop "the push to GitHub failed ($RACES lost races, $BLIPS other fail
 if ! q git tag "$TAG" "$RELEASE_SHA" || ! q git push --no-verify "$REMOTE" "refs/tags/$TAG"; then
     finding "ERROR" "Git" "Tag $TAG did not reach GitHub" "git push $REMOTE $TAG"
 fi
-if [[ "$(git symbolic-ref -q --short HEAD)" == "$BRANCH" ]]; then
+if [[ -z "$NESTED_PREFIX" && "$(git symbolic-ref -q --short HEAD)" == "$BRANCH" ]]; then
     q git -c core.hooksPath=/dev/null merge --ff-only "$REMOTE/$BRANCH" \
         || finding "WARNING" "Git" "This checkout could not fast-forward to $TAG — pull when convenient" "git pull --no-rebase $REMOTE $BRANCH"
 fi
 echo "$TAG  pushed  ($((SECONDS - START))s)"
+if [[ -n "$NESTED_PREFIX" ]]; then   # nested: the My-matrx Vercel project builds this release commit
+    TRIGGER="$NESTED_TOP/apps/matrx-frontend/scripts/vercel-trigger-release.sh"
+    if [[ -f "$TRIGGER" ]]; then
+        (cd "$NESTED_TOP" && bash "$TRIGGER" "$RELEASE_SHA" "my-matrx-release: $TAG${NOTE:+ - $NOTE}") 2>&1 | tee -a "$LOG"
+    else
+        finding "ERROR" "Deploy" "$TRIGGER is missing — $TAG was pushed but NOT built" "bash apps/matrx-frontend/scripts/vercel-trigger-release.sh $RELEASE_SHA \"my-matrx-release: $TAG\""
+    fi
+fi
 
 if [[ -n "$AFTER_PUSH" ]]; then
     if ! (cd "$ROOT" && bash -c "$AFTER_PUSH") >>"$LOG" 2>&1; then
