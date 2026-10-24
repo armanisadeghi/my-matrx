@@ -1,0 +1,11 @@
+# Real assets kept in my-matrx (no_junk.py --root apps/my-matrx reads this; one path per line, `# reason`).
+# Everything under public/ is SERVED (mymatrx.com/<path> and client domains); iopbm is a REAL client site.
+public/favicon.ico  # mymatrx.com favicon
+public/iopbm/assets/IOPBM Newport Beach Gastroenterology Icon.jpg  # iopbm favicon (public/iopbm/home.html)
+public/iopbm/assets/IOPBM Newport Beach Gastroenterology Logo Cropped-optimized.PNG  # iopbm header logo (home.html + CMS header component)
+public/iopbm/assets/IOPBM Newport Beach Gastroenterology Logo Cropped-optimized.webp  # iopbm header logo webp (home.html + CMS header component)
+public/iopbm/assets/Newport Beach Gastroenterologist Dr Angie Sadeghi.webp  # iopbm doctor photo (CMS client_pages row)
+public/iopbm/assets/IOPBM Newport Beach Gastroenterology Logo Cropped.PNG  # iopbm logo master, served URL (unreferenced 2026-10-23; owner call)
+public/iopbm/assets/IOPBM Newport Beach Gastroenterology Logo.PNG  # iopbm logo master, served URL (unreferenced 2026-10-23; owner call)
+public/iopbm/assets/Newport Beach Gastroenterologist Dr Angie Sadeghi 567w.webp  # iopbm photo variant, served URL (unreferenced 2026-10-23; owner call)
+public/iopbm/assets/angie-sadeghi-2.jpg  # iopbm photo, served URL (unreferenced 2026-10-23; owner call)
